@@ -2,6 +2,7 @@ package pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.model.ModPack;
@@ -33,7 +34,8 @@ public class CurseForgeAPIService
             final String name = jsonNode.get("name").textValue();
             final String summary = jsonNode.get("summary").textValue();
             final String thumbnail = jsonNode.get("attachments").get(0).get("thumbnailUrl").textValue();
-            final ModPack modPack = new ModPack(id, name, summary, thumbnail);
+            final String version = jsonNode.get("latestFiles").get(0).get("gameVersion").get(0).textValue();
+            final ModPack modPack = new ModPack(id, name, summary, thumbnail, version);
             modPacks.add(modPack);
         }
 
@@ -74,5 +76,12 @@ public class CurseForgeAPIService
             }
         }
         return 0;
+    }
+
+    public String getModpackDescription(final int id)
+    {
+        final String url = "https://addons-ecs.forgesvc.net/api/v2/addon/" + id + "/description";
+        final String modpackDescription = REST_TEMPLATE.getForObject(url, String.class);
+        return modpackDescription;
     }
 }
