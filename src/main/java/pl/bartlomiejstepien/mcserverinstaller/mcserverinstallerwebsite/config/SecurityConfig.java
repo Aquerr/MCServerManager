@@ -1,6 +1,7 @@
 package pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.config;
 
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.authentication.configurers.provisioning.UserDetailsManagerConfigurer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -16,9 +17,15 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter
     @Override
     protected void configure(HttpSecurity http) throws Exception
     {
-        http.authorizeRequests()
+        http
+                .csrf().ignoringAntMatchers("/api/**")
+                .and()
+                .authorizeRequests()
                 .antMatchers("/css/**", "/js/**").permitAll()
                 .antMatchers(Routes.LOGIN, Routes.HOME, Routes.ROOT).authenticated()
+                .antMatchers(HttpMethod.GET, "/api/modpacks/**").authenticated()
+                .antMatchers(HttpMethod.POST, "/api/modpacks/**").authenticated()
+                .antMatchers("/servers/**").authenticated()
                 .and()
                     .formLogin()
                     .loginPage(Routes.LOGIN)

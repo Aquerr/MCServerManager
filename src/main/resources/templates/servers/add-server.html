@@ -21,7 +21,6 @@
     <script type="text/javascript">
         window.onload = function () {
             let cardElements = document.getElementsByClassName("card");
-
             for (let element of cardElements) {
                 element.addEventListener("click", function () {
 
@@ -37,10 +36,37 @@
                         $("#modpack-modal .modal-title").text(modpackTitle);
                         $("#modpack-modal .modal-body").html(description);
 
+                        $("#modpack-modal #install-server").attr("modpack-id", modpackId);
+
                         $("#modpack-modal").modal("show");
                     });
                 });
             }
+
+            $("#install-server").on("click", function () {
+                let modpackId = $("#install-server").attr("modpack-id");
+
+                //TODO: Fire installation on the server...
+                $.ajax({
+                    url: "/api/modpacks/" + modpackId + "/install",
+                    method: "POST"
+                }).done(function (response) {
+                    console.log("Server has been installed!");
+                });
+
+                function showInstallationStatus() {
+                    //TODO: Show installation status for the given user.
+                    $.ajax({
+                        url: "/api/servers/installation-status/" + modpackId,
+                        method: "GET"
+                    }).done(function (response) {
+                        console.log("Status = " + response);
+                    });
+                }
+
+                //TODO: Show installation status for the user
+                setInterval(showInstallationStatus, 4000);
+            });
         }
     </script>
 
@@ -62,7 +88,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary">Install</button>
+                <button type="button" class="btn btn-primary" id="install-server">Install</button>
             </div>
         </div>
     </div>
