@@ -1,5 +1,7 @@
 package pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.service;
 
+import net.lingala.zip4j.ZipFile;
+import net.lingala.zip4j.exception.ZipException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
@@ -8,6 +10,7 @@ import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.config.Co
 import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.model.InstallationStatus;
 import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.model.ModPack;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -62,14 +65,16 @@ public class ServerService
         }
     }
 
-    public Map<Integer, InstallationStatus> getModpacksInstallationStatuses()
+    /**
+     * Installs the server with the given modpack.
+     *
+     * @param username the username
+     * @param modpackId the modpack id
+     * @return newly generated server id
+     */
+    public String installServer(final String username, final int modpackId)
     {
-        return this.MODPACKS_INSTALLATION_STATUSES;
-    }
-
-    public void installServer(final String username, final int modpackId)
-    {
-        this.MODPACKS_INSTALLATION_STATUSES.put(modpackId, new InstallationStatus(0, "Checking server existence..."));
+        MODPACKS_INSTALLATION_STATUSES.put(modpackId, new InstallationStatus(0, "Checking server existence..."));
 
         final ModPack modPack = this.curseForgeAPIService.getModpack(modpackId);
 
@@ -89,12 +94,32 @@ public class ServerService
         }
 
         // Download server files...
-        this.MODPACKS_INSTALLATION_STATUSES.put(modpackId, new InstallationStatus(25, "Downloading server files..."));
+        MODPACKS_INSTALLATION_STATUSES.put(modpackId, new InstallationStatus(25, "Downloading server files..."));
 
         final int latestServerFileId = modPack.getLatestFiles().get(0).getServerPackFileId();
         final String serverDownloadUrl = this.curseForgeAPIService.getLatestServerDownloadUrl(modpackId, latestServerFileId);
         final String serverFilesZipPath = this.curseForgeAPIService.downloadServerFile(modpackId, serverDownloadUrl);
 
-        // Attach server to given user
+        MODPACKS_INSTALLATION_STATUSES.put(modpackId, new InstallationStatus(50, "Unpacking server files..."));
+
+        //TODO: Unpack server files
+        final ZipFile zipFile = new ZipFile("downloads" + File.separator + serverFilesZipPath);
+        try
+        {
+            zipFile.extractAll(config.getServersDir() + File.separator + username + File.separator + modPack.getName());
+        }
+        catch (ZipException e)
+        {
+            e.printStackTrace();
+        }
+
+        MODPACKS_INSTALLATION_STATUSES.put(modpackId, new InstallationStatus(75, "Last steps..."));
+
+        //TODO: Attach server to given user
+
+        //TODO: Set eula to true?
+
+        MODPACKS_INSTALLATION_STATUSES.put(modpackId, new InstallationStatus(100, "Server is ready!"));
+        return "";
     }
 }

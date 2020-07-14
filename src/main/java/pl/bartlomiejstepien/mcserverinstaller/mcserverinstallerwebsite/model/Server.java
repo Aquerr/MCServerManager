@@ -4,6 +4,8 @@ import java.util.List;
 
 public class Server
 {
+    private String id;
+
     private String name;
     private String motd;
 

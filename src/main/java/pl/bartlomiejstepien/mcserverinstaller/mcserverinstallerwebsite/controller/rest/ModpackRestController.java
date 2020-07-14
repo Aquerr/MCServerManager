@@ -29,8 +29,9 @@ public class ModpackRestController
     }
 
     @PostMapping("/{id}/install")
-    public void installModpack(@PathVariable("id") final int id, final Principal principal)
+    public String installModpack(@PathVariable("id") final int id, final Principal principal)
     {
-        this.serverService.installServer(principal.getName(), id);
+        final String serverId = this.serverService.installServer(principal.getName(), id);
+        return serverId;
     }
 }

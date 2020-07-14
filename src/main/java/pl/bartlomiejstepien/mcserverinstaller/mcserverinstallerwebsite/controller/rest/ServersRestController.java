@@ -11,8 +11,8 @@ import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.service.S
 public class ServersRestController
 {
     @GetMapping("/installation-status/{modpackId}")
-    public int getInstallationStatus(@PathVariable final int modpackId)
+    public String getInstallationStatus(@PathVariable final int modpackId)
     {
-        return ServerService.MODPACKS_INSTALLATION_STATUSES.get(modpackId).getPercent();
+        return ServerService.MODPACKS_INSTALLATION_STATUSES.get(modpackId).getMessage();
     }
 }
