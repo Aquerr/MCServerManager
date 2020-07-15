@@ -1,11 +1,12 @@
 package pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.controller.rest;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.model.User;
 import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.service.CurseForgeAPIService;
 import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.service.ServerService;
-
-import java.security.Principal;
+import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.service.UserService;
 
 @RestController
 @RequestMapping("/api/modpacks")
@@ -14,12 +15,14 @@ public class ModpackRestController
     private final CurseForgeAPIService curseForgeAPIService;
 
     private final ServerService serverService;
+    private final UserService userService;
 
     @Autowired
-    public ModpackRestController(final CurseForgeAPIService curseForgeAPIService, final ServerService serverService)
+    public ModpackRestController(final CurseForgeAPIService curseForgeAPIService, final ServerService serverService, final UserService userService)
     {
         this.curseForgeAPIService = curseForgeAPIService;
         this.serverService = serverService;
+        this.userService = userService;
     }
 
     @GetMapping("/{id}/description")
@@ -29,9 +32,9 @@ public class ModpackRestController
     }
 
     @PostMapping("/{id}/install")
-    public String installModpack(@PathVariable("id") final int id, final Principal principal)
+    public int installModpack(@PathVariable("id") final int id, final Authentication authentication)
     {
-        final String serverId = this.serverService.installServer(principal.getName(), id);
-        return serverId;
+        final User user = (User) authentication.getPrincipal();
+        return this.serverService.installServer(user, id);
     }
 }

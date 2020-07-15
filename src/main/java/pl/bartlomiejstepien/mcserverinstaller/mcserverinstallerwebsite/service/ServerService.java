@@ -6,9 +6,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.config.Config;
 import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.model.InstallationStatus;
 import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.model.ModPack;
+import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.model.Server;
+import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.model.User;
+import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.repository.ServerRepository;
+import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.repository.dto.ServerDto;
 
 import java.io.File;
 import java.io.IOException;
@@ -16,23 +21,27 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class ServerService
 {
-    @Autowired
     private Config config;
 
     // Modpack id ==> InstallationStatus
     public static final Map<Integer, InstallationStatus> MODPACKS_INSTALLATION_STATUSES = new HashMap<>();
 
     private final CurseForgeAPIService curseForgeAPIService;
+    private final ServerRepository serverRepository;
 
     @Autowired
-    public ServerService(final CurseForgeAPIService curseForgeAPIService)
+    public ServerService(final Config config, final CurseForgeAPIService curseForgeAPIService, final ServerRepository serverRepository)
     {
+        this.config = config;
         this.curseForgeAPIService = curseForgeAPIService;
+        this.serverRepository = serverRepository;
     }
 
     @EventListener(ApplicationReadyEvent.class)
@@ -68,17 +77,18 @@ public class ServerService
     /**
      * Installs the server with the given modpack.
      *
-     * @param username the username
+     * @param user the username
      * @param modpackId the modpack id
      * @return newly generated server id
      */
-    public String installServer(final String username, final int modpackId)
+    @Transactional
+    public int installServer(final User user, final int modpackId)
     {
         MODPACKS_INSTALLATION_STATUSES.put(modpackId, new InstallationStatus(0, "Checking server existence..."));
 
         final ModPack modPack = this.curseForgeAPIService.getModpack(modpackId);
 
-        final Path serversUsernamePath = Paths.get(config.getServersDir()).resolve(username);
+        final Path serversUsernamePath = Paths.get(config.getServersDir()).resolve(user.getUsername());
         final Path serverPath = serversUsernamePath.resolve(modPack.getName());
 
         if (Files.exists(serverPath))
@@ -106,7 +116,7 @@ public class ServerService
         final ZipFile zipFile = new ZipFile("downloads" + File.separator + serverFilesZipPath);
         try
         {
-            zipFile.extractAll(config.getServersDir() + File.separator + username + File.separator + modPack.getName());
+            zipFile.extractAll(serverPath.toString());
         }
         catch (ZipException e)
         {
@@ -116,10 +126,44 @@ public class ServerService
         MODPACKS_INSTALLATION_STATUSES.put(modpackId, new InstallationStatus(75, "Last steps..."));
 
         //TODO: Attach server to given user
+        final ServerDto serverDto = new ServerDto(0, serverPath.toString(), user);
+        user.addServer(serverDto);
+
+        addServer(serverDto);
 
         //TODO: Set eula to true?
 
         MODPACKS_INSTALLATION_STATUSES.put(modpackId, new InstallationStatus(100, "Server is ready!"));
-        return "";
+        return serverDto.getId();
+    }
+
+    @Transactional
+    public void addServer(final Server server)
+    {
+        this.serverRepository.save(ServerDto.fromServer(server));
+    }
+
+    @Transactional
+    public void addServer(final ServerDto serverDto)
+    {
+        this.serverRepository.save(serverDto);
+    }
+
+    @Transactional
+    public List<Server> getServers()
+    {
+        return this.serverRepository.findAll().stream().map(Server::fromDAO).collect(Collectors.toList());
+    }
+
+    @Transactional
+    public void deleteServer(final int id)
+    {
+        this.serverRepository.delete(id);
+    }
+
+    @Transactional
+    public Server getServer(final int id)
+    {
+        return this.serverRepository.find(id).toServer();
     }
 }

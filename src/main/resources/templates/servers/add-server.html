@@ -20,6 +20,17 @@
 
     <script type="text/javascript">
         window.onload = function () {
+            let logoutButton = document.getElementById('logoutButton');
+
+            logoutButton.addEventListener("click", function () {
+                let logoutForm = document.getElementById("logoutForm");
+                logoutForm.submit();
+            });
+        }
+    </script>
+
+    <script type="text/javascript">
+        window.onload = function () {
             let cardElements = document.getElementsByClassName("card");
             for (let element of cardElements) {
                 element.addEventListener("click", function () {
@@ -63,6 +74,10 @@
                     $("#server-install-modal .modal-body").text("Your server is ready!");
                     $("#server-install-modal #open-server").removeAttr("hidden");
                     $("#server-install-modal #open-server").attr("href", "/servers/" + response);
+                }).fail(function (response) {
+                    console.log(response);
+                    clearInterval(installationStatusMessageInterval);
+                    $("#server-install-modal .modal-body").text("Someting went wrong...");
                 });
 
                 function showInstallationStatus() {
@@ -131,7 +146,7 @@
 </div>
 
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-    <a class="navbar-brand" href="#">MCServerInstaller</a>
+    <a class="navbar-brand" th:href="@{/}">MCServerInstaller</a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarContent" aria-controls="navbarContent">
         <span class="navbar-toggler-icon"></span>
     </button>

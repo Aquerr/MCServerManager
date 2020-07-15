@@ -2,17 +2,20 @@ package pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.model;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.repository.dto.ServerDto;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 
 @Entity
 @Table(name = "user")
 public class User implements UserDetails
 {
     @Id
-    @Table(name = "id")
+    @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
@@ -21,6 +24,9 @@ public class User implements UserDetails
 
     @Column(name = "password")
     private String password;
+
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "user")
+    private List<ServerDto> servers;
 
     public User()
     {
@@ -61,7 +67,7 @@ public class User implements UserDetails
     @Override
     public boolean isAccountNonLocked()
     {
-        return false;
+        return true;
     }
 
     @Override
@@ -75,4 +81,18 @@ public class User implements UserDetails
     {
         return true;
     }
+
+    public void addServer(final ServerDto serverDto)
+    {
+        if (this.servers == null)
+            this.servers = new ArrayList<>();
+
+        this.servers.add(serverDto);
+        serverDto.setUser(this);
+    }
+
+//    public List<Server> getServers()
+//    {
+//        return this.servers;
+//    }
 }
