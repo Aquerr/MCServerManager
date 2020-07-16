@@ -21,7 +21,7 @@ CREATE TABLE IF NOT EXISTS server (
 );
 CREATE UNIQUE INDEX ON server (id);
 
-MERGE INTO user (id, username, password) VALUES (1, 'Nerdi', '$2a$10$RsBi7zEwsAHxTgQO8cBX5Oe7iCPvIkGN3ichuibM9uGzmvx6TzFC6')
+-- MERGE INTO user (id, username, password) VALUES (1, 'Nerdi', '$2a$10$RsBi7zEwsAHxTgQO8cBX5Oe7iCPvIkGN3ichuibM9uGzmvx6TzFC6')
 
 -- CREATE TABLE IF NOT EXISTS user_server (
 --     user_id         INT         NOT NULL,

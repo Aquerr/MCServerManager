@@ -91,7 +91,17 @@ public class User implements UserDetails
         serverDto.setUser(this);
     }
 
-//    public List<Server> getServers()
+    public int getId()
+    {
+        return id;
+    }
+
+    public List<ServerDto> getServers()
+    {
+        return servers;
+    }
+
+    //    public List<Server> getServers()
 //    {
 //        return this.servers;
 //    }

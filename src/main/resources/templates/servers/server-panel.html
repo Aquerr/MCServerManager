@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/fragments :: head (pageTitle='Server Panel')">
+</head>
+<body>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            let consoleUpdateIntervalId = null;
+
+            function updateConsole() {
+                let serverId = $("#server-id").val();
+
+                $.ajax({
+                    url: "/api/server/" + serverId + "/console",
+                    method: "GET"
+                }).done(function (response) {
+                    $("server-console").text(response);
+                });
+            }
+
+            consoleUpdateIntervalId = setInterval(updateConsole, 4000);
+        });
+
+
+    </script>
+
+    <div th:replace="fragments/fragments :: header"></div>
+    <main class="container">
+
+        <div id="server-panel">
+            <input id="server-id" type="text" th:value="${server.getId()}" hidden>
+
+            <ul class="nav nav-tabs" id="tabs" role="tablist">
+                <li class="nav-link" role="presentation">
+                    <a class="nav-link active" id="server-console-tab" data-toggle="tab" href="#server-console" role="tab" aria-controls="server-console" aria-selected="true">Console</a>
+                </li>
+                <li class="nav-link" role="presentation">
+                    <a class="nav-link" id="server-settings-tab" data-toggle="tab" href="#server-settings" role="tab" aria-controls="server-settings" aria-selected="false">Settings</a>
+                </li>
+            </ul>
+
+            <div class="tab-content" id="tab-content">
+                <div id="server-console" class="tab-pane fade show active" role="tabpanel" aria-labelledby="server-console-tab">
+                    <div class="mt-2">
+                        <textarea disabled class="form-control" id="console" style="resize: none; background-color: black; color: white; min-height: 400px;">
+                        </textarea>
+                        <input id="console-input" class="form-control" type="text" placeholder="Enter command here...">
+                    </div>
+                </div>
+
+                <div id="server-settings" class="tab-pane fade" role="tabpanel" aria-labelledby="server-settings-tab">
+                    <label for="server-level-name">Level Name</label>
+                    <input id="server-level-name" class="form-control" type="text" th:value="${server.getLevelName()}">
+
+                    <label for="server-online-mode">Online Mode</label>
+                    <input id="server-online-mode" class="form-control" type="text" th:value="${server.getOnlineMode()}">
+                </div>
+            </div>
+        </div>
+
+    </main>
+</body>
+</html>

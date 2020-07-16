@@ -30,8 +30,13 @@ public class ServerRepository
 
     public void save(final ServerDto serverDto)
     {
+        this.entityManager.persist(serverDto);
+//        this.entityManager.flush();
+    }
+
+    public void update(final ServerDto serverDto)
+    {
         this.entityManager.merge(serverDto);
-        this.entityManager.flush();
     }
 
     public void delete(final int id)

@@ -17,12 +17,11 @@ import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.repositor
 
 import java.io.File;
 import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -89,7 +88,7 @@ public class ServerService
         final ModPack modPack = this.curseForgeAPIService.getModpack(modpackId);
 
         final Path serversUsernamePath = Paths.get(config.getServersDir()).resolve(user.getUsername());
-        final Path serverPath = serversUsernamePath.resolve(modPack.getName());
+        Path serverPath = serversUsernamePath.resolve(modPack.getName());
 
         if (Files.exists(serverPath))
             throw new RuntimeException("Server for this modpack already exists!");
@@ -124,6 +123,22 @@ public class ServerService
         }
 
         MODPACKS_INSTALLATION_STATUSES.put(modpackId, new InstallationStatus(75, "Last steps..."));
+
+        if (!Files.exists(serverPath.resolve("server.properties")))
+        {
+            try
+            {
+                Optional<Path> path = Files.list(serverPath).findFirst();
+                if (path.isPresent())
+                {
+                    serverPath = path.get();
+                }
+            }
+            catch (IOException e)
+            {
+                e.printStackTrace();
+            }
+        }
 
         //TODO: Attach server to given user
         final ServerDto serverDto = new ServerDto(0, serverPath.toString(), user);
@@ -165,5 +180,10 @@ public class ServerService
     public Server getServer(final int id)
     {
         return this.serverRepository.find(id).toServer();
+    }
+
+    public ArrayList<Server> getServersForUser(User principal)
+    {
+        return new ArrayList<>();
     }
 }
