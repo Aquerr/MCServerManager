@@ -70,6 +70,6 @@ public class ServerDto
 
     public Server toServer()
     {
-        return Server.fromDAO(this);
+        return Server.fromDto(this);
     }
 }

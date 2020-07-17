@@ -1,13 +1,16 @@
 package pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.controller.rest;
 
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.*;
 import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.model.InstallationStatus;
+import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.model.Server;
+import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.model.User;
 import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.service.ServerService;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/servers")
@@ -31,5 +34,29 @@ public class ServersRestController
     {
         final List<String> logs = this.serverService.getServerLatestLog(serverId);
         return logs;
+    }
+
+    @PostMapping("/{id}/command")
+    public void postCommand(final @PathVariable("id") int serverId, @RequestBody String command, final Authentication authentication)
+    {
+        final User user = (User)authentication.getPrincipal();
+
+        if (user.getServers().stream().noneMatch(serverDto -> serverDto.getId() == serverId))
+            throw new RuntimeException("Access denied!");
+
+        this.serverService.postCommand(serverId, command);
+    }
+
+    @PostMapping("/{id}/settings")
+    public void saveSettings(final @PathVariable("id") int serverId, @RequestBody Map<String, String> properties, final Authentication authentication)
+    {
+        final User user = (User)authentication.getPrincipal();
+
+        final Optional<Server> optionalServer = user.getServerById(serverId);
+        if (!optionalServer.isPresent())
+            throw new RuntimeException("Access denied!");
+
+        final Server server = optionalServer.get();
+        server.saveProperties(properties);
     }
 }

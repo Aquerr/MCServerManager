@@ -5,10 +5,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.repository.dto.ServerDto;
 
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 @Entity
 @Table(name = "user")
@@ -101,6 +98,11 @@ public class User implements UserDetails
         return servers;
     }
 
+    public Optional<Server> getServerById(final int id)
+    {
+        final Optional<ServerDto> optionalServerDto = this.servers.stream().filter(serverDto -> serverDto.getId() == id).findFirst();
+        return optionalServerDto.map(Server::fromDto);
+    }
     //    public List<Server> getServers()
 //    {
 //        return this.servers;

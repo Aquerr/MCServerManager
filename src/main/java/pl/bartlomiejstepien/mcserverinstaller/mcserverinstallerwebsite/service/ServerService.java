@@ -1,5 +1,6 @@
 package pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.service;
 
+import com.github.t9t.minecraftrconclient.RconClient;
 import net.lingala.zip4j.ZipFile;
 import net.lingala.zip4j.exception.ZipException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +18,6 @@ import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.repositor
 
 import java.io.File;
 import java.io.IOException;
-import java.io.RandomAccessFile;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -167,7 +167,7 @@ public class ServerService
     @Transactional
     public List<Server> getServers()
     {
-        return this.serverRepository.findAll().stream().map(Server::fromDAO).collect(Collectors.toList());
+        return this.serverRepository.findAll().stream().map(Server::fromDto).collect(Collectors.toList());
     }
 
     @Transactional
@@ -207,5 +207,14 @@ public class ServerService
             e.printStackTrace();
         }
         return Collections.emptyList();
+    }
+
+    public void postCommand(int serverId, String command)
+    {
+        final Server server = getServer(serverId);
+        try(RconClient rconClient = RconClient.open("localhost", server.getRconPort(), server.getRconPassword()))
+        {
+            rconClient.sendCommand(command);
+        }
     }
 }
