@@ -38,6 +38,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter
                 .antMatchers(Routes.LOGIN, Routes.HOME, Routes.ROOT).authenticated()
                 .antMatchers(HttpMethod.GET, "/api/modpacks/**").authenticated()
                 .antMatchers(HttpMethod.POST, "/api/modpacks/**").authenticated()
+                .antMatchers("/api/servers/**").authenticated()
                 .antMatchers("/servers/**").authenticated()
                 .and()
                     .formLogin()

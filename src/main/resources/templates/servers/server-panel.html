@@ -11,10 +11,11 @@
                 let serverId = $("#server-id").val();
 
                 $.ajax({
-                    url: "/api/server/" + serverId + "/console",
+                    url: "/api/servers/" + serverId + "/latest-log",
                     method: "GET"
                 }).done(function (response) {
-                    $("server-console").text(response);
+                    console.log(response);
+                    $("#console").text(response.join("\n"));
                 });
             }
 

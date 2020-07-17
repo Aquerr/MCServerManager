@@ -10,6 +10,7 @@ sourceCompatibility = '1.8'
 
 repositories {
 	mavenCentral()
+	maven { url "https://jitpack.io"}
 }
 
 dependencies {
@@ -26,6 +27,8 @@ dependencies {
 	}
 
 	implementation 'net.lingala.zip4j:zip4j:2.6.1'
+
+	implementation 'com.github.Kronos666:rkon-core:master-SNAPSHOT'
 
 	runtimeOnly 'com.h2database:h2:1.4.200'
 }

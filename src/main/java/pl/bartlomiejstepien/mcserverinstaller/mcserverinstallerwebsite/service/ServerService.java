@@ -186,4 +186,26 @@ public class ServerService
     {
         return new ArrayList<>();
     }
+
+    @Transactional
+    public List<String> getServerLatestLog(int serverId)
+    {
+        final Server server = getServer(serverId);
+        final String serverPath = server.getPath();
+        final Path latestLogPath = Paths.get(serverPath + File.separator + "logs" + File.separator + "latest.log");
+
+        if (Files.notExists(latestLogPath))
+            return Collections.emptyList();
+
+        try
+        {
+            final List<String> lines = Files.readAllLines(latestLogPath);
+            return lines;
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+        return Collections.emptyList();
+    }
 }
