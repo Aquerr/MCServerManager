@@ -15,11 +15,54 @@
                     method: "GET"
                 }).done(function (response) {
                     console.log(response);
-                    $("#console").text(response.join("\n"));
+                    let serverConsole = document.getElementById("console");
+                    serverConsole.value = response.join("\n");
+                    serverConsole.scrollTop = serverConsole.scrollHeight;
                 });
             }
 
             consoleUpdateIntervalId = setInterval(updateConsole, 4000);
+
+
+            $("#save-settings").on("click", function () {
+
+                let serverId = $("#server-id").val();
+                let button = $(this);
+                button.prop("disabled", true);
+                button.text("");
+                button.append("<span class='spinner-border spinner-border-sm' role='status' aria-hidden='true'></span>");
+
+                let json = {};
+                json["level_name"] = $("#server-level-name").val();
+                json["online_mode"] = $("#server-online-mode").val();
+
+                $.ajax({
+                    url: "/api/servers/" + serverId + "/settings",
+                    method: "POST",
+                    contentType: "application/json",
+                    data: JSON.stringify(json)
+                }).done(function () {
+                    location.reload();
+                });
+            });
+
+            $("#console-input").on("keydown", function (event) {
+                if (event.code === "Enter") {
+                    let serverId = $("#server-id").val();
+                    let command = $("#console-input").val();
+                    $("#console-input").val("");
+
+                    $.ajax({
+                        url: "/api/servers/" + serverId + "/command",
+                        method: "POST",
+                        contentType: "text/plain",
+                        data: command
+                    }).done(function (response) {
+                        console.log("Command sent!");
+                        console.log(response);
+                    });
+                }
+            });
         });
 
 
@@ -50,11 +93,21 @@
                 </div>
 
                 <div id="server-settings" class="tab-pane fade" role="tabpanel" aria-labelledby="server-settings-tab">
-                    <label for="server-level-name">Level Name</label>
-                    <input id="server-level-name" class="form-control" type="text" th:value="${server.getLevelName()}">
-
-                    <label for="server-online-mode">Online Mode</label>
-                    <input id="server-online-mode" class="form-control" type="text" th:value="${server.getOnlineMode()}">
+                    <div class="container mt-2">
+                        <div class="row">
+                            <div class="col-sm">
+                                <label for="server-level-name">Level Name</label>
+                                <input name="level-name" id="server-level-name" class="form-control" type="text" th:value="${server.getLevelName()}">
+                            </div>
+                            <div class="col-sm">
+                                <label for="server-online-mode">Online Mode</label>
+                                <input name="online-mode" id="server-online-mode" class="form-control" type="text" th:value="${server.getOnlineMode()}">
+                            </div>
+                        </div>
+                        <div class="mt-2 float-right">
+                            <button id="save-settings" class="btn btn-primary" type="button">Save</button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

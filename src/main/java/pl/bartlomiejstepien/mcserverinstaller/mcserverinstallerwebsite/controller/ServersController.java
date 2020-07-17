@@ -1,6 +1,7 @@
 package pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -8,10 +9,12 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.model.ModPack;
 import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.model.Server;
+import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.model.User;
 import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.service.CurseForgeAPIService;
 import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.service.ServerService;
 
 import java.util.List;
+import java.util.Optional;
 
 @Controller
 @RequestMapping("/servers")
@@ -36,14 +39,15 @@ public class ServersController
     }
 
     @GetMapping("/{id}")
-    public String showServer(final @PathVariable("id") int id, final Model model)
+    public String showServer(final @PathVariable("id") int id, final Model model, final Authentication authentication)
     {
-        final Server server = this.serverService.getServer(id);
+        final User user = (User)authentication.getPrincipal();
+        final Optional<Server> optionalServer = user.getServerById(id);
 
-        if (server == null)
-            throw new RuntimeException("Server with the given id does not exist!");
+        if (!optionalServer.isPresent())
+            throw new RuntimeException("Access denied!");
 
-        model.addAttribute("server", server);
+        model.addAttribute("server", optionalServer.get());
         return "servers/server-panel";
     }
 }

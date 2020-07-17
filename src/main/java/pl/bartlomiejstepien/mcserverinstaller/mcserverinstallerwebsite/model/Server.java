@@ -53,7 +53,7 @@ public class Server
                 startFilePath = Files.list(Paths.get(serverPath)).filter(file ->
                 {
                     String fileName = file.getFileName().toString();
-                    if(fileName.endsWith(".bat") && (fileName.contains("start") || fileName.contains("launch") || fileName.contains("run")))
+                    if(fileName.endsWith(".bat") && (fileName.contains("start") || fileName.contains("Start") || fileName.contains("launch") || fileName.contains("Launch") || fileName.contains("Run") || fileName.contains("run")))
                         return true;
                     else return false;
                 }).findFirst().orElse(null);
@@ -106,8 +106,8 @@ public class Server
 
             server.setLevelName(levelName);
             server.setOnlineMode(onlineMode);
-            server.setRconPort(Integer.parseInt(properties.getProperty("rcon-port")));
-            server.setRconPassword(properties.getProperty("rcon-password"));
+            server.setRconPort(Integer.parseInt(properties.getProperty("rcon.port")));
+            server.setRconPassword(properties.getProperty("rcon.password"));
         }
 
         return server;

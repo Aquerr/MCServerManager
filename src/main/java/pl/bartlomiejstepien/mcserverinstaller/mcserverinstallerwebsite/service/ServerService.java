@@ -205,13 +205,21 @@ public class ServerService
         catch (IOException e)
         {
             e.printStackTrace();
+            try
+            {
+                Files.delete(latestLogPath);
+                Files.createFile(latestLogPath);
+            }
+            catch (IOException ioException)
+            {
+                ioException.printStackTrace();
+            }
         }
         return Collections.emptyList();
     }
 
-    public void postCommand(int serverId, String command)
+    public void postCommand(final Server server, String command)
     {
-        final Server server = getServer(serverId);
         try(RconClient rconClient = RconClient.open("localhost", server.getRconPort(), server.getRconPassword()))
         {
             rconClient.sendCommand(command);

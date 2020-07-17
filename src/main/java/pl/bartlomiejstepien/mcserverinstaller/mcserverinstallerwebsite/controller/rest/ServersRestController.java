@@ -1,13 +1,16 @@
 package pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.controller.rest;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.springframework.http.HttpHeaders;
 import org.springframework.security.core.Authentication;
+import org.springframework.util.MimeTypeUtils;
 import org.springframework.web.bind.annotation.*;
 import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.model.InstallationStatus;
 import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.model.Server;
 import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.model.User;
 import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.service.ServerService;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -41,15 +44,21 @@ public class ServersRestController
     {
         final User user = (User)authentication.getPrincipal();
 
-        if (user.getServers().stream().noneMatch(serverDto -> serverDto.getId() == serverId))
+        final Optional<Server> optionalServer = user.getServerById(serverId);
+        if (!optionalServer.isPresent())
             throw new RuntimeException("Access denied!");
 
-        this.serverService.postCommand(serverId, command);
+        final Server server = optionalServer.get();
+        this.serverService.postCommand(server, command);
     }
 
-    @PostMapping("/{id}/settings")
-    public void saveSettings(final @PathVariable("id") int serverId, @RequestBody Map<String, String> properties, final Authentication authentication)
+    @PostMapping(value = "/{id}/settings", consumes = MimeTypeUtils.APPLICATION_JSON_VALUE)
+    public void saveSettings(final @PathVariable("id") int serverId, @RequestBody ObjectNode json, final Authentication authentication)
     {
+        final Map<String, String> parsedMap = new HashMap<>();
+        parsedMap.put("level-name", json.get("level_name").textValue());
+        parsedMap.put("online-mode", json.get("online_mode").textValue());
+
         final User user = (User)authentication.getPrincipal();
 
         final Optional<Server> optionalServer = user.getServerById(serverId);
@@ -57,6 +66,6 @@ public class ServersRestController
             throw new RuntimeException("Access denied!");
 
         final Server server = optionalServer.get();
-        server.saveProperties(properties);
+        server.saveProperties(parsedMap);
     }
 }
