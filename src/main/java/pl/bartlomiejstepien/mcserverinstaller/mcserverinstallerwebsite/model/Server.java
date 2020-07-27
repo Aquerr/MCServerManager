@@ -36,6 +36,9 @@ public class Server
     private int rconPort;
     private String rconPassword;
 
+
+    private boolean isRunning;
+
     public static Server fromDto(final ServerDto serverDto)
     {
         //TODO: Load server information from server.properties.
@@ -200,6 +203,27 @@ public class Server
     public String getStartFilePath()
     {
         return startFilePath;
+    }
+
+    public void start()
+    {
+        //TODO: Start new process by running the server start file.
+
+        //TODO: Store the pid of the process in a file.
+
+        this.isRunning = true;
+    }
+
+    public void stop()
+    {
+        //TODO: Read pid of the process from the file and try to stop it.
+
+        this.isRunning = false;
+    }
+
+    public boolean isRunning()
+    {
+        return this.isRunning;
     }
 
     public void saveProperties(Map<String, String> settings)

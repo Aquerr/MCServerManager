@@ -19,6 +19,7 @@ public class H2UserDetailsService implements UserDetailsService
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException
     {
+        //TODO: findByUsername should return User with Server (not ServerDto).
         final UserDetails userDetails = this.userService.findByUsername(username);
 
         if (userDetails == null)

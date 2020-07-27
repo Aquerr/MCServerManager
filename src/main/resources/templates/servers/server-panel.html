@@ -21,7 +21,7 @@
                 });
             }
 
-            consoleUpdateIntervalId = setInterval(updateConsole, 4000);
+            consoleUpdateIntervalId = setInterval(updateConsole, 5000);
 
 
             $("#save-settings").on("click", function () {
@@ -82,7 +82,14 @@
                     <a class="nav-link" id="server-settings-tab" data-toggle="tab" href="#server-settings" role="tab" aria-controls="server-settings" aria-selected="false">Settings</a>
                 </li>
             </ul>
-
+            <div class="nav-link float-right" role="presentation" style="display: inline-block;">
+                <div th:if="${!server.isRunning()}">
+                    <button id="start-button" class="btn btn-primary">Start Server</button>
+                </div>
+                <div th:if="${server.isRunning()}">
+                    <button id="start-button" class="btn btn-primary">Stop Server</button>
+                </div>
+            </div>
             <div class="tab-content" id="tab-content">
                 <div id="server-console" class="tab-pane fade show active" role="tabpanel" aria-labelledby="server-console-tab">
                     <div class="mt-2">
