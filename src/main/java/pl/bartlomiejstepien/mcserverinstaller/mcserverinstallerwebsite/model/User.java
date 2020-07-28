@@ -7,23 +7,15 @@ import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.repositor
 import javax.persistence.*;
 import java.util.*;
 
-@Entity
-@Table(name = "user")
 public class User implements UserDetails
 {
-    @Id
-    @Column(name = "id")
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    @Column(name = "username")
     private String username;
 
-    @Column(name = "password")
     private String password;
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "user")
-    private List<ServerDto> servers;
+    private List<Server> servers;
 
     public User()
     {
@@ -79,13 +71,13 @@ public class User implements UserDetails
         return true;
     }
 
-    public void addServer(final ServerDto serverDto)
+    public void addServer(final Server server)
     {
         if (this.servers == null)
             this.servers = new ArrayList<>();
 
-        this.servers.add(serverDto);
-        serverDto.setUser(this);
+        this.servers.add(server);
+        server.setUser(this);
     }
 
     public int getId()
@@ -93,15 +85,14 @@ public class User implements UserDetails
         return id;
     }
 
-    public List<ServerDto> getServers()
+    public List<Server> getServers()
     {
         return servers;
     }
 
     public Optional<Server> getServerById(final int id)
     {
-        final Optional<ServerDto> optionalServerDto = this.servers.stream().filter(serverDto -> serverDto.getId() == id).findFirst();
-        return optionalServerDto.map(Server::fromDto);
+        return this.servers.stream().filter(serverDto -> serverDto.getId() == id).findFirst();
     }
     //    public List<Server> getServers()
 //    {

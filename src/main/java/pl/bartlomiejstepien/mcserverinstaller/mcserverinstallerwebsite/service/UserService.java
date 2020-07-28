@@ -45,7 +45,7 @@ public class UserService
     }
 
     @Transactional
-    public UserDetails findByUsername(String username)
+    public User findByUsername(String username)
     {
         return this.userRepository.findByUsername(username);
     }

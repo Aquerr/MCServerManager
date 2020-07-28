@@ -28,7 +28,7 @@ public class HomeController
     public String root(final Model model, final Authentication authentication)
     {
         // Return user's list of servers here...
-        final List<Server> servers = ((User)authentication.getPrincipal()).getServers().stream().map(ServerDto::toServer).collect(Collectors.toList());
+        final List<Server> servers = ((User)authentication.getPrincipal()).getServers();
 
         model.addAttribute("servers", servers);
         return "index";

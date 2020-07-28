@@ -19,14 +19,14 @@ public class ServerDto
 
     @ManyToOne
     @JoinColumn(name = "user_id")
-    private User user;
+    private UserDto user;
 
     public ServerDto()
     {
 
     }
 
-    public ServerDto(int id, String path, User user)
+    public ServerDto(int id, String path, UserDto user)
     {
         this.id = id;
         this.path = path;
@@ -35,7 +35,10 @@ public class ServerDto
 
     public static ServerDto fromServer(Server server)
     {
-        return new ServerDto(server.getId(), server.getPath(), server.getUser());
+        final UserDto userDto = UserDto.fromUser(server.getUser());
+        final ServerDto serverDto = new ServerDto(server.getId(), server.getPath(), userDto);
+        userDto.addServer(serverDto);
+        return serverDto;
     }
 
     public int getId()
@@ -58,12 +61,12 @@ public class ServerDto
         this.path = path;
     }
 
-    public User getUser()
+    public UserDto getUser()
     {
         return this.user;
     }
 
-    public void setUser(User user)
+    public void setUser(UserDto user)
     {
         this.user = user;
     }

@@ -2,6 +2,7 @@ package pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.model;
 
 import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.repository.dto.ServerDto;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -29,6 +30,8 @@ public class Server
     // Properties
     private String levelName;
     private boolean onlineMode;
+    private int port;
+    private boolean pvp;
 
     //Query
 
@@ -43,7 +46,8 @@ public class Server
     {
         //TODO: Load server information from server.properties.
         final String serverPath = serverDto.getPath();
-        final Server server = new Server(serverDto.getId(), "TEST", serverDto.getPath(), serverDto.getUser());
+//        final User user = serverDto.getUser().toUser();
+        final Server server = new Server(serverDto.getId(), serverDto.getPath().substring(serverPath.lastIndexOf(File.separator)) + 1, serverPath, null);
 
         // Find start file. BATCH or SHELL depending on operating system.
         Path startFilePath = null;
@@ -106,14 +110,28 @@ public class Server
 
             final String levelName = properties.getProperty("level-name");
             final boolean onlineMode = Boolean.parseBoolean(properties.getProperty("online-mode"));
+            final int port = Integer.parseInt(properties.getProperty("server-port"));
+            final boolean pvp = Boolean.parseBoolean(properties.getProperty("pvp"));
 
             server.setLevelName(levelName);
             server.setOnlineMode(onlineMode);
+            server.setPort(port);
+            server.setPvp(pvp);
             server.setRconPort(Integer.parseInt(properties.getProperty("rcon.port")));
             server.setRconPassword(properties.getProperty("rcon.password"));
         }
 
         return server;
+    }
+
+    private void setPvp(boolean pvp)
+    {
+        this.pvp = pvp;
+    }
+
+    private void setPort(int port)
+    {
+        this.port = port;
     }
 
     public void setRconPort(int rconPort)
@@ -190,6 +208,16 @@ public class Server
         this.onlineMode = onlineMode;
     }
 
+    public boolean getPvp()
+    {
+        return this.pvp;
+    }
+
+    public int getPort()
+    {
+        return port;
+    }
+
     public int getRconPort()
     {
         return rconPort;
@@ -256,5 +284,10 @@ public class Server
         {
             e.printStackTrace();
         }
+    }
+
+    public void setUser(User user)
+    {
+        this.user = user;
     }
 }

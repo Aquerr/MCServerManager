@@ -111,6 +111,16 @@
                                 <input name="online-mode" id="server-online-mode" class="form-control" type="text" th:value="${server.getOnlineMode()}">
                             </div>
                         </div>
+                        <div class="row">
+                            <div class="col-sm">
+                                <label for="server-port">Server Port</label>
+                                <input name="server-port" id="server-port" class="form-control" type="text" th:value="${server.getPort()}">
+                            </div>
+                            <div class="col-sm">
+                                <label for="server-pvp">PVP</label>
+                                <input name="server-pvp" id="server-pvp" class="form-control" type="text" th:value="${server.getPvp()}">
+                            </div>
+                        </div>
                         <div class="mt-2 float-right">
                             <button id="save-settings" class="btn btn-primary" type="button">Save</button>
                         </div>

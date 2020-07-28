@@ -141,21 +141,21 @@ public class ServerService
         }
 
         //TODO: Attach server to given user
-        final ServerDto serverDto = new ServerDto(0, serverPath.toString(), user);
-        user.addServer(serverDto);
+        final Server server = new Server(0, "", serverPath.toString(), user);
+        user.addServer(server);
 
-        addServer(serverDto);
+        final int id = addServer(server);
 
         //TODO: Set eula to true?
 
         MODPACKS_INSTALLATION_STATUSES.put(modpackId, new InstallationStatus(100, "Server is ready!"));
-        return serverDto.getId();
+        return id;
     }
 
     @Transactional
-    public void addServer(final Server server)
+    public int addServer(final Server server)
     {
-        this.serverRepository.save(ServerDto.fromServer(server));
+        return this.serverRepository.save(ServerDto.fromServer(server));
     }
 
     @Transactional

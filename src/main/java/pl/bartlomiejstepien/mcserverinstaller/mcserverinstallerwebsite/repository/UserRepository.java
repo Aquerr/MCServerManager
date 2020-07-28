@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Repository;
 import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.model.User;
+import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.repository.dto.UserDto;
 
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
@@ -22,7 +23,7 @@ public class UserRepository
 
     public User find(final int id)
     {
-        return this.entityManager.find(User.class, id);
+        return this.entityManager.find(UserDto.class, id).toUser();
     }
 
     public List<User> findAll()
@@ -42,13 +43,13 @@ public class UserRepository
             this.entityManager.remove(user);
     }
 
-    public UserDetails findByUsername(String username)
+    public User findByUsername(final String username)
     {
-        final Query query = this.entityManager.createQuery("SELECT u FROM User u WHERE u.username = :username");
+        final Query query = this.entityManager.createQuery("SELECT u FROM UserDto u WHERE u.username = :username");
         query.setParameter("username", username);
 
         final Object object = query.getSingleResult();
-
-        return (User) object;
+        final UserDto userDto = (UserDto) object;
+        return userDto.toUser();
     }
 }

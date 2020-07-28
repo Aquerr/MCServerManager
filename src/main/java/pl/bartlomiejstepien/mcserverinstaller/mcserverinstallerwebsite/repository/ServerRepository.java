@@ -28,9 +28,10 @@ public class ServerRepository
         return this.entityManager.createQuery("from server").getResultList();
     }
 
-    public void save(final ServerDto serverDto)
+    public int save(final ServerDto serverDto)
     {
-        this.entityManager.persist(serverDto);
+        final ServerDto mergedServerDto = this.entityManager.merge(serverDto);
+        return mergedServerDto.getId();
 //        this.entityManager.flush();
     }
 
