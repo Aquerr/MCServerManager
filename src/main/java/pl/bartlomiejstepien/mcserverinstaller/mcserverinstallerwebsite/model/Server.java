@@ -1,31 +1,32 @@
 package pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.model;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.repository.dto.ServerDto;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 
 public class Server
 {
+    private static final Logger LOGGER = LoggerFactory.getLogger(Server.class);
+
+    private static final Map<Integer, Process> SERVER_PROCESSES = new HashMap<>();
+
     private int id;
     private String name;
-    private String path;
+    private String serverDir;
 
     private User user;
 
 
     private List<String> players;
 
-    private String startFilePath;
+    private Path startFilePath;
 
     // Properties
     private String levelName;
@@ -53,7 +54,7 @@ public class Server
         Path startFilePath = null;
 
         final String osName = System.getProperty("os.name");
-        if (osName.contains("win"))
+        if (osName.contains("win") || osName.contains("Win"))
         {
             try
             {
@@ -89,7 +90,7 @@ public class Server
         }
 
         if (startFilePath != null)
-            server.setStartFilePath(startFilePath.toString());
+            server.setStartFilePath(startFilePath);
 
 
         //Load server.properties
@@ -144,7 +145,7 @@ public class Server
         this.rconPassword = rconPassword;
     }
 
-    public void setStartFilePath(String startFilePath)
+    public void setStartFilePath(Path startFilePath)
     {
         this.startFilePath = startFilePath;
     }
@@ -154,11 +155,11 @@ public class Server
 
     }
 
-    public Server(int id, String name, String path, User user)
+    public Server(int id, String name, String serverDir, User user)
     {
         this.id = id;
         this.name = name;
-        this.path = path;
+        this.serverDir = serverDir;
         this.user = user;
         this.players = new ArrayList<>();
     }
@@ -178,9 +179,9 @@ public class Server
         return players;
     }
 
-    public String getPath()
+    public String getServerDir()
     {
-        return this.path;
+        return this.serverDir;
     }
 
     public User getUser()
@@ -228,7 +229,7 @@ public class Server
         return rconPassword;
     }
 
-    public String getStartFilePath()
+    public Path getStartFilePath()
     {
         return startFilePath;
     }
@@ -239,6 +240,36 @@ public class Server
 
         //TODO: Store the pid of the process in a file.
 
+        try
+        {
+            final String startFilePath = this.startFilePath.toAbsolutePath().toString();
+            final String serverDir = Paths.get(this.serverDir).toAbsolutePath().toString();
+
+            Process process = null;
+
+            final String osName = System.getProperty("os.name");
+            if (osName.contains("Win") || osName.contains("win"))
+            {
+                process = Runtime.getRuntime().exec(startFilePath, null, new File(serverDir));
+//                final ProcessBuilder processBuilder = new ProcessBuilder("cmd.exe", "/c", serverDir.substring(0, 2), "cd \"" + serverDir + "\" && " + this.startFilePath.getFileName().toString());
+//                process = processBuilder.start();
+
+//                final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(process.getInputStream(), StandardCharsets.UTF_8));
+//                String str;
+//                while ((str = bufferedReader.readLine()) != null)
+//                    System.out.println(str);
+            }
+            else
+            {
+                process = Runtime.getRuntime().exec("sh " + startFilePath, null, new File(serverDir));
+            }
+            SERVER_PROCESSES.put(this.id, process);
+        }
+        catch (IOException e)
+        {
+            LOGGER.error("Could not start server with id=" + this.id, e);
+        }
+
         this.isRunning = true;
     }
 
@@ -246,17 +277,33 @@ public class Server
     {
         //TODO: Read pid of the process from the file and try to stop it.
 
+        final Process process = SERVER_PROCESSES.get(this.id);
+
+
+        if (process == null || !process.isAlive())
+        {
+            LOGGER.warn("Tried to stop server that is not running. Server id=" + this.id);
+            return;
+        }
+        process.destroy();
         this.isRunning = false;
     }
 
     public boolean isRunning()
     {
+        final Process serverProcess = SERVER_PROCESSES.get(this.id);
+        if (serverProcess != null && serverProcess.isAlive())
+            return true;
+
+        //TODO: Check pid file...
+
         return this.isRunning;
     }
 
     public void saveProperties(Map<String, String> settings)
     {
-        final Path propertiesFilePath = Paths.get(this.path).resolve("server.properties");
+        LOGGER.info("Saving server properties for server id=" + this.id);
+        final Path propertiesFilePath = Paths.get(this.serverDir).resolve("server.properties");
 
         try
         {
@@ -284,6 +331,7 @@ public class Server
         {
             e.printStackTrace();
         }
+        LOGGER.info("Saved server properties for server id=" + this.id);
     }
 
     public void setUser(User user)

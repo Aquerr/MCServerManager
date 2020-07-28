@@ -63,6 +63,22 @@
                     });
                 }
             });
+
+            $("#toggle-button").on("click", function (event) {
+                let serverId = $("#server-id").val();
+
+                let button = $(this);
+                button.prop("disabled", true);
+                button.text("");
+                button.append("<span class='spinner-border spinner-border-sm' role='status' aria-hidden='true'></span>");
+
+                $.ajax({
+                    url: "/api/servers/" + serverId + "/toggle",
+                    method: "POST"
+                }).done(function (response) {
+                    location.reload();
+                });
+            });
         });
 
 
@@ -81,15 +97,11 @@
                 <li class="nav-link" role="presentation">
                     <a class="nav-link" id="server-settings-tab" data-toggle="tab" href="#server-settings" role="tab" aria-controls="server-settings" aria-selected="false">Settings</a>
                 </li>
+                <li class="nav-link float-right" role="presentation">
+                    <a th:if="${!server.isRunning()}" id="toggle-button" class="nav-link" style="color: #007bff;text-decoration: none;background-color: transparent; cursor: pointer;">Start Server</a>
+                    <a th:if="${server.isRunning()}" id="toggle-button" class="nav-link" style="color: #007bff;text-decoration: none;background-color: transparent; cursor: pointer;">Stop Server</a>
+                </li>
             </ul>
-            <div class="nav-link float-right" role="presentation" style="display: inline-block;">
-                <div th:if="${!server.isRunning()}">
-                    <button id="start-button" class="btn btn-primary">Start Server</button>
-                </div>
-                <div th:if="${server.isRunning()}">
-                    <button id="start-button" class="btn btn-primary">Stop Server</button>
-                </div>
-            </div>
             <div class="tab-content" id="tab-content">
                 <div id="server-console" class="tab-pane fade show active" role="tabpanel" aria-labelledby="server-console-tab">
                     <div class="mt-2">

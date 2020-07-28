@@ -1,7 +1,6 @@
 package pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.repository.dto;
 
 import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.model.Server;
-import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.model.User;
 
 import javax.persistence.*;
 
@@ -36,7 +35,7 @@ public class ServerDto
     public static ServerDto fromServer(Server server)
     {
         final UserDto userDto = UserDto.fromUser(server.getUser());
-        final ServerDto serverDto = new ServerDto(server.getId(), server.getPath(), userDto);
+        final ServerDto serverDto = new ServerDto(server.getId(), server.getServerDir(), userDto);
         userDto.addServer(serverDto);
         return serverDto;
     }

@@ -191,7 +191,7 @@ public class ServerService
     public List<String> getServerLatestLog(int serverId)
     {
         final Server server = getServer(serverId);
-        final String serverPath = server.getPath();
+        final String serverPath = server.getServerDir();
         final Path latestLogPath = Paths.get(serverPath + File.separator + "logs" + File.separator + "latest.log");
 
         if (Files.notExists(latestLogPath))

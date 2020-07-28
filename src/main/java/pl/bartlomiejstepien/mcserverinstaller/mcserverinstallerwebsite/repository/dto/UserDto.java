@@ -42,7 +42,7 @@ public class UserDto
         final UserDto userDto = new UserDto(user.getId(), user.getUsername(), user.getPassword());
         for (final Server server : user.getServers())
         {
-            final ServerDto serverDto = new ServerDto(server.getId(), server.getPath(), userDto);
+            final ServerDto serverDto = new ServerDto(server.getId(), server.getServerDir(), userDto);
             serverDto.setUser(userDto);
             userDto.addServer(serverDto);
         }

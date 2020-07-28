@@ -52,6 +52,21 @@ public class ServersRestController
         this.serverService.postCommand(server, command);
     }
 
+    @PostMapping("/{id}/toggle")
+    public void toggleServer(final @PathVariable("id") int serverId, final Authentication authentication)
+    {
+        final User user = (User) authentication.getPrincipal();
+
+        final Optional<Server> optionalServer = user.getServerById(serverId);
+        if (!optionalServer.isPresent())
+            throw new RuntimeException("Access denied!");
+
+        final Server server = optionalServer.get();
+        if (server.isRunning())
+            server.stop();
+        else server.start();
+    }
+
     @PostMapping(value = "/{id}/settings", consumes = MimeTypeUtils.APPLICATION_JSON_VALUE)
     public void saveSettings(final @PathVariable("id") int serverId, @RequestBody ObjectNode json, final Authentication authentication)
     {
