@@ -278,7 +278,7 @@ public class Server
             if (osName.contains("Win") || osName.contains("win"))
             {
                 process = Runtime.getRuntime().exec(startFilePath, null, new File(serverDir));
-                final InputStream inputStream = process.getInputStream();
+//                final InputStream inputStream = process.getInputStream();
 //                final ProcessBuilder processBuilder = new ProcessBuilder("cmd.exe", "/c", serverDir.substring(0, 2), "cd \"" + serverDir + "\" && " + this.startFilePath.getFileName().toString());
 //                process = processBuilder.start();
 
