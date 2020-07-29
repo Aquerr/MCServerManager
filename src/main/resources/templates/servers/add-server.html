@@ -49,7 +49,7 @@
                 }).fail(function (response) {
                     console.log(response);
                     clearInterval(installationStatusMessageInterval);
-                    $("#server-install-modal .modal-body").text("Someting went wrong...");
+                    $("#server-install-modal .modal-body").text(response["responseJSON"]["message"]);
                 });
 
                 function showInstallationStatus() {

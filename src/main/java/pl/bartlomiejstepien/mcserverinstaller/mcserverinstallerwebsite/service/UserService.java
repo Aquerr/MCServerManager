@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.model.User;
 import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.repository.UserRepository;
+import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.repository.dto.UserDto;
 
 import java.util.List;
 
@@ -41,7 +42,7 @@ public class UserService
     @Transactional
     public void save(final User user)
     {
-        this.userRepository.save(user);
+        this.userRepository.save(UserDto.fromUser(user));
     }
 
     @Transactional

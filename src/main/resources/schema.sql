@@ -15,11 +15,16 @@ CREATE UNIQUE INDEX ON user (id);
 CREATE TABLE IF NOT EXISTS server (
     id          INT AUTO_INCREMENT                NOT NULL,
     path        VARCHAR(250)         UNIQUE        NOT NULL,
-    user_id     INT                               NOT NULL,
-    PRIMARY KEY (id),
-    FOREIGN KEY (user_id) REFERENCES user(id) ON DELETE CASCADE
+    PRIMARY KEY (id)
 );
 CREATE UNIQUE INDEX ON server (id);
+
+CREATE TABLE IF NOT EXISTS user_server (
+    user_id     INT         NOT NULL,
+    server_id   INT         NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES user(id) ON DELETE CASCADE,
+    FOREIGN KEY (server_id) REFERENCES server(id) ON DELETE CASCADE
+);
 
 -- MERGE INTO user (id, username, password) VALUES (1, 'Nerdi', '$2a$10$RsBi7zEwsAHxTgQO8cBX5Oe7iCPvIkGN3ichuibM9uGzmvx6TzFC6')
 

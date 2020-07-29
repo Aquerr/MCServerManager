@@ -30,8 +30,8 @@ public class ServerRepository
 
     public int save(final ServerDto serverDto)
     {
-        final ServerDto mergedServerDto = this.entityManager.merge(serverDto);
-        return mergedServerDto.getId();
+        this.entityManager.persist(serverDto);
+        return serverDto.getId();
 //        this.entityManager.flush();
     }
 

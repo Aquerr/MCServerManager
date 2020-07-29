@@ -15,7 +15,7 @@ public class User implements UserDetails
 
     private String password;
 
-    private List<Server> servers;
+    private final List<Server> servers = new ArrayList<>();
 
     public User()
     {
@@ -73,11 +73,12 @@ public class User implements UserDetails
 
     public void addServer(final Server server)
     {
-        if (this.servers == null)
-            this.servers = new ArrayList<>();
-
         this.servers.add(server);
-        server.setUser(this);
+    }
+
+    public void removeServer(final Server server)
+    {
+        this.servers.remove(server);
     }
 
     public int getId()

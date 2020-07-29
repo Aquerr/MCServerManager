@@ -9,6 +9,7 @@ import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.repositor
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Repository
 public class UserRepository
@@ -23,22 +24,25 @@ public class UserRepository
 
     public User find(final int id)
     {
-        return this.entityManager.find(UserDto.class, id).toUser();
+        final UserDto userDto = this.entityManager.find(UserDto.class, id);
+        if (userDto != null)
+            return userDto.toUser();
+        else return null;
     }
 
     public List<User> findAll()
     {
-        return this.entityManager.createQuery("from User").getResultList();
+        return ((List<UserDto>)this.entityManager.createQuery("from user").getResultList()).stream().map(UserDto::toUser).collect(Collectors.toList());
     }
 
-    public void save(final User user)
+    public void save(final UserDto user)
     {
         this.entityManager.merge(user);
     }
 
     public void delete(final int id)
     {
-        final User user = this.entityManager.find(User.class, id);
+        final UserDto user = this.entityManager.find(UserDto.class, id);
         if (user != null)
             this.entityManager.remove(user);
     }

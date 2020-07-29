@@ -3,6 +3,7 @@ package pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.model;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.repository.dto.ServerDto;
+import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.repository.dto.UserDto;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -10,6 +11,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.concurrent.ForkJoinPool;
+import java.util.stream.Collectors;
 
 public class Server
 {
@@ -21,10 +24,9 @@ public class Server
     private String name;
     private String serverDir;
 
-    private User user;
+    private final List<User> users = new ArrayList<>();
 
-
-    private List<String> players;
+    private final List<String> players = new LinkedList<>();
 
     private Path startFilePath;
 
@@ -48,7 +50,14 @@ public class Server
         //TODO: Load server information from server.properties.
         final String serverPath = serverDto.getPath();
 //        final User user = serverDto.getUser().toUser();
-        final Server server = new Server(serverDto.getId(), serverDto.getPath().substring(serverPath.lastIndexOf(File.separator)) + 1, serverPath, null);
+        final Server server = new Server(serverDto.getId(), serverDto.getPath().substring(serverPath.lastIndexOf(File.separator)) + 1, serverPath);
+
+        for (final UserDto userDto : serverDto.getUsers())
+        {
+            final User user = new User(userDto.getId(), userDto.getUsername(), userDto.getPassword());
+            user.addServer(server);
+            server.addUser(user);
+        }
 
         // Find start file. BATCH or SHELL depending on operating system.
         Path startFilePath = null;
@@ -155,13 +164,16 @@ public class Server
 
     }
 
-    public Server(int id, String name, String serverDir, User user)
+    public Server(int id, String name, String serverDir)
     {
         this.id = id;
         this.name = name;
         this.serverDir = serverDir;
-        this.user = user;
-        this.players = new ArrayList<>();
+    }
+
+    public void setId(int id)
+    {
+        this.id = id;
     }
 
     public int getId()
@@ -184,9 +196,24 @@ public class Server
         return this.serverDir;
     }
 
-    public User getUser()
+    public List<User> getUsers()
     {
-        return user;
+        return users;
+    }
+
+    public void addUser(final User user)
+    {
+        this.users.add(user);
+    }
+
+    public void addUsers(List<User> users)
+    {
+        this.users.addAll(users);
+    }
+
+    public void removeUser(final User user)
+    {
+        this.users.remove(user);
     }
 
     public String getLevelName()
@@ -251,13 +278,26 @@ public class Server
             if (osName.contains("Win") || osName.contains("win"))
             {
                 process = Runtime.getRuntime().exec(startFilePath, null, new File(serverDir));
+                final InputStream inputStream = process.getInputStream();
 //                final ProcessBuilder processBuilder = new ProcessBuilder("cmd.exe", "/c", serverDir.substring(0, 2), "cd \"" + serverDir + "\" && " + this.startFilePath.getFileName().toString());
 //                process = processBuilder.start();
 
-//                final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(process.getInputStream(), StandardCharsets.UTF_8));
-//                String str;
-//                while ((str = bufferedReader.readLine()) != null)
-//                    System.out.println(str);
+//                ForkJoinPool.commonPool().execute(new Thread(() -> {
+//                    final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
+//                    String str;
+//                    while (true)
+//                    {
+//                        try
+//                        {
+//                            if ((str = bufferedReader.readLine()) != null)
+//                                System.out.println(str);
+//                        }
+//                        catch (IOException e)
+//                        {
+//                            e.printStackTrace();
+//                        }
+//                    }
+//                }));
             }
             else
             {
@@ -332,10 +372,5 @@ public class Server
             e.printStackTrace();
         }
         LOGGER.info("Saved server properties for server id=" + this.id);
-    }
-
-    public void setUser(User user)
-    {
-        this.user = user;
     }
 }

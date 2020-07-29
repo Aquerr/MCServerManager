@@ -1,8 +1,12 @@
 package pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.repository.dto;
 
 import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.model.Server;
+import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.model.User;
 
 import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "server")
@@ -16,27 +20,33 @@ public class ServerDto
     @Column(name = "path")
     private String path;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id")
-    private UserDto user;
+    @ManyToMany(mappedBy = "servers")
+    private final List<UserDto> users = new ArrayList<>();
 
     public ServerDto()
     {
 
     }
 
-    public ServerDto(int id, String path, UserDto user)
+    public ServerDto(int id, String path)
     {
         this.id = id;
         this.path = path;
-        this.user = user;
     }
 
     public static ServerDto fromServer(Server server)
     {
-        final UserDto userDto = UserDto.fromUser(server.getUser());
-        final ServerDto serverDto = new ServerDto(server.getId(), server.getServerDir(), userDto);
-        userDto.addServer(serverDto);
+        if (server == null)
+            throw new IllegalArgumentException("Server cannot be null");
+
+        final ServerDto serverDto = new ServerDto(server.getId(), server.getServerDir());
+        for (final User user : server.getUsers())
+        {
+            final UserDto userDto = new UserDto(user.getId(), user.getUsername(), user.getPassword());
+            userDto.addServer(serverDto);
+            serverDto.addUser(userDto);
+        }
+
         return serverDto;
     }
 
@@ -60,14 +70,19 @@ public class ServerDto
         this.path = path;
     }
 
-    public UserDto getUser()
+    public List<UserDto> getUsers()
     {
-        return this.user;
+        return this.users;
     }
 
-    public void setUser(UserDto user)
+    public void addUser(UserDto userDto)
     {
-        this.user = user;
+        this.users.add(userDto);
+    }
+
+    public void addUsers(List<UserDto> userDtos)
+    {
+        this.users.addAll(userDtos);
     }
 
     public Server toServer()

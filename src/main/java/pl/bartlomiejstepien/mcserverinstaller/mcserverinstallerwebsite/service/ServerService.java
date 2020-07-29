@@ -3,6 +3,8 @@ package pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.service;
 import com.github.t9t.minecraftrconclient.RconClient;
 import net.lingala.zip4j.ZipFile;
 import net.lingala.zip4j.exception.ZipException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
@@ -14,6 +16,7 @@ import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.model.Mod
 import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.model.Server;
 import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.model.User;
 import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.repository.ServerRepository;
+import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.repository.UserRepository;
 import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.repository.dto.ServerDto;
 
 import java.io.File;
@@ -27,26 +30,30 @@ import java.util.stream.Collectors;
 @Service
 public class ServerService
 {
-    private Config config;
+    private static final Logger LOGGER = LoggerFactory.getLogger(ServerService.class);
 
     // Modpack id ==> InstallationStatus
     public static final Map<Integer, InstallationStatus> MODPACKS_INSTALLATION_STATUSES = new HashMap<>();
 
+    private Config config;
+
     private final CurseForgeAPIService curseForgeAPIService;
     private final ServerRepository serverRepository;
+    private final UserService userService;
 
     @Autowired
-    public ServerService(final Config config, final CurseForgeAPIService curseForgeAPIService, final ServerRepository serverRepository)
+    public ServerService(final Config config, final CurseForgeAPIService curseForgeAPIService, final UserService userService, final ServerRepository serverRepository)
     {
         this.config = config;
         this.curseForgeAPIService = curseForgeAPIService;
+        this.userService = userService;
         this.serverRepository = serverRepository;
     }
 
     @EventListener(ApplicationReadyEvent.class)
     public void startup()
     {
-        // Prepare servers directory structure here...
+        LOGGER.info("Preparing file structure...");
 
         final Path serversDirectoryPath = Paths.get(".").resolve(config.getServersDir());
         if (Files.notExists(serversDirectoryPath))
@@ -71,6 +78,8 @@ public class ServerService
                 e.printStackTrace();
             }
         }
+
+        LOGGER.info("Structure generated!");
     }
 
     /**
@@ -141,10 +150,16 @@ public class ServerService
         }
 
         //TODO: Attach server to given user
-        final Server server = new Server(0, "", serverPath.toString(), user);
+        final Server server = new Server(0, "", serverPath.toString());
         user.addServer(server);
+        server.addUser(user);
 
         final int id = addServer(server);
+        final Server server1 = getServer(id);
+        user.removeServer(server);
+        user.addServer(server1);
+
+        userService.save(user);
 
         //TODO: Set eula to true?
 
@@ -155,7 +170,8 @@ public class ServerService
     @Transactional
     public int addServer(final Server server)
     {
-        return this.serverRepository.save(ServerDto.fromServer(server));
+        final ServerDto serverDto = ServerDto.fromServer(server);
+        return this.serverRepository.save(serverDto);
     }
 
     @Transactional

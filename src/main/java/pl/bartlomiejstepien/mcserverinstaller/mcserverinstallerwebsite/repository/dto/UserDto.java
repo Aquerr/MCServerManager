@@ -22,8 +22,9 @@ public class UserDto
     @Column(name = "password")
     private String password;
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "user")
-    private List<ServerDto> servers;
+    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @JoinTable(name = "user_server", joinColumns = {@JoinColumn(name = "user_id")}, inverseJoinColumns = {@JoinColumn(name = "server_id")})
+    private final List<ServerDto> servers = new ArrayList<>();
 
     public UserDto()
     {
@@ -39,11 +40,14 @@ public class UserDto
 
     public static UserDto fromUser(User user)
     {
+        if (user == null)
+            throw new IllegalArgumentException("User cannot be null");
+
         final UserDto userDto = new UserDto(user.getId(), user.getUsername(), user.getPassword());
         for (final Server server : user.getServers())
         {
-            final ServerDto serverDto = new ServerDto(server.getId(), server.getServerDir(), userDto);
-            serverDto.setUser(userDto);
+            final ServerDto serverDto = new ServerDto(server.getId(), server.getServerDir());
+            serverDto.addUser(userDto);
             userDto.addServer(serverDto);
         }
         return userDto;
@@ -86,11 +90,12 @@ public class UserDto
 
     public void addServer(final ServerDto serverDto)
     {
-        if (this.servers == null)
-            this.servers = new ArrayList<>();
-
         this.servers.add(serverDto);
-        serverDto.setUser(this);
+    }
+
+    private void addServers(final List<ServerDto> serverDtos)
+    {
+        this.servers.addAll(serverDtos);
     }
 
     public int getId()
@@ -114,7 +119,7 @@ public class UserDto
         for (final ServerDto serverDto : this.servers)
         {
             final Server server = Server.fromDto(serverDto);
-            server.setUser(user);
+            server.addUser(user);
             user.addServer(server);
         }
         return user;
