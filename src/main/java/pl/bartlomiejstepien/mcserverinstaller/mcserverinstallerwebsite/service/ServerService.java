@@ -35,7 +35,7 @@ public class ServerService
     // Modpack id ==> InstallationStatus
     public static final Map<Integer, InstallationStatus> MODPACKS_INSTALLATION_STATUSES = new HashMap<>();
 
-    private Config config;
+    private final Config config;
 
     private final CurseForgeAPIService curseForgeAPIService;
     private final ServerRepository serverRepository;
@@ -245,15 +245,15 @@ public class ServerService
     @Transactional
     public void importServer(final User user, final String serverName, final String path)
     {
-        final Server server = new Server(0, serverName, path);
-        user.addServer(server);
+        final Server server = getServerByPath(path).orElse(new Server(0, serverName, path));
         server.addUser(user);
+        addServer(server);
+    }
 
-        final int id = addServer(server);
-        final Server server1 = getServer(id);
-        user.removeServer(server);
-        user.addServer(server1);
-
-        userService.save(user);
+    @Transactional
+    public Optional<Server> getServerByPath(final String path)
+    {
+        final ServerDto serverDto = this.serverRepository.findByPath(path);
+        return Optional.ofNullable(serverDto).map(ServerDto::toServer);
     }
 }

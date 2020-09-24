@@ -12,7 +12,7 @@ import java.util.*;
 public class UserDto
 {
     @Id
-    @Column(name = "id")
+    @Column(name = "id", nullable = false, updatable = false, unique = true, insertable = false)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 

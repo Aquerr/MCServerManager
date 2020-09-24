@@ -9,6 +9,7 @@ import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.model.Ser
 import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.model.User;
 import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.repository.dto.ServerDto;
 import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.service.ServerService;
+import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.service.UserService;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -17,18 +18,25 @@ import java.util.stream.Collectors;
 public class HomeController
 {
     private final ServerService serverService;
+    private final UserService userService;
 
     @Autowired
-    public HomeController(final ServerService serverService)
+    public HomeController(final ServerService serverService, final UserService userService)
     {
         this.serverService = serverService;
+        this.userService = userService;
     }
 
     @GetMapping("/")
     public String root(final Model model, final Authentication authentication)
     {
+        final User user = (User)authentication.getPrincipal();
+
         // Return user's list of servers here...
-        final List<Server> servers = ((User)authentication.getPrincipal()).getServers();
+        List<Server> servers = (user).getServers();
+
+        if (servers.isEmpty())
+            servers = serverService.getServersForUser(user);
 
         model.addAttribute("servers", servers);
         return "index";

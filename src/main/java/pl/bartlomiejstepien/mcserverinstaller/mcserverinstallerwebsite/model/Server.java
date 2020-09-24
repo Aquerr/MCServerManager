@@ -11,12 +11,16 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.concurrent.Executors;
 import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 public class Server
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(Server.class);
+    private static final ScheduledExecutorService SCHEDULED_EXECUTOR_SERVICE = Executors.newSingleThreadScheduledExecutor();
 
     private static final Map<Integer, Process> SERVER_PROCESSES = new HashMap<>();
 
@@ -50,7 +54,7 @@ public class Server
         //TODO: Load server information from server.properties.
         final String serverPath = serverDto.getPath();
 //        final User user = serverDto.getUser().toUser();
-        final Server server = new Server(serverDto.getId(), serverDto.getPath().substring(serverPath.lastIndexOf(File.separator)) + 1, serverPath);
+        final Server server = new Server(serverDto.getId(), serverDto.getPath().substring(serverPath.lastIndexOf(File.separator) + 1), serverPath);
 
         for (final UserDto userDto : serverDto.getUsers())
         {
@@ -246,7 +250,7 @@ public class Server
             final String startFilePath = this.startFilePath.toAbsolutePath().toString();
             final String serverDir = Paths.get(this.serverDir).toAbsolutePath().toString();
 
-            Process process = null;
+            Process process;
 
             final String osName = System.getProperty("os.name");
             if (osName.contains("Win") || osName.contains("win"))
@@ -293,13 +297,18 @@ public class Server
 
         final Process process = SERVER_PROCESSES.get(this.id);
 
-
         if (process == null || !process.isAlive())
         {
             LOGGER.warn("Tried to stop server that is not running. Server id=" + this.id);
             return;
         }
+
         process.destroy();
+        SCHEDULED_EXECUTOR_SERVICE.schedule(() -> {
+            if (process.isAlive())
+                process.destroyForcibly();
+        }, 20, TimeUnit.SECONDS);
+
         this.isRunning = false;
     }
 

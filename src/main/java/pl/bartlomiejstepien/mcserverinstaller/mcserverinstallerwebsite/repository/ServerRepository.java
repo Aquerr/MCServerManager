@@ -1,10 +1,13 @@
 package pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.repository;
 
+import org.hibernate.query.criteria.internal.CriteriaQueryImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.repository.dto.ServerDto;
 
 import javax.persistence.EntityManager;
+import javax.persistence.TypedQuery;
+import javax.persistence.criteria.CriteriaQuery;
 import java.util.List;
 
 @Repository
@@ -25,13 +28,14 @@ public class ServerRepository
 
     public List<ServerDto> findAll()
     {
-        return this.entityManager.createQuery("from server").getResultList();
+        final TypedQuery<ServerDto> query = this.entityManager.createQuery("SELECT server FROM ServerDto server", ServerDto.class);
+        return query.getResultList();
     }
 
     public int save(final ServerDto serverDto)
     {
-        this.entityManager.persist(serverDto);
-        return serverDto.getId();
+        final ServerDto mergedServer = this.entityManager.merge(serverDto);
+        return mergedServer.getId();
 //        this.entityManager.flush();
     }
 
@@ -45,5 +49,19 @@ public class ServerRepository
         final ServerDto user = this.entityManager.find(ServerDto.class, id);
         if (user != null)
             this.entityManager.remove(user);
+    }
+
+    public ServerDto findByPath(String path)
+    {
+        try
+        {
+            final TypedQuery<ServerDto> query = this.entityManager.createQuery("SELECT server FROM ServerDto server WHERE server.path = :serverPath", ServerDto.class);
+            query.setParameter("serverPath", path);
+            return query.getSingleResult();
+        }
+        catch (Exception exception)
+        {
+            return null;
+        }
     }
 }

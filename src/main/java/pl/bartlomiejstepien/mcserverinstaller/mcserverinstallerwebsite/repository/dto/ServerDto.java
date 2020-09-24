@@ -13,14 +13,14 @@ import java.util.stream.Collectors;
 public class ServerDto
 {
     @Id
-    @Column(name = "id")
+    @Column(name = "id", nullable = false, updatable = false, unique = true, insertable = false)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
     @Column(name = "path")
     private String path;
 
-    @ManyToMany(mappedBy = "servers")
+    @ManyToMany(mappedBy = "servers", cascade = CascadeType.ALL)
     private final List<UserDto> users = new ArrayList<>();
 
     public ServerDto()
