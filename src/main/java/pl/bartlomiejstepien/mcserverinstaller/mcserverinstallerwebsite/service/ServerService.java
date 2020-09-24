@@ -242,9 +242,18 @@ public class ServerService
         }
     }
 
+    @Transactional
     public void importServer(final User user, final String serverName, final String path)
     {
-         
-    }
+        final Server server = new Server(0, serverName, path);
+        user.addServer(server);
+        server.addUser(user);
 
+        final int id = addServer(server);
+        final Server server1 = getServer(id);
+        user.removeServer(server);
+        user.addServer(server1);
+
+        userService.save(user);
+    }
 }

@@ -103,33 +103,7 @@ public class Server
 
 
         //Load server.properties
-        if (Files.exists(Paths.get(serverPath).resolve("server.properties")))
-        {
-            //TODO: Read server.properties
-
-            final Properties properties = new Properties();
-            try
-            {
-                final InputStream inputStream = Files.newInputStream(Paths.get(serverPath).resolve("server.properties"));
-                properties.load(inputStream);
-            }
-            catch (IOException e)
-            {
-                e.printStackTrace();
-            }
-
-            final String levelName = properties.getProperty("level-name");
-            final boolean onlineMode = Boolean.parseBoolean(properties.getProperty("online-mode"));
-            final int port = Integer.parseInt(properties.getProperty("server-port"));
-            final boolean pvp = Boolean.parseBoolean(properties.getProperty("pvp"));
-
-            server.setLevelName(levelName);
-            server.setOnlineMode(onlineMode);
-            server.setPort(port);
-            server.setPvp(pvp);
-            server.setRconPort(Integer.parseInt(properties.getProperty("rcon.port")));
-            server.setRconPassword(properties.getProperty("rcon.password"));
-        }
+        server.loadProperties();
 
         return server;
     }
@@ -372,5 +346,36 @@ public class Server
             e.printStackTrace();
         }
         LOGGER.info("Saved server properties for server id=" + this.id);
+    }
+
+    public void loadProperties()
+    {
+        if (Files.exists(Paths.get(serverDir).resolve("server.properties")))
+        {
+            final Properties properties = new Properties();
+            try
+            {
+                final InputStream inputStream = Files.newInputStream(Paths.get(serverDir).resolve("server.properties"));
+                properties.load(inputStream);
+            }
+            catch (IOException e)
+            {
+                e.printStackTrace();
+            }
+
+            final String levelName = properties.getProperty("level-name");
+            final boolean onlineMode = Boolean.parseBoolean(properties.getProperty("online-mode"));
+            final int port = Integer.parseInt(properties.getProperty("server-port"));
+            final boolean pvp = Boolean.parseBoolean(properties.getProperty("pvp"));
+            final int rconPort = properties.getProperty("rcon.port") != null ? Integer.parseInt(properties.getProperty("rcon.port")) : 0;
+            final String rconPassword = properties.getProperty("rcon.password") != null ? properties.getProperty("rcon.password") : "";
+
+            setLevelName(levelName);
+            setOnlineMode(onlineMode);
+            setPort(port);
+            setPvp(pvp);
+            setRconPort(rconPort);
+            setRconPassword(rconPassword);
+        }
     }
 }
