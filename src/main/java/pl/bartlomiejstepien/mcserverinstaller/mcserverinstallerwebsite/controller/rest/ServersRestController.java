@@ -83,4 +83,14 @@ public class ServersRestController
         final Server server = optionalServer.get();
         server.saveProperties(parsedMap);
     }
+
+    @PostMapping(value = "/import-server", consumes = MimeTypeUtils.APPLICATION_JSON_VALUE)
+    public void importServer(final @RequestBody ObjectNode json, final Authentication authentication)
+    {
+        String serverName = json.get("server-name").textValue();
+        String path = json.get("path").textValue();
+        System.out.println("server-name =" + serverName);
+        System.out.println("path =" + path);
+        serverService.importServer((User)authentication.getPrincipal(), serverName, path);
+    }
 }

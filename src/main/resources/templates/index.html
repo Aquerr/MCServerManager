@@ -11,9 +11,51 @@
                 let serverId = $(this).find("#server-id").val();
                 window.location.href = "/servers/" + serverId;
             });
+            $("#import-server-button").on("click", function() {
+                $("#server-import-modal").modal("show");
+            });
+            $("#import-server").on("click", function() {
+                var data = {};
+                data["server-name"] = $("#server-name").val();
+                data["path"] = $("#path").val();
+                $.ajax({
+                    url: "/api/servers/import-server",
+                    method: "POST",
+                    data: JSON.stringify(data),
+                    contentType: "application/json"
+                }).done(function(response){
+                    alert("Done!");
+                    location.reload();
+                });
+            });
         });
     </script>
-
+    <div class="modal fade" tabindex="-1" role="dialog" id="server-import-modal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Import server</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="server-name">Server name</label>
+                        <input id="server-name" type="text" name="server-name" placeholder="Server name" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="path">Path</label>
+                        <input id="path" type="text" name="path" class="form-control" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" id="import-server">Import</button>
+                </div>
+            </div>
+        </div>
+    </div>
     <div th:replace="fragments/fragments :: header"></div>
 
     <div class="container mt-4">
@@ -22,10 +64,14 @@
         <h3>My Servers</h3>
         <hr>
 
-        <div th:if="${servers.isEmpty()}" class="text-center">
-            <p class="text-muted">Your server list is empty :(</p>
+        <div class="text-center">
+            <div th:if="${servers.isEmpty()}">
+                <p class="text-muted">Your server list is empty :(</p>
+            </div>
             <a href="#" th:href="@{/servers/add-server}" class="btn btn-light">Add a new server</a>
+            <a href="#" id="import-server-button" class="btn btn-light">Import server</a>
         </div>
+
 
         <div th:if="${!servers.isEmpty()}">
             <th:block th:each="server : ${servers}">

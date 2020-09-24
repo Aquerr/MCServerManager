@@ -234,11 +234,17 @@ public class ServerService
         return Collections.emptyList();
     }
 
-    public void postCommand(final Server server, String command)
+    public void postCommand(final Server server, final String command)
     {
         try(RconClient rconClient = RconClient.open("localhost", server.getRconPort(), server.getRconPassword()))
         {
             rconClient.sendCommand(command);
         }
     }
+
+    public void importServer(final User user, final String serverName, final String path)
+    {
+         
+    }
+
 }
