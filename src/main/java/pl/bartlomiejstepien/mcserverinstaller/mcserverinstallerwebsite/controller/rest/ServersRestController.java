@@ -49,7 +49,7 @@ public class ServersRestController
             throw new RuntimeException("Access denied!");
 
         final Server server = optionalServer.get();
-        this.serverService.postCommand(server, command);
+        server.postCommand(command);
     }
 
     @PostMapping("/{id}/toggle")
@@ -63,7 +63,9 @@ public class ServersRestController
 
         final Server server = optionalServer.get();
         if (server.isRunning())
+        {
             server.stop();
+        }
         else server.start();
     }
 

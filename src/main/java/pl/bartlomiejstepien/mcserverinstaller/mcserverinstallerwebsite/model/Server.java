@@ -1,5 +1,6 @@
 package pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.model;
 
+import com.github.t9t.minecraftrconclient.RconClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.repository.dto.ServerDto;
@@ -295,21 +296,23 @@ public class Server
     {
         //TODO: Read pid of the process from the file and try to stop it.
 
-        final Process process = SERVER_PROCESSES.get(this.id);
+        postCommand("stop");
 
-        if (process == null || !process.isAlive())
-        {
-            LOGGER.warn("Tried to stop server that is not running. Server id=" + this.id);
-            return;
-        }
-
-        process.destroy();
         SCHEDULED_EXECUTOR_SERVICE.schedule(() -> {
+
+            final Process process = SERVER_PROCESSES.get(this.id);
+
+            if (process == null || !process.isAlive())
+            {
+                LOGGER.warn("Tried to stop server that is not running. Server id=" + this.id);
+                return;
+            }
+
+            process.destroy();
             if (process.isAlive())
                 process.destroyForcibly();
+            this.isRunning = false;
         }, 20, TimeUnit.SECONDS);
-
-        this.isRunning = false;
     }
 
     public boolean isRunning()
@@ -387,4 +390,13 @@ public class Server
             setRconPassword(rconPassword);
         }
     }
+
+    public void postCommand(final String command)
+    {
+        try(RconClient rconClient = RconClient.open("localhost", getRconPort(), getRconPassword()))
+        {
+            rconClient.sendCommand(command);
+        }
+    }
+
 }
