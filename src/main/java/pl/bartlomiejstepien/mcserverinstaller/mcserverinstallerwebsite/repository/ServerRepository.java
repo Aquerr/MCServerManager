@@ -1,13 +1,11 @@
 package pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.repository;
 
-import org.hibernate.query.criteria.internal.CriteriaQueryImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.repository.dto.ServerDto;
 
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
-import javax.persistence.criteria.CriteriaQuery;
 import java.util.List;
 
 @Repository

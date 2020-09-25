@@ -5,9 +5,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.repository.dto.ServerDto;
 import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.repository.dto.UserDto;
+import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.util.ProcessUtil;
 
 import java.io.*;
-import java.nio.charset.StandardCharsets;
+import java.nio.Buffer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -16,7 +17,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 public class Server
 {
@@ -242,13 +242,8 @@ public class Server
 
     public void start()
     {
-        //TODO: Start new process by running the server start file.
-
-        //TODO: Store the pid of the process in a file.
-
         try
         {
-            final String startFilePath = this.startFilePath.toAbsolutePath().toString();
             final String serverDir = Paths.get(this.serverDir).toAbsolutePath().toString();
 
             Process process;
@@ -256,31 +251,13 @@ public class Server
             final String osName = System.getProperty("os.name");
             if (osName.contains("Win") || osName.contains("win"))
             {
-                process = Runtime.getRuntime().exec(startFilePath, null, new File(serverDir));
-//                final InputStream inputStream = process.getInputStream();
-//                final ProcessBuilder processBuilder = new ProcessBuilder("cmd.exe", "/c", serverDir.substring(0, 2), "cd \"" + serverDir + "\" && " + this.startFilePath.getFileName().toString());
-//                process = processBuilder.start();
+                process = Runtime.getRuntime().exec("cmd /c start " + this.startFilePath.getFileName().toString() + " title " + this.name, null, new File(serverDir));
+//                process = Runtime.getRuntime().exec(new String[]{"powershell.exe", "(Start-Process .\\" + this.startFilePath.getFileName().toString() + "-passthru).Id"}, null, new File(serverDir));
 
-//                ForkJoinPool.commonPool().execute(new Thread(() -> {
-//                    final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
-//                    String str;
-//                    while (true)
-//                    {
-//                        try
-//                        {
-//                            if ((str = bufferedReader.readLine()) != null)
-//                                System.out.println(str);
-//                        }
-//                        catch (IOException e)
-//                        {
-//                            e.printStackTrace();
-//                        }
-//                    }
-//                }));
             }
             else
             {
-                process = Runtime.getRuntime().exec("sh " + startFilePath, null, new File(serverDir));
+                process = Runtime.getRuntime().exec("sh " + this.startFilePath.getFileName().toString(), null, new File(serverDir));
             }
             SERVER_PROCESSES.put(this.id, process);
         }
@@ -294,24 +271,31 @@ public class Server
 
     public void stop()
     {
-        //TODO: Read pid of the process from the file and try to stop it.
-
         postCommand("stop");
 
         SCHEDULED_EXECUTOR_SERVICE.schedule(() -> {
-
             final Process process = SERVER_PROCESSES.get(this.id);
 
-            if (process == null || !process.isAlive())
+            if (process != null)
             {
-                LOGGER.warn("Tried to stop server that is not running. Server id=" + this.id);
-                return;
+                if (process.isAlive())
+                {
+                    process.destroy();
+                }
             }
 
-            process.destroy();
-            if (process.isAlive())
-                process.destroyForcibly();
+            try
+            {
+                final long processId = ProcessUtil.getProcessID(this.name);
+                Runtime.getRuntime().exec("taskkill /F /T /PID " + processId);
+            }
+            catch (IOException e)
+            {
+                e.printStackTrace();
+            }
+
             this.isRunning = false;
+            SERVER_PROCESSES.remove(this.id);
         }, 20, TimeUnit.SECONDS);
     }
 
@@ -396,6 +380,10 @@ public class Server
         try(RconClient rconClient = RconClient.open("localhost", getRconPort(), getRconPassword()))
         {
             rconClient.sendCommand(command);
+        }
+        catch(Exception exception)
+        {
+            System.out.println("Could not send a command to the server. Server id = " + getId() + " | Server name = " + getName());
         }
     }
 
