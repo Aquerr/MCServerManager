@@ -3,6 +3,7 @@ package pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.model;
 import com.github.t9t.minecraftrconclient.RconClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.exception.ServerNotRunningException;
 import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.repository.dto.ServerDto;
 import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.repository.dto.UserDto;
 import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.util.ProcessUtil;
@@ -271,7 +272,14 @@ public class Server
 
     public void stop()
     {
-        postCommand("stop");
+        try
+        {
+            postCommand("stop");
+        }
+        catch (ServerNotRunningException exception)
+        {
+            return;
+        }
 
         SCHEDULED_EXECUTOR_SERVICE.schedule(() -> {
             final Process process = SERVER_PROCESSES.get(this.id);
@@ -375,13 +383,16 @@ public class Server
         }
     }
 
-    public void postCommand(final String command)
+    public void postCommand(final String command) throws ServerNotRunningException
     {
-        try(RconClient rconClient = RconClient.open("localhost", getRconPort(), getRconPassword()))
+        if (!this.isRunning)
+            throw new ServerNotRunningException();
+
+        try(final RconClient rconClient = RconClient.open("localhost", getRconPort(), getRconPassword()))
         {
             rconClient.sendCommand(command);
         }
-        catch(Exception exception)
+        catch(final Exception exception)
         {
             System.out.println("Could not send a command to the server. Server id = " + getId() + " | Server name = " + getName());
         }

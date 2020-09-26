@@ -11,6 +11,7 @@ import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.repositor
 import java.util.List;
 
 @Service
+@Transactional
 public class UserService
 {
     private final UserRepository userRepository;
@@ -21,31 +22,26 @@ public class UserService
         this.userRepository = userRepository;
     }
 
-    @Transactional
     public User find(final int id)
     {
         return this.userRepository.find(id);
     }
 
-    @Transactional
     public List<User> findAll()
     {
         return this.userRepository.findAll();
     }
 
-    @Transactional
     public void delete(final int id)
     {
         this.userRepository.delete(id);
     }
 
-    @Transactional
     public void save(final User user)
     {
         this.userRepository.save(UserDto.fromUser(user));
     }
 
-    @Transactional
     public User findByUsername(String username)
     {
         return this.userRepository.findByUsername(username);

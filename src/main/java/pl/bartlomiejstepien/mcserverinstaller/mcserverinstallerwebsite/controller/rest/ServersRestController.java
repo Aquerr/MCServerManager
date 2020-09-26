@@ -5,6 +5,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.security.core.Authentication;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.web.bind.annotation.*;
+import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.exception.ServerNotRunningException;
 import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.model.InstallationStatus;
 import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.model.Server;
 import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.model.User;
@@ -49,7 +50,15 @@ public class ServersRestController
             throw new RuntimeException("Access denied!");
 
         final Server server = optionalServer.get();
-        server.postCommand(command);
+
+        try
+        {
+            server.postCommand(command);
+        }
+        catch (final ServerNotRunningException exception)
+        {
+
+        }
     }
 
     @PostMapping("/{id}/toggle")
