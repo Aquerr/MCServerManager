@@ -8,14 +8,15 @@ import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.repositor
 import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.repository.dto.UserDto;
 import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.util.ProcessUtil;
 
-import java.io.*;
-import java.nio.Buffer;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
@@ -47,9 +48,6 @@ public class Server
     //Rcon
     private int rconPort;
     private String rconPassword;
-
-
-    private boolean isRunning;
 
     public static Server fromDto(final ServerDto serverDto)
     {
@@ -266,8 +264,6 @@ public class Server
         {
             LOGGER.error("Could not start server with id=" + this.id, e);
         }
-
-        this.isRunning = true;
     }
 
     public void stop()
@@ -302,7 +298,6 @@ public class Server
                 e.printStackTrace();
             }
 
-            this.isRunning = false;
             SERVER_PROCESSES.remove(this.id);
         }, 20, TimeUnit.SECONDS);
     }
@@ -313,9 +308,8 @@ public class Server
         if (serverProcess != null && serverProcess.isAlive())
             return true;
 
-        //TODO: Check pid file...
-
-        return this.isRunning;
+        final long serverProcessId = ProcessUtil.getProcessID(this.name);
+        return serverProcessId != -1;
     }
 
     public void saveProperties(Map<String, String> settings)
@@ -385,7 +379,7 @@ public class Server
 
     public void postCommand(final String command) throws ServerNotRunningException
     {
-        if (!this.isRunning)
+        if (!this.isRunning())
             throw new ServerNotRunningException();
 
         try(final RconClient rconClient = RconClient.open("localhost", getRconPort(), getRconPassword()))
