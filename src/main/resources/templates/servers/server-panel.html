@@ -116,21 +116,21 @@
                         <div class="row">
                             <div class="col-sm">
                                 <label for="server-level-name">Level Name</label>
-                                <input name="level-name" id="server-level-name" class="form-control" type="text" th:value="${server.getLevelName()}">
+                                <input name="level-name" id="server-level-name" class="form-control" type="text" th:value="${server.getServerProperties().getLevelName()}">
                             </div>
                             <div class="col-sm">
                                 <label for="server-online-mode">Online Mode</label>
-                                <input name="online-mode" id="server-online-mode" class="form-control" type="text" th:value="${server.getOnlineMode()}">
+                                <input name="online-mode" id="server-online-mode" class="form-control" type="text" th:value="${server.getServerProperties().isOnlineMode()}">
                             </div>
                         </div>
                         <div class="row">
                             <div class="col-sm">
                                 <label for="server-port">Server Port</label>
-                                <input name="server-port" id="server-port" class="form-control" type="text" th:value="${server.getPort()}">
+                                <input name="server-port" id="server-port" class="form-control" type="text" th:value="${server.getServerProperties().getPort()}">
                             </div>
                             <div class="col-sm">
                                 <label for="server-pvp">PVP</label>
-                                <input name="server-pvp" id="server-pvp" class="form-control" type="text" th:value="${server.getPvp()}">
+                                <input name="server-pvp" id="server-pvp" class="form-control" type="text" th:value="${server.getServerProperties().isPvp()}">
                             </div>
                         </div>
                         <div class="mt-2 float-right">

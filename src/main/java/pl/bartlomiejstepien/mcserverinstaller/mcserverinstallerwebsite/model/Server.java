@@ -38,16 +38,18 @@ public class Server
     private Path startFilePath;
 
     // Properties
-    private String levelName;
-    private boolean onlineMode;
-    private int port;
-    private boolean pvp;
+//    private String levelName;
+//    private boolean onlineMode;
+//    private int port;
+//    private boolean pvp;
+
+    private final ServerProperties serverProperties = new ServerProperties();
 
     //Query
 
     //Rcon
-    private int rconPort;
-    private String rconPassword;
+//    private int rconPort;
+//    private String rconPassword;
 
     public static Server fromDto(final ServerDto serverDto)
     {
@@ -112,26 +114,6 @@ public class Server
         return server;
     }
 
-    private void setPvp(boolean pvp)
-    {
-        this.pvp = pvp;
-    }
-
-    private void setPort(int port)
-    {
-        this.port = port;
-    }
-
-    public void setRconPort(int rconPort)
-    {
-        this.rconPort = rconPort;
-    }
-
-    public void setRconPassword(String rconPassword)
-    {
-        this.rconPassword = rconPassword;
-    }
-
     public void setStartFilePath(Path startFilePath)
     {
         this.startFilePath = startFilePath;
@@ -194,49 +176,14 @@ public class Server
         this.users.remove(user);
     }
 
-    public String getLevelName()
-    {
-        return this.levelName;
-    }
-
-    public boolean getOnlineMode()
-    {
-        return this.onlineMode;
-    }
-
-    public void setLevelName(String levelName)
-    {
-        this.levelName = levelName;
-    }
-
-    public void setOnlineMode(boolean onlineMode)
-    {
-        this.onlineMode = onlineMode;
-    }
-
-    public boolean getPvp()
-    {
-        return this.pvp;
-    }
-
-    public int getPort()
-    {
-        return port;
-    }
-
-    public int getRconPort()
-    {
-        return rconPort;
-    }
-
-    public String getRconPassword()
-    {
-        return rconPassword;
-    }
-
     public Path getStartFilePath()
     {
         return startFilePath;
+    }
+
+    public ServerProperties getServerProperties()
+    {
+        return serverProperties;
     }
 
     public void start()
@@ -312,7 +259,7 @@ public class Server
         return serverProcessId != -1;
     }
 
-    public void saveProperties(Map<String, String> settings)
+    public void saveProperties(ServerProperties serverProperties)
     {
         LOGGER.info("Saving server properties for server id=" + this.id);
         final Path propertiesFilePath = Paths.get(this.serverDir).resolve("server.properties");
@@ -328,7 +275,7 @@ public class Server
             }
 
             //Add new values
-            for (final Map.Entry<String, String> entry : settings.entrySet())
+            for (final Map.Entry<String, String> entry : serverProperties.toMap().entrySet())
             {
                 properties.setProperty(entry.getKey(), entry.getValue());
             }
@@ -351,16 +298,14 @@ public class Server
         if (Files.exists(Paths.get(serverDir).resolve("server.properties")))
         {
             final Properties properties = new Properties();
-            try
+            try(final InputStream inputStream = Files.newInputStream(Paths.get(serverDir).resolve("server.properties")))
             {
-                final InputStream inputStream = Files.newInputStream(Paths.get(serverDir).resolve("server.properties"));
                 properties.load(inputStream);
             }
-            catch (IOException e)
+            catch (IOException exception)
             {
-                e.printStackTrace();
+                exception.printStackTrace();
             }
-
             final String levelName = properties.getProperty("level-name");
             final boolean onlineMode = Boolean.parseBoolean(properties.getProperty("online-mode"));
             final int port = Integer.parseInt(properties.getProperty("server-port"));
@@ -368,12 +313,12 @@ public class Server
             final int rconPort = properties.getProperty("rcon.port") != null ? Integer.parseInt(properties.getProperty("rcon.port")) : 0;
             final String rconPassword = properties.getProperty("rcon.password") != null ? properties.getProperty("rcon.password") : "";
 
-            setLevelName(levelName);
-            setOnlineMode(onlineMode);
-            setPort(port);
-            setPvp(pvp);
-            setRconPort(rconPort);
-            setRconPassword(rconPassword);
+            serverProperties.setLevelName(levelName);
+            serverProperties.setOnlineMode(onlineMode);
+            serverProperties.setPort(port);
+            serverProperties.setPvp(pvp);
+            serverProperties.setRconPort(rconPort);
+            serverProperties.setRconPassword(rconPassword);
         }
     }
 
@@ -382,7 +327,7 @@ public class Server
         if (!this.isRunning())
             throw new ServerNotRunningException();
 
-        try(final RconClient rconClient = RconClient.open("localhost", getRconPort(), getRconPassword()))
+        try(final RconClient rconClient = RconClient.open("localhost", this.serverProperties.getRconPort(), this.serverProperties.getRconPassword()))
         {
             rconClient.sendCommand(command);
         }

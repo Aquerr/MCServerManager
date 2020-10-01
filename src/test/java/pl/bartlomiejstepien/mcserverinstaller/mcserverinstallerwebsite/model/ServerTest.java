@@ -3,6 +3,7 @@ package pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.model;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
+import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.exception.ServerNotRunningException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -50,6 +51,6 @@ class ServerTest
     public void postCommandThrowsIllegalStateExceptionWhenServerIsNotRunning()
     {
         final Server server = new Server(0, "Test Server", "Test Path");
-        assertThrows(IllegalStateException.class, () -> server.postCommand("help"));
+        assertThrows(ServerNotRunningException.class, () -> server.postCommand("help"));
     }
 }

@@ -4,10 +4,12 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.core.Authentication;
 import org.springframework.util.MimeTypeUtils;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.exception.ServerNotRunningException;
 import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.model.InstallationStatus;
 import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.model.Server;
+import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.model.ServerProperties;
 import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.model.User;
 import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.service.ServerService;
 
@@ -79,12 +81,8 @@ public class ServersRestController
     }
 
     @PostMapping(value = "/{id}/settings", consumes = MimeTypeUtils.APPLICATION_JSON_VALUE)
-    public void saveSettings(final @PathVariable("id") int serverId, @RequestBody ObjectNode json, final Authentication authentication)
+    public void saveSettings(final @PathVariable("id") int serverId, @RequestBody @Validated ServerProperties serverProperties, final Authentication authentication)
     {
-        final Map<String, String> parsedMap = new HashMap<>();
-        parsedMap.put("level-name", json.get("level_name").textValue());
-        parsedMap.put("online-mode", json.get("online_mode").textValue());
-
         final User user = (User)authentication.getPrincipal();
 
         final Optional<Server> optionalServer = user.getServerById(serverId);
@@ -92,7 +90,7 @@ public class ServersRestController
             throw new RuntimeException("Access denied!");
 
         final Server server = optionalServer.get();
-        server.saveProperties(parsedMap);
+        server.saveProperties(serverProperties);
     }
 
     @PostMapping(value = "/import-server", consumes = MimeTypeUtils.APPLICATION_JSON_VALUE)

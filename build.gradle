@@ -18,20 +18,18 @@ dependencies {
 	implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity5'
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
-//	implementation 'org.springframework.boot:spring-boot-starter-webflux'
 	implementation 'org.springframework.boot:spring-boot-starter-security'
 
-	implementation 'net.java.dev.jna:jna:5.6.0'
-	implementation 'net.java.dev.jna:jna-platform:5.6.0'
+	implementation 'net.lingala.zip4j:zip4j:2.6.1'
+	implementation 'com.github.t9t.minecraft-rcon-client:minecraft-rcon-client:1.0.0'
+	implementation 'io.springfox:springfox-boot-starter:3.0.0'
+	implementation 'io.springfox:springfox-swagger-ui:3.0.0'
+	implementation 'org.openclover:clover-maven-plugin:4.4.1'
 
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
 	testImplementation('org.springframework.boot:spring-boot-starter-test') {
 		exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
 	}
-
-	implementation 'net.lingala.zip4j:zip4j:2.6.1'
-
-	implementation 'com.github.t9t.minecraft-rcon-client:minecraft-rcon-client:1.0.0'
 
 	runtimeOnly 'com.h2database:h2:1.4.200'
 }
