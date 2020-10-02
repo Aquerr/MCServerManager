@@ -3,6 +3,8 @@ package pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.service;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.web.util.UrlUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.config.CurseForgeAPIRoutes;
@@ -12,9 +14,9 @@ import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.model.Mod
 import java.io.BufferedInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URL;
+import java.io.UnsupportedEncodingException;
+import java.net.*;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Instant;
@@ -26,6 +28,14 @@ import java.util.List;
 public class CurseForgeAPIService
 {
     private static final RestTemplate REST_TEMPLATE = new RestTemplate();
+
+    private final ServerInstaller serverInstaller;
+
+    @Autowired
+    public CurseForgeAPIService(final ServerInstaller serverInstaller)
+    {
+        this.serverInstaller = serverInstaller;
+    }
 
     public List<ModPack> getModpacks()
     {
@@ -112,43 +122,25 @@ public class CurseForgeAPIService
 
     /**
      * Downloads the zip file that contains server files.
+     *
+     * @param modPack
      * @param serverDownloadUrl the link to download from
      * @return the name of the zip file (with .zip extension)
      */
-    public String downloadServerFile(final int modpackId, final String serverDownloadUrl)
+    public String downloadServerFile(final ModPack modPack, String serverDownloadUrl) throws MalformedURLException
     {
-        URI uri = URI.create(serverDownloadUrl);
-        Path path = Paths.get(uri.getPath());
-        final String last = path.getName(path.getNameCount() - 1).toString();
-
-//        final WebClient webClient = WebClient.create(serverDownloadUrl);
-//        final byte[] response = webClient
-//                .get()
-//                .retrieve()
-//                .bodyToMono(byte[].class)
-//                .block();
-//
-//
-        URL url = null;
-        try
-        {
-            url = new URL(serverDownloadUrl);
-        }
-        catch (MalformedURLException e)
-        {
-            e.printStackTrace();
-        }
+        final URL url = new URL(serverDownloadUrl);
 
         try(BufferedInputStream bufferedInputStream = new BufferedInputStream(url.openStream());
-            FileOutputStream fileOutputStream = new FileOutputStream("downloads/" + last))
+            FileOutputStream fileOutputStream = new FileOutputStream("downloads/" + modPack.getName()))
         {
             byte[] dataBuffer = new byte[1024];
             int bytesRead;
             while ((bytesRead = bufferedInputStream.read(dataBuffer, 0, 1024)) != -1)
             {
-                final InstallationStatus installationStatus = ServerService.MODPACKS_INSTALLATION_STATUSES.getOrDefault(modpackId, new InstallationStatus(0, "Downloading server files..."));
+                final InstallationStatus installationStatus = this.serverInstaller.getInstallationStatus(modPack.getId()).orElse(new InstallationStatus(0, "Downloading server files..."));
                 installationStatus.setPercent(installationStatus.getPercent() + 5);
-                ServerService.MODPACKS_INSTALLATION_STATUSES.put(modpackId, installationStatus);
+                this.serverInstaller.setInstallationStatus(modPack.getId(), installationStatus);
                 fileOutputStream.write(dataBuffer, 0, bytesRead);
             }
         }
@@ -170,6 +162,6 @@ public class CurseForgeAPIService
 //            e.printStackTrace();
 //        }
 
-        return last;
+        return modPack.getName();
     }
 }

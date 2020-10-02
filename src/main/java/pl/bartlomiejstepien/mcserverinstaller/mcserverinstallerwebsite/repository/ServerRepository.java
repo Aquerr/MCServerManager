@@ -2,6 +2,7 @@ package pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.reposito
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
+import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.model.Server;
 import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.repository.dto.ServerDto;
 
 import javax.persistence.EntityManager;
@@ -61,5 +62,12 @@ public class ServerRepository
         {
             return null;
         }
+    }
+
+    public List<ServerDto> findByUserId(int userId)
+    {
+        final TypedQuery<ServerDto> query = this.entityManager.createQuery("SELECT server FROM ServerDto server WHERE :userId IN (server.users)", ServerDto.class);
+        query.setParameter("userId", userId);
+        return query.getResultList();
     }
 }

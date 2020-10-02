@@ -58,7 +58,9 @@
                         url: "/api/servers/installation-status/" + modpackId,
                         method: "GET"
                     }).done(function (response) {
-                        $("#server-install-modal #installation-status").text(response);
+                        let message = response["message"];
+                        let percent = response["percent"];
+                        $("#server-install-modal #installation-status").text(percent + " " + message);
                     });
                 }
 

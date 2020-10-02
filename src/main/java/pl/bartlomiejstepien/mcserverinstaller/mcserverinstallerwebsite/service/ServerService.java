@@ -1,6 +1,5 @@
 package pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.service;
 
-import com.github.t9t.minecraftrconclient.RconClient;
 import net.lingala.zip4j.ZipFile;
 import net.lingala.zip4j.exception.ZipException;
 import org.slf4j.Logger;
@@ -16,11 +15,11 @@ import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.model.Mod
 import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.model.Server;
 import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.model.User;
 import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.repository.ServerRepository;
-import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.repository.UserRepository;
 import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.repository.dto.ServerDto;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -32,22 +31,25 @@ public class ServerService
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(ServerService.class);
 
-    // Modpack id ==> InstallationStatus
-    public static final Map<Integer, InstallationStatus> MODPACKS_INSTALLATION_STATUSES = new HashMap<>();
-
     private final Config config;
 
     private final CurseForgeAPIService curseForgeAPIService;
     private final ServerRepository serverRepository;
     private final UserService userService;
+    private final ServerInstaller serverInstaller;
 
     @Autowired
-    public ServerService(final Config config, final CurseForgeAPIService curseForgeAPIService, final UserService userService, final ServerRepository serverRepository)
+    public ServerService(final Config config,
+                         final CurseForgeAPIService curseForgeAPIService,
+                         final UserService userService,
+                         final ServerRepository serverRepository,
+                         final ServerInstaller serverInstaller)
     {
         this.config = config;
         this.curseForgeAPIService = curseForgeAPIService;
         this.userService = userService;
         this.serverRepository = serverRepository;
+        this.serverInstaller = serverInstaller;
     }
 
     @EventListener(ApplicationReadyEvent.class)
@@ -92,7 +94,7 @@ public class ServerService
     @Transactional
     public int installServer(final User user, final int modpackId)
     {
-        MODPACKS_INSTALLATION_STATUSES.put(modpackId, new InstallationStatus(0, "Checking server existence..."));
+        this.serverInstaller.setInstallationStatus(modpackId, new InstallationStatus(0, "Checking server existence..."));
 
         final ModPack modPack = this.curseForgeAPIService.getModpack(modpackId);
 
@@ -112,16 +114,26 @@ public class ServerService
         }
 
         // Download server files...
-        MODPACKS_INSTALLATION_STATUSES.put(modpackId, new InstallationStatus(25, "Downloading server files..."));
+        this.serverInstaller.setInstallationStatus(modpackId, new InstallationStatus(25, "Downloading server files..."));
 
         final int latestServerFileId = modPack.getLatestFiles().get(0).getServerPackFileId();
-        final String serverDownloadUrl = this.curseForgeAPIService.getLatestServerDownloadUrl(modpackId, latestServerFileId);
-        final String serverFilesZipPath = this.curseForgeAPIService.downloadServerFile(modpackId, serverDownloadUrl);
+        String serverDownloadUrl = this.curseForgeAPIService.getLatestServerDownloadUrl(modpackId, latestServerFileId);
+        try
+        {
+            //TODO: Fix url. ( ) still not work
+            serverDownloadUrl = serverDownloadUrl.replaceAll(" ", "+");
+            this.curseForgeAPIService.downloadServerFile(modPack, serverDownloadUrl);
+        }
+        catch (MalformedURLException e)
+        {
+            e.printStackTrace();
+            return -1;
+        }
 
-        MODPACKS_INSTALLATION_STATUSES.put(modpackId, new InstallationStatus(50, "Unpacking server files..."));
+        this.serverInstaller.setInstallationStatus(modpackId, new InstallationStatus(50, "Unpacking server files..."));
 
         //TODO: Unpack server files
-        final ZipFile zipFile = new ZipFile("downloads" + File.separator + serverFilesZipPath);
+        final ZipFile zipFile = new ZipFile("downloads" + File.separator + modPack.getName());
         try
         {
             zipFile.extractAll(serverPath.toString());
@@ -131,7 +143,7 @@ public class ServerService
             e.printStackTrace();
         }
 
-        MODPACKS_INSTALLATION_STATUSES.put(modpackId, new InstallationStatus(75, "Last steps..."));
+        this.serverInstaller.setInstallationStatus(modpackId, new InstallationStatus(75, "Last steps..."));
 
         if (!Files.exists(serverPath.resolve("server.properties")))
         {
@@ -149,22 +161,14 @@ public class ServerService
             }
         }
 
-        //TODO: Attach server to given user
-        final Server server = new Server(0, "", serverPath.toString());
-        user.addServer(server);
+        final Server server = new Server(0, modPack.getName(), serverPath.toString());
         server.addUser(user);
-
-        final int id = addServer(server);
-        final Server server1 = getServer(id);
-        user.removeServer(server);
-        user.addServer(server1);
-
-        userService.save(user);
+        int serverId = addServer(server);
 
         //TODO: Set eula to true?
 
-        MODPACKS_INSTALLATION_STATUSES.put(modpackId, new InstallationStatus(100, "Server is ready!"));
-        return id;
+        this.serverInstaller.setInstallationStatus(modpackId, new InstallationStatus(100, "Server is ready!"));
+        return serverId;
     }
 
     @Transactional
@@ -198,9 +202,12 @@ public class ServerService
         return this.serverRepository.find(id).toServer();
     }
 
-    public ArrayList<Server> getServersForUser(User principal)
+    @Transactional
+    public List<Server> getServersForUser(final int userId)
     {
-        return new ArrayList<>();
+        return this.serverRepository.findByUserId(userId).stream()
+                .map(ServerDto::toServer)
+                .collect(Collectors.toList());
     }
 
     @Transactional
@@ -234,7 +241,6 @@ public class ServerService
         return Collections.emptyList();
     }
 
-
     @Transactional
     public void importServer(final User user, final String serverName, final String path)
     {
@@ -248,5 +254,10 @@ public class ServerService
     {
         final ServerDto serverDto = this.serverRepository.findByPath(path);
         return Optional.ofNullable(serverDto).map(ServerDto::toServer);
+    }
+
+    public Optional<InstallationStatus> getInstallationStatus(int serverId)
+    {
+        return this.serverInstaller.getInstallationStatus(serverId);
     }
 }

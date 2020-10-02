@@ -30,9 +30,9 @@ public class ServersRestController
     }
 
     @GetMapping("/installation-status/{modpackId}")
-    public String getInstallationStatus(@PathVariable final int modpackId)
+    public InstallationStatus getInstallationStatus(@PathVariable final int modpackId)
     {
-        return ServerService.MODPACKS_INSTALLATION_STATUSES.getOrDefault(modpackId, new InstallationStatus(0, "")).getMessage();
+        return this.serverService.getInstallationStatus(modpackId).orElse(new InstallationStatus(0, ""));
     }
 
     @GetMapping("/{id}/latest-log")
