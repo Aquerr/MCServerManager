@@ -1,8 +1,19 @@
+//buildscript {
+//	repositories {
+//		jcenter()
+//	}
+//
+//	dependencies {
+//		classpath 'com.bmuschko:gradle-clover-plugin:3.0.1'
+//	}
+//}
+
 plugins {
 	id 'org.springframework.boot' version '2.3.4.RELEASE'
 	id 'io.spring.dependency-management' version '1.0.10.RELEASE'
 	id 'java'
 }
+//apply plugin: 'com.bmuschko.clover'
 
 group = 'pl.bartlomiejstepien.mcserverinstaller'
 version = '0.0.1-SNAPSHOT'
@@ -24,7 +35,7 @@ dependencies {
 	implementation 'com.github.t9t.minecraft-rcon-client:minecraft-rcon-client:1.0.0'
 	implementation 'io.springfox:springfox-boot-starter:3.0.0'
 	implementation 'io.springfox:springfox-swagger-ui:3.0.0'
-	implementation 'org.openclover:clover-maven-plugin:4.4.1'
+//	clover 'org.openclover:clover:4.4.1'
 
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
 	testImplementation('org.springframework.boot:spring-boot-starter-test') {
