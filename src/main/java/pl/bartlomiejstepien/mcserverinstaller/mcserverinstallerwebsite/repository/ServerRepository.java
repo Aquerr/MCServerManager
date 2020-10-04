@@ -66,8 +66,9 @@ public class ServerRepository
 
     public List<ServerDto> findByUserId(int userId)
     {
-        final TypedQuery<ServerDto> query = this.entityManager.createQuery("SELECT server FROM ServerDto server WHERE :userId IN (server.users)", ServerDto.class);
+        final TypedQuery<ServerDto> query = this.entityManager.createQuery("SELECT server FROM ServerDto AS server JOIN server.users AS user WHERE user.id = :userId", ServerDto.class);
         query.setParameter("userId", userId);
-        return query.getResultList();
+        List<ServerDto> serverDtos = query.getResultList();
+        return serverDtos;
     }
 }

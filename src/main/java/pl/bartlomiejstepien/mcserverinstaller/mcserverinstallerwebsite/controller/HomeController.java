@@ -35,8 +35,8 @@ public class HomeController
         // Return user's list of servers here...
         List<Server> servers = (user).getServers();
 
-//        if (servers.isEmpty())
-//            servers = serverService.getServersForUser(user.getId());
+        if (servers.isEmpty())
+            servers = serverService.getServersForUser(user.getId());
 
         model.addAttribute("servers", servers);
         return "index";

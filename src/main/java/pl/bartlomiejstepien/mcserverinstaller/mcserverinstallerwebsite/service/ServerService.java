@@ -164,6 +164,8 @@ public class ServerService
         final Server server = new Server(0, modPack.getName(), serverPath.toString());
         server.addUser(user);
         int serverId = addServer(server);
+        server.setId(serverId);
+        user.addServer(server);
 
         //TODO: Set eula to true?
 
