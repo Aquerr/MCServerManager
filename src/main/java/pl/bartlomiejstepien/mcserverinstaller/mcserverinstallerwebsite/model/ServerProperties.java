@@ -1,15 +1,23 @@
 package pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.model;
 
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import java.util.*;
 
 public class ServerProperties
 {
+    @NotNull
+    @NotBlank
     private String levelName;
-    private boolean onlineMode;
-    private int port;
-    private boolean pvp;
 
+    private boolean onlineMode;
+
+    private int port;
+
+    private boolean pvp;
     private int rconPort;
+    @NotNull
+    @NotBlank
     private String rconPassword;
 
     public ServerProperties()

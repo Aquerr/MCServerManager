@@ -13,6 +13,7 @@ import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.model.Ser
 import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.model.User;
 import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.service.ServerService;
 
+import javax.validation.Valid;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -81,7 +82,7 @@ public class ServersRestController
     }
 
     @PostMapping(value = "/{id}/settings", consumes = MimeTypeUtils.APPLICATION_JSON_VALUE)
-    public void saveSettings(final @PathVariable("id") int serverId, @RequestBody @Validated ServerProperties serverProperties, final Authentication authentication)
+    public void saveSettings(final @PathVariable("id") int serverId, @RequestBody @Valid ServerProperties serverProperties, final Authentication authentication)
     {
         final User user = (User)authentication.getPrincipal();
 

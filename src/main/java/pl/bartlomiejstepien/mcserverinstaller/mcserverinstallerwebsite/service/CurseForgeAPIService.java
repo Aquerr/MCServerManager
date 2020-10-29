@@ -139,7 +139,7 @@ public class CurseForgeAPIService
             while ((bytesRead = bufferedInputStream.read(dataBuffer, 0, 1024)) != -1)
             {
                 final InstallationStatus installationStatus = this.serverInstaller.getInstallationStatus(modPack.getId()).orElse(new InstallationStatus(0, "Downloading server files..."));
-                installationStatus.setPercent(installationStatus.getPercent() + 5);
+                installationStatus.setPercent(bufferedInputStream.available() / 100);
                 this.serverInstaller.setInstallationStatus(modPack.getId(), installationStatus);
                 fileOutputStream.write(dataBuffer, 0, bytesRead);
             }
