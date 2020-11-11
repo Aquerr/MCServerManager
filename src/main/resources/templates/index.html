@@ -22,10 +22,15 @@
                     url: "/api/servers/import-server",
                     method: "POST",
                     data: JSON.stringify(data),
-                    contentType: "application/json"
-                }).done(function(response){
-                    alert("Done!");
-                    location.reload();
+                    contentType: "application/json",
+                    success: function (response) {
+                        location.reload();
+                    },
+                    error: function (response) {
+                        alert(response.responseJSON.message)
+                        console.log(response);
+                        console.log("Error: " + response.responseJSON.message);
+                    }
                 });
             });
         });

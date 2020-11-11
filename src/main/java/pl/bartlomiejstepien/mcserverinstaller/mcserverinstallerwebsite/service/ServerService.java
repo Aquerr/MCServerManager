@@ -10,6 +10,7 @@ import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.config.Config;
+import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.exception.ServerAlreadyOwnedException;
 import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.model.InstallationStatus;
 import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.model.ModPack;
 import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.model.Server;
@@ -247,6 +248,8 @@ public class ServerService
     public void importServer(final User user, final String serverName, final String path)
     {
         final Server server = getServerByPath(path).orElse(new Server(0, serverName, path));
+        if (server.getId() != 0 && user.getServers().stream().anyMatch(x -> path.equals(x.getServerDir())))
+            throw new ServerAlreadyOwnedException(user, server);
         server.addUser(user);
         addServer(server);
     }

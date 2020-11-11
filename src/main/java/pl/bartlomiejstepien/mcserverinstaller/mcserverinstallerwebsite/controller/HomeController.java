@@ -1,5 +1,7 @@
 package pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.controller;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
@@ -11,12 +13,15 @@ import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.repositor
 import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.service.ServerService;
 import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.service.UserService;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Controller
 public class HomeController
 {
+    private static final Logger LOGGER = LoggerFactory.getLogger(HomeController.class);
+
     private final ServerService serverService;
     private final UserService userService;
 
@@ -32,11 +37,12 @@ public class HomeController
     {
         final User user = (User)authentication.getPrincipal();
 
-        // Return user's list of servers here...
-        List<Server> servers = (user).getServers();
+        LOGGER.info("Accessing url / by user " + user.getUsername());
 
-        if (servers.isEmpty())
-            servers = serverService.getServersForUser(user.getId());
+        // Return user's list of servers here...
+//        List<Server> servers = (user).getServers();
+        LOGGER.info("");
+        List<Server> servers = new ArrayList<>(serverService.getServersForUser(user.getId()));
 
         model.addAttribute("servers", servers);
         return "index";

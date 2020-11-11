@@ -110,4 +110,17 @@ public class ServerProperties
     {
 
     }
+
+    @Override
+    public String toString()
+    {
+        return "ServerProperties{" +
+                "levelName='" + levelName + '\'' +
+                ", onlineMode=" + onlineMode +
+                ", port=" + port +
+                ", pvp=" + pvp +
+                ", rconPort=" + rconPort +
+                ", rconPassword='" + rconPassword + '\'' +
+                '}';
+    }
 }

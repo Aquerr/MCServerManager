@@ -337,4 +337,19 @@ public class Server
         }
     }
 
+    @Override
+    public boolean equals(Object o)
+    {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Server server = (Server) o;
+        return id == server.id &&
+                serverDir.equals(server.serverDir);
+    }
+
+    @Override
+    public int hashCode()
+    {
+        return Objects.hash(id, serverDir);
+    }
 }
