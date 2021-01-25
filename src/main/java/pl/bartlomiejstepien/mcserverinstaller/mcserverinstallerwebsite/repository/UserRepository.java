@@ -1,10 +1,9 @@
 package pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.repository;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Repository;
-import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.model.User;
-import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.repository.dto.UserDto;
+import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.model.UserDto;
+import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.repository.dto.User;
 
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
@@ -22,38 +21,38 @@ public class UserRepository
         this.entityManager = entityManager;
     }
 
-    public User find(final int id)
+    public UserDto find(final int id)
     {
-        final UserDto userDto = this.entityManager.find(UserDto.class, id);
-        if (userDto != null)
-            return userDto.toUser();
+        final User user = this.entityManager.find(User.class, id);
+        if (user != null)
+            return user.toUser();
         else return null;
     }
 
-    public List<User> findAll()
+    public List<UserDto> findAll()
     {
-        return ((List<UserDto>)this.entityManager.createQuery("from user").getResultList()).stream().map(UserDto::toUser).collect(Collectors.toList());
+        return ((List<User>)this.entityManager.createQuery("from user").getResultList()).stream().map(User::toUser).collect(Collectors.toList());
     }
 
-    public void save(final UserDto user)
+    public void save(final User user)
     {
         this.entityManager.merge(user);
     }
 
     public void delete(final int id)
     {
-        final UserDto user = this.entityManager.find(UserDto.class, id);
+        final User user = this.entityManager.find(User.class, id);
         if (user != null)
             this.entityManager.remove(user);
     }
 
     public User findByUsername(final String username)
     {
-        final Query query = this.entityManager.createQuery("SELECT u FROM UserDto u WHERE u.username = :username");
+        final Query query = this.entityManager.createQuery("SELECT u FROM User u WHERE u.username = :username");
         query.setParameter("username", username);
 
         final Object object = query.getSingleResult();
-        final UserDto userDto = (UserDto) object;
-        return userDto.toUser();
+        final User user = (User) object;
+        return user;
     }
 }

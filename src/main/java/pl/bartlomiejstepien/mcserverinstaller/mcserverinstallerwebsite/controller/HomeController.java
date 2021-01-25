@@ -7,15 +7,14 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.model.Server;
-import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.model.User;
-import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.repository.dto.ServerDto;
+import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.model.ServerDto;
+import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.model.UserDto;
 import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.service.ServerService;
 import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.service.UserService;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Controller
 public class HomeController
@@ -33,18 +32,17 @@ public class HomeController
     }
 
     @GetMapping("/")
-    public String root(final Model model, final Authentication authentication)
+    public String root(final Model model, final Authentication authentication, HttpServletRequest httpServletRequest)
     {
-        final User user = (User)authentication.getPrincipal();
+        final UserDto userDto = (UserDto)authentication.getPrincipal();
 
-        LOGGER.info("Accessing url / by user " + user.getUsername());
+        LOGGER.info("Accessing url / by user " + userDto.getUsername() + " " + httpServletRequest.getRemoteAddr());
 
         // Return user's list of servers here...
 //        List<Server> servers = (user).getServers();
-        LOGGER.info("");
-        List<Server> servers = new ArrayList<>(serverService.getServersForUser(user.getId()));
+        List<ServerDto> serverDtos = new ArrayList<>(serverService.getServersForUser(userDto.getId()));
 
-        model.addAttribute("servers", servers);
+        model.addAttribute("servers", serverDtos);
         return "index";
     }
 

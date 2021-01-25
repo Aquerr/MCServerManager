@@ -10,14 +10,14 @@ CREATE TABLE IF NOT EXISTS user (
    password        VARCHAR(200)                    NOT NULL,
    PRIMARY KEY (id)
 );
-CREATE UNIQUE INDEX ON user (id);
+CREATE UNIQUE INDEX IF NOT EXISTS user_idx ON user (id);
 
 CREATE TABLE IF NOT EXISTS server (
     id          INT AUTO_INCREMENT                NOT NULL,
     path        VARCHAR(250)         UNIQUE        NOT NULL,
     PRIMARY KEY (id)
 );
-CREATE UNIQUE INDEX ON server (id);
+CREATE UNIQUE INDEX IF NOT EXISTS server_idx ON server (id);
 
 CREATE TABLE IF NOT EXISTS user_server (
     user_id     INT         NOT NULL,

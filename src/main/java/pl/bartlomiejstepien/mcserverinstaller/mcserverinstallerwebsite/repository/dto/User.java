@@ -1,15 +1,15 @@
 package pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.repository.dto;
 
 import org.springframework.security.core.GrantedAuthority;
-import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.model.Server;
-import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.model.User;
+import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.model.ServerDto;
+import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.model.UserDto;
 
 import javax.persistence.*;
 import java.util.*;
 
 @Entity
 @Table(name = "user")
-public class UserDto
+public class User
 {
     @Id
     @Column(name = "id", nullable = false, updatable = false, unique = true, insertable = false)
@@ -24,33 +24,33 @@ public class UserDto
 
     @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinTable(name = "user_server", joinColumns = {@JoinColumn(name = "user_id")}, inverseJoinColumns = {@JoinColumn(name = "server_id")})
-    private final List<ServerDto> servers = new ArrayList<>();
+    private final List<Server> servers = new ArrayList<>();
 
-    public UserDto()
+    public User()
     {
 
     }
 
-    public UserDto(int id, String username, String password)
+    public User(int id, String username, String password)
     {
         this.id = id;
         this.username = username;
         this.password = password;
     }
 
-    public static UserDto fromUser(User user)
+    public static User fromUser(UserDto userDto)
     {
-        if (user == null)
+        if (userDto == null)
             throw new IllegalArgumentException("User cannot be null");
 
-        final UserDto userDto = new UserDto(user.getId(), user.getUsername(), user.getPassword());
-        for (final Server server : user.getServers())
+        final User user = new User(userDto.getId(), userDto.getUsername(), userDto.getPassword());
+        for (final ServerDto serverDto : userDto.getServers())
         {
-            final ServerDto serverDto = new ServerDto(server.getId(), server.getServerDir());
-            serverDto.addUser(userDto);
-            userDto.addServer(serverDto);
+            final Server server = new Server(serverDto.getId(), serverDto.getServerDir());
+            server.addUser(user);
+            user.addServer(server);
         }
-        return userDto;
+        return user;
     }
 
     public Collection<? extends GrantedAuthority> getAuthorities()
@@ -88,14 +88,14 @@ public class UserDto
         return true;
     }
 
-    public void addServer(final ServerDto serverDto)
+    public void addServer(final Server server)
     {
-        this.servers.add(serverDto);
+        this.servers.add(server);
     }
 
-    private void addServers(final List<ServerDto> serverDtos)
+    private void addServers(final List<Server> servers)
     {
-        this.servers.addAll(serverDtos);
+        this.servers.addAll(servers);
     }
 
     public int getId()
@@ -103,26 +103,26 @@ public class UserDto
         return id;
     }
 
-    public List<ServerDto> getServers()
+    public List<Server> getServers()
     {
         return servers;
     }
 
-    public Optional<ServerDto> getServerById(final int id)
+    public Optional<Server> getServerById(final int id)
     {
         return this.servers.stream().filter(serverDto -> serverDto.getId() == id).findFirst();
     }
 
-    public User toUser()
+    public UserDto toUser()
     {
-        final User user = new User(this.id, this.username, this.password);
-        for (final ServerDto serverDto : this.servers)
+        final UserDto userDto = new UserDto(this.id, this.username, this.password);
+        for (final Server server : this.servers)
         {
-            final Server server = Server.fromDto(serverDto);
-            server.addUser(user);
-            user.addServer(server);
+            final ServerDto serverDto = ServerDto.fromServer(server);
+            serverDto.addUser(userDto);
+            userDto.addServer(serverDto);
         }
-        return user;
+        return userDto;
     }
 
     //    public List<Server> getServers()

@@ -3,23 +3,18 @@ package pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.controll
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.util.MimeTypeUtils;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.exception.ServerNotRunningException;
 import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.model.InstallationStatus;
-import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.model.Server;
+import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.model.ServerDto;
 import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.model.ServerProperties;
-import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.model.User;
+import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.model.UserDto;
 import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.service.ServerService;
 
 import javax.validation.Valid;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -54,17 +49,17 @@ public class ServersRestController
     {
         LOGGER.info("Posting command {" + command + "} to server id = " + serverId);
 
-        final User user = (User)authentication.getPrincipal();
+        final UserDto userDto = (UserDto)authentication.getPrincipal();
 
-        final Optional<Server> optionalServer = user.getServerById(serverId);
+        final Optional<ServerDto> optionalServer = userDto.getServerById(serverId);
         if (!optionalServer.isPresent())
             throw new RuntimeException("Access denied!");
 
-        final Server server = optionalServer.get();
+        final ServerDto serverDto = optionalServer.get();
 
         try
         {
-            server.postCommand(command);
+            serverDto.postCommand(command);
         }
         catch (final ServerNotRunningException exception)
         {
@@ -77,18 +72,18 @@ public class ServersRestController
     {
         LOGGER.info("Toggling server. Server Id = " + serverId);
 
-        final User user = (User) authentication.getPrincipal();
+        final UserDto userDto = (UserDto) authentication.getPrincipal();
 
-        final Optional<Server> optionalServer = user.getServerById(serverId);
+        final Optional<ServerDto> optionalServer = userDto.getServerById(serverId);
         if (!optionalServer.isPresent())
             throw new RuntimeException("Access denied!");
 
-        final Server server = optionalServer.get();
-        if (server.isRunning())
+        final ServerDto serverDto = optionalServer.get();
+        if (serverDto.isRunning())
         {
-            server.stop();
+            serverDto.stop();
         }
-        else server.start();
+        else serverDto.start();
     }
 
     @PostMapping(value = "/{id}/settings", consumes = MimeTypeUtils.APPLICATION_JSON_VALUE)
@@ -96,14 +91,14 @@ public class ServersRestController
     {
         LOGGER.info("Saving server settings " + serverProperties + " for server id " + serverId);
 
-        final User user = (User)authentication.getPrincipal();
+        final UserDto userDto = (UserDto)authentication.getPrincipal();
 
-        final Optional<Server> optionalServer = user.getServerById(serverId);
+        final Optional<ServerDto> optionalServer = userDto.getServerById(serverId);
         if (!optionalServer.isPresent())
             throw new RuntimeException("Access denied!");
 
-        final Server server = optionalServer.get();
-        server.saveProperties(serverProperties);
+        final ServerDto serverDto = optionalServer.get();
+        serverDto.saveProperties(serverProperties);
 
         LOGGER.debug("Saved server settings for server id = " + serverId);
     }
@@ -111,10 +106,12 @@ public class ServersRestController
     @PostMapping(value = "/import-server", consumes = MimeTypeUtils.APPLICATION_JSON_VALUE)
     public void importServer(final @RequestBody ObjectNode json, final Authentication authentication)
     {
+        LOGGER.info("importServer request: " + json.toString());
+
         String serverName = json.get("server-name").textValue();
         String path = json.get("path").textValue();
         LOGGER.info("Importing server. Server name: " + serverName + ", server path: " + path);
-        serverService.importServer((User)authentication.getPrincipal(), serverName, path);
+        serverService.importServer((UserDto)authentication.getPrincipal(), serverName, path);
         LOGGER.debug("Server has been imported.");
     }
 }

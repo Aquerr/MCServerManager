@@ -2,12 +2,10 @@ package pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.model;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.repository.dto.ServerDto;
 
-import javax.persistence.*;
 import java.util.*;
 
-public class User implements UserDetails
+public class UserDto implements UserDetails
 {
     private int id;
 
@@ -15,14 +13,14 @@ public class User implements UserDetails
 
     private String password;
 
-    private final List<Server> servers = new ArrayList<>();
+    private final List<ServerDto> serverDtos = new ArrayList<>();
 
-    public User()
+    public UserDto()
     {
 
     }
 
-    public User(int id, String username, String password)
+    public UserDto(int id, String username, String password)
     {
         this.id = id;
         this.username = username;
@@ -71,14 +69,14 @@ public class User implements UserDetails
         return true;
     }
 
-    public void addServer(final Server server)
+    public void addServer(final ServerDto serverDto)
     {
-        this.servers.add(server);
+        this.serverDtos.add(serverDto);
     }
 
-    public void removeServer(final Server server)
+    public void removeServer(final ServerDto serverDto)
     {
-        this.servers.remove(server);
+        this.serverDtos.remove(serverDto);
     }
 
     public int getId()
@@ -86,14 +84,14 @@ public class User implements UserDetails
         return id;
     }
 
-    public List<Server> getServers()
+    public List<ServerDto> getServers()
     {
-        return servers;
+        return serverDtos;
     }
 
-    public Optional<Server> getServerById(final int id)
+    public Optional<ServerDto> getServerById(final int id)
     {
-        return this.servers.stream().filter(serverDto -> serverDto.getId() == id).findFirst();
+        return this.serverDtos.stream().filter(serverDto -> serverDto.getId() == id).findFirst();
     }
     //    public List<Server> getServers()
 //    {

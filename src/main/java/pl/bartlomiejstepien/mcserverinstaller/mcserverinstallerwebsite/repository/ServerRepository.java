@@ -2,8 +2,7 @@ package pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.reposito
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
-import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.model.Server;
-import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.repository.dto.ServerDto;
+import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.repository.dto.Server;
 
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
@@ -20,41 +19,41 @@ public class ServerRepository
         this.entityManager = entityManager;
     }
 
-    public ServerDto find(final int id)
+    public Server find(final int id)
     {
-        return this.entityManager.find(ServerDto.class, id);
+        return this.entityManager.find(Server.class, id);
     }
 
-    public List<ServerDto> findAll()
+    public List<Server> findAll()
     {
-        final TypedQuery<ServerDto> query = this.entityManager.createQuery("SELECT server FROM ServerDto server", ServerDto.class);
+        final TypedQuery<Server> query = this.entityManager.createQuery("SELECT server FROM Server server", Server.class);
         return query.getResultList();
     }
 
-    public int save(final ServerDto serverDto)
+    public int save(final Server server)
     {
-        final ServerDto mergedServer = this.entityManager.merge(serverDto);
+        final Server mergedServer = this.entityManager.merge(server);
         return mergedServer.getId();
 //        this.entityManager.flush();
     }
 
-    public void update(final ServerDto serverDto)
+    public void update(final Server server)
     {
-        this.entityManager.merge(serverDto);
+        this.entityManager.merge(server);
     }
 
     public void delete(final int id)
     {
-        final ServerDto user = this.entityManager.find(ServerDto.class, id);
+        final Server user = this.entityManager.find(Server.class, id);
         if (user != null)
             this.entityManager.remove(user);
     }
 
-    public ServerDto findByPath(String path)
+    public Server findByPath(String path)
     {
         try
         {
-            final TypedQuery<ServerDto> query = this.entityManager.createQuery("SELECT server FROM ServerDto server WHERE server.path = :serverPath", ServerDto.class);
+            final TypedQuery<Server> query = this.entityManager.createQuery("SELECT server FROM Server server WHERE server.path = :serverPath", Server.class);
             query.setParameter("serverPath", path);
             return query.getSingleResult();
         }
@@ -64,11 +63,11 @@ public class ServerRepository
         }
     }
 
-    public List<ServerDto> findByUserId(int userId)
+    public List<Server> findByUserId(int userId)
     {
-        final TypedQuery<ServerDto> query = this.entityManager.createQuery("SELECT server FROM ServerDto AS server JOIN server.users AS user WHERE user.id = :userId", ServerDto.class);
+        final TypedQuery<Server> query = this.entityManager.createQuery("SELECT server FROM Server AS server JOIN server.users AS user WHERE user.id = :userId", Server.class);
         query.setParameter("userId", userId);
-        List<ServerDto> serverDtos = query.getResultList();
-        return serverDtos;
+        List<Server> servers = query.getResultList();
+        return servers;
     }
 }

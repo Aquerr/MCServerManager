@@ -1,7 +1,7 @@
 package pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.exception;
 
-import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.model.Server;
-import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.model.User;
+import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.model.ServerDto;
+import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.model.UserDto;
 
 public class ServerAlreadyOwnedException extends RuntimeException
 {
@@ -20,8 +20,8 @@ public class ServerAlreadyOwnedException extends RuntimeException
         super(message, cause);
     }
 
-    public ServerAlreadyOwnedException(User user, Server server)
+    public ServerAlreadyOwnedException(UserDto userDto, ServerDto serverDto)
     {
-        super("Username: " + user.getUsername() + ", Server path: " + server.getServerDir());
+        super("Username: " + userDto.getUsername() + ", Server path: " + serverDto.getServerDir());
     }
 }

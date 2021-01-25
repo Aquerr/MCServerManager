@@ -6,8 +6,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.model.ModPack;
-import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.model.Server;
-import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.model.User;
+import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.model.ServerDto;
+import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.model.UserDto;
 import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.service.CurseForgeAPIService;
 import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.service.ServerService;
 
@@ -39,8 +39,15 @@ public class ServersController
     @GetMapping("/{id}")
     public String showServer(final @PathVariable("id") int id, final Model model, final Authentication authentication)
     {
-        final User user = (User)authentication.getPrincipal();
-        final Optional<Server> optionalServer = user.getServerById(id);
+        final UserDto userDto = (UserDto)authentication.getPrincipal();
+        Optional<ServerDto> optionalServer = userDto.getServerById(id);
+
+        if (!optionalServer.isPresent())
+        {
+            optionalServer = this.serverService.getServersForUser(userDto.getId()).stream()
+                    .filter(serverDto -> serverDto.getId() == id)
+                    .findFirst();
+        }
 
         if (!optionalServer.isPresent())
             throw new RuntimeException("Access denied!");

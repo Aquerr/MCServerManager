@@ -23,4 +23,11 @@ public class RestErrorController
         final RestErrorResponse restErrorResponse = new RestErrorResponse(HttpStatus.CONFLICT.value(), "Server with the given path is already owned by the user!");
         return ResponseEntity.status(HttpStatus.CONFLICT).body(restErrorResponse);
     }
+
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<?> handleException(final RuntimeException exception)
+    {
+        final RestErrorResponse restErrorResponse = new RestErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), exception.getMessage());
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(restErrorResponse);
+    }
 }

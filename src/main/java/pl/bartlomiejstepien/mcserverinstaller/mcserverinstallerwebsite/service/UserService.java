@@ -1,12 +1,11 @@
 package pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.model.User;
+import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.model.UserDto;
 import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.repository.UserRepository;
-import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.repository.dto.UserDto;
+import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.repository.dto.User;
 
 import java.util.List;
 
@@ -22,12 +21,12 @@ public class UserService
         this.userRepository = userRepository;
     }
 
-    public User find(final int id)
+    public UserDto find(final int id)
     {
         return this.userRepository.find(id);
     }
 
-    public List<User> findAll()
+    public List<UserDto> findAll()
     {
         return this.userRepository.findAll();
     }
@@ -37,13 +36,13 @@ public class UserService
         this.userRepository.delete(id);
     }
 
-    public void save(final User user)
+    public void save(final UserDto userDto)
     {
-        this.userRepository.save(UserDto.fromUser(user));
+        this.userRepository.save(User.fromUser(userDto));
     }
 
-    public User findByUsername(String username)
+    public UserDto findByUsername(String username)
     {
-        return this.userRepository.findByUsername(username);
+        return this.userRepository.findByUsername(username).toUser();
     }
 }

@@ -49,8 +49,7 @@ public class ModPack
             latestFiles.add(modpackFile);
         }
 
-        final ModPack modPack = new ModPack(id, name, summary, thumbnail, version, latestFiles);
-        return modPack;
+        return new ModPack(id, name, summary, thumbnail, version, latestFiles);
     }
 
     public ModPack(int id, String name, String summary, String thumbnailUrl, final String version, final List<ModpackFile> latestFiles)

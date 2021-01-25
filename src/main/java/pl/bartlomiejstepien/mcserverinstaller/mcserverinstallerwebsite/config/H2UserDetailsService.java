@@ -4,7 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.model.User;
+import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.model.UserDto;
 import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.service.UserService;
 
 public class H2UserDetailsService implements UserDetailsService
@@ -21,11 +21,11 @@ public class H2UserDetailsService implements UserDetailsService
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException
     {
         //TODO: findByUsername should return User with Server (not ServerDto).
-        final User userDetails = this.userService.findByUsername(username);
+        final UserDto userDtoDetails = this.userService.findByUsername(username);
 
-        if (userDetails == null)
+        if (userDtoDetails == null)
             throw new UsernameNotFoundException("Could not find user with username = " + username);
 
-        return userDetails;
+        return userDtoDetails;
     }
 }

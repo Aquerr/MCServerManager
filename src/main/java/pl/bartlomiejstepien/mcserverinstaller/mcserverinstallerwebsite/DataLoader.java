@@ -4,7 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
-import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.model.User;
+import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.model.UserDto;
 import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.service.ServerService;
 import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.service.UserService;
 
@@ -24,10 +24,10 @@ public class DataLoader
     @EventListener(ApplicationReadyEvent.class)
     public void loadData()
     {
-        final User user = this.userService.find(1);
-        if (user == null || !user.getUsername().equals("Nerdi"))
+        final UserDto userDto = this.userService.find(1);
+        if (userDto == null || !userDto.getUsername().equals("Nerdi"))
         {
-            this.userService.save(new User(0, "Nerdi", "$2a$10$RsBi7zEwsAHxTgQO8cBX5Oe7iCPvIkGN3ichuibM9uGzmvx6TzFC6"));
+            this.userService.save(new UserDto(0, "Nerdi", "$2a$10$RsBi7zEwsAHxTgQO8cBX5Oe7iCPvIkGN3ichuibM9uGzmvx6TzFC6"));
         }
     }
 }

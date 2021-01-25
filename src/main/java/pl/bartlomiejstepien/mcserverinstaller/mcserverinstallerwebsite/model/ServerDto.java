@@ -4,8 +4,8 @@ import com.github.t9t.minecraftrconclient.RconClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.exception.ServerNotRunningException;
-import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.repository.dto.ServerDto;
-import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.repository.dto.UserDto;
+import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.repository.dto.Server;
+import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.repository.dto.User;
 import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.util.ProcessUtil;
 
 import java.io.File;
@@ -20,9 +20,9 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-public class Server
+public class ServerDto
 {
-    private static final Logger LOGGER = LoggerFactory.getLogger(Server.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ServerDto.class);
     private static final ScheduledExecutorService SCHEDULED_EXECUTOR_SERVICE = Executors.newSingleThreadScheduledExecutor();
 
     private static final Map<Integer, Process> SERVER_PROCESSES = new HashMap<>();
@@ -31,7 +31,7 @@ public class Server
     private String name;
     private String serverDir;
 
-    private final List<User> users = new ArrayList<>();
+    private final List<UserDto> userDtos = new ArrayList<>();
 
     private final List<String> players = new LinkedList<>();
 
@@ -51,18 +51,18 @@ public class Server
 //    private int rconPort;
 //    private String rconPassword;
 
-    public static Server fromDto(final ServerDto serverDto)
+    public static ServerDto fromServer(final Server server)
     {
         //TODO: Load server information from server.properties.
-        final String serverPath = serverDto.getPath();
+        final String serverPath = server.getPath();
 //        final User user = serverDto.getUser().toUser();
-        final Server server = new Server(serverDto.getId(), serverDto.getPath().substring(serverPath.lastIndexOf(File.separator) + 1), serverPath);
+        final ServerDto serverDto = new ServerDto(server.getId(), server.getPath().substring(serverPath.lastIndexOf(File.separator) + 1), serverPath);
 
-        for (final UserDto userDto : serverDto.getUsers())
+        for (final User user : server.getUsers())
         {
-            final User user = new User(userDto.getId(), userDto.getUsername(), userDto.getPassword());
-            user.addServer(server);
-            server.addUser(user);
+            final UserDto userDto = new UserDto(user.getId(), user.getUsername(), user.getPassword());
+            userDto.addServer(serverDto);
+            serverDto.addUser(userDto);
         }
 
         // Find start file. BATCH or SHELL depending on operating system.
@@ -105,13 +105,13 @@ public class Server
         }
 
         if (startFilePath != null)
-            server.setStartFilePath(startFilePath);
+            serverDto.setStartFilePath(startFilePath);
 
 
         //Load server.properties
-        server.loadProperties();
+        serverDto.loadProperties();
 
-        return server;
+        return serverDto;
     }
 
     public void setStartFilePath(Path startFilePath)
@@ -119,12 +119,12 @@ public class Server
         this.startFilePath = startFilePath;
     }
 
-    public Server()
+    public ServerDto()
     {
 
     }
 
-    public Server(int id, String name, String serverDir)
+    public ServerDto(int id, String name, String serverDir)
     {
         this.id = id;
         this.name = name;
@@ -156,24 +156,24 @@ public class Server
         return this.serverDir;
     }
 
-    public List<User> getUsers()
+    public List<UserDto> getUsers()
     {
-        return users;
+        return userDtos;
     }
 
-    public void addUser(final User user)
+    public void addUser(final UserDto userDto)
     {
-        this.users.add(user);
+        this.userDtos.add(userDto);
     }
 
-    public void addUsers(List<User> users)
+    public void addUsers(List<UserDto> userDtos)
     {
-        this.users.addAll(users);
+        this.userDtos.addAll(userDtos);
     }
 
-    public void removeUser(final User user)
+    public void removeUser(final UserDto userDto)
     {
-        this.users.remove(user);
+        this.userDtos.remove(userDto);
     }
 
     public Path getStartFilePath()
@@ -342,9 +342,9 @@ public class Server
     {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        Server server = (Server) o;
-        return id == server.id &&
-                serverDir.equals(server.serverDir);
+        ServerDto serverDto = (ServerDto) o;
+        return id == serverDto.id &&
+                serverDir.equals(serverDto.serverDir);
     }
 
     @Override

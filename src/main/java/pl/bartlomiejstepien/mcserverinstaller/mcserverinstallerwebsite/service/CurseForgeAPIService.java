@@ -8,13 +8,11 @@ import org.springframework.security.web.util.UrlUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.config.CurseForgeAPIRoutes;
+import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.exception.CouldNotDownloadServerFilesException;
 import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.model.InstallationStatus;
 import pl.bartlomiejstepien.mcserverinstaller.mcserverinstallerwebsite.model.ModPack;
 
-import java.io.BufferedInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.net.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
@@ -127,28 +125,29 @@ public class CurseForgeAPIService
      * @param serverDownloadUrl the link to download from
      * @return the name of the zip file (with .zip extension)
      */
-    public String downloadServerFile(final ModPack modPack, String serverDownloadUrl) throws MalformedURLException
+    public String downloadServerFile(final ModPack modPack, String serverDownloadUrl) throws CouldNotDownloadServerFilesException
     {
-        final URL url = new URL(serverDownloadUrl);
-
-        try(BufferedInputStream bufferedInputStream = new BufferedInputStream(url.openStream());
-            FileOutputStream fileOutputStream = new FileOutputStream("downloads/" + modPack.getName()))
+        try
         {
-            byte[] dataBuffer = new byte[1024];
-            int bytesRead;
-            while ((bytesRead = bufferedInputStream.read(dataBuffer, 0, 1024)) != -1)
+            final URL url = new URL(serverDownloadUrl);
+            try(BufferedInputStream bufferedInputStream = new BufferedInputStream(url.openStream());
+                FileOutputStream fileOutputStream = new FileOutputStream("downloads" + File.separator + modPack.getName() + "_" + modPack.getVersion()))
             {
-                final InstallationStatus installationStatus = this.serverInstaller.getInstallationStatus(modPack.getId()).orElse(new InstallationStatus(0, "Downloading server files..."));
-                installationStatus.setPercent(bufferedInputStream.available() / 100);
-                this.serverInstaller.setInstallationStatus(modPack.getId(), installationStatus);
-                fileOutputStream.write(dataBuffer, 0, bytesRead);
+                byte[] dataBuffer = new byte[1024];
+                int bytesRead;
+                while ((bytesRead = bufferedInputStream.read(dataBuffer, 0, 1024)) != -1)
+                {
+                    final InstallationStatus installationStatus = this.serverInstaller.getInstallationStatus(modPack.getId()).orElse(new InstallationStatus(0, "Downloading server files..."));
+                    installationStatus.setPercent(bufferedInputStream.available() / 100);
+                    this.serverInstaller.setInstallationStatus(modPack.getId(), installationStatus);
+                    fileOutputStream.write(dataBuffer, 0, bytesRead);
+                }
             }
         }
-        catch (IOException e)
+        catch (Exception exception)
         {
-            e.printStackTrace();
+            throw new CouldNotDownloadServerFilesException("Could not download server files", exception);
         }
-
 
         //Working!!!
 //        try(InputStream inputStream = url.openStream(); ReadableByteChannel readableByteChannel = Channels.newChannel(inputStream);
