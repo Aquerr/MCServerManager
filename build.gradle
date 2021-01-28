@@ -15,7 +15,7 @@ plugins {
 }
 //apply plugin: 'com.bmuschko.clover'
 
-group = 'pl.bartlomiejstepien.mcserverinstaller'
+group = 'pl.bartlomiejstepien.mcsm'
 version = '0.0.1-SNAPSHOT'
 sourceCompatibility = JavaVersion.VERSION_1_8
 targetCompatibility = JavaVersion.VERSION_1_8
@@ -26,16 +26,18 @@ repositories {
 
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
-	implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity5'
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.springframework.boot:spring-boot-starter-security'
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
 
+	implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity5'
+
 	implementation 'net.lingala.zip4j:zip4j:2.6.1'
 	implementation 'com.github.t9t.minecraft-rcon-client:minecraft-rcon-client:1.0.0'
 	implementation 'io.springfox:springfox-boot-starter:3.0.0'
 	implementation 'io.springfox:springfox-swagger-ui:3.0.0'
+//	implementation 'org.liquibase:liquibase-core:4.2.2'
 //	clover 'org.openclover:clover:4.4.1'
 
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'

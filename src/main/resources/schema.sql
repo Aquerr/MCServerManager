@@ -14,6 +14,7 @@ CREATE UNIQUE INDEX IF NOT EXISTS user_idx ON user (id);
 
 CREATE TABLE IF NOT EXISTS server (
     id          INT AUTO_INCREMENT                NOT NULL,
+    name        VARCHAR(250)                      NOT NULL,
     path        VARCHAR(250)         UNIQUE        NOT NULL,
     PRIMARY KEY (id)
 );

@@ -69,15 +69,6 @@
         <h3>My Servers</h3>
         <hr>
 
-        <div class="text-center">
-            <div th:if="${servers.isEmpty()}">
-                <p class="text-muted">Your server list is empty :(</p>
-            </div>
-            <a href="#" th:href="@{/servers/add-server}" class="btn btn-light">Add a new server</a>
-            <a href="#" id="import-server-button" class="btn btn-light">Import server</a>
-        </div>
-
-
         <div th:if="${!servers.isEmpty()}">
             <th:block th:each="server : ${servers}">
 
@@ -91,6 +82,14 @@
                 </div>
 
             </th:block>
+        </div>
+
+        <div class="text-center">
+            <div th:if="${servers.isEmpty()}">
+                <p class="text-muted">Your server list is empty :(</p>
+            </div>
+            <a href="#" th:href="@{/servers/add-server}" class="btn btn-light">Add a new server</a>
+            <a href="#" id="import-server-button" class="btn btn-light">Import server</a>
         </div>
     </div>
 </body>
