@@ -1,7 +1,5 @@
 package pl.bartlomiejstepien.mcsm.repository.ds;
 
-import pl.bartlomiejstepien.mcsm.model.ServerDto;
-
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -76,8 +74,8 @@ public class Server
         this.users.addAll(users);
     }
 
-    public ServerDto toServer()
-    {
-        return ServerDto.fromServer(this);
-    }
+//    public ServerDto toServer()
+//    {
+//        return ServerDto.fromServer(this);
+//    }
 }

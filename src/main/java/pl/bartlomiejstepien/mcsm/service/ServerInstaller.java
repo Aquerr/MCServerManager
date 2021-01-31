@@ -4,11 +4,12 @@ import net.lingala.zip4j.ZipFile;
 import net.lingala.zip4j.exception.ZipException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import pl.bartlomiejstepien.mcsm.auth.AuthenticatedUser;
+import pl.bartlomiejstepien.mcsm.config.Config;
 import pl.bartlomiejstepien.mcsm.model.InstallationStatus;
 import pl.bartlomiejstepien.mcsm.model.ModPack;
-import pl.bartlomiejstepien.mcsm.model.UserDto;
 
 import java.io.File;
 import java.io.IOException;
@@ -22,6 +23,14 @@ import java.util.Optional;
 public class ServerInstaller
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(ServerInstaller.class);
+
+    private final Config config;
+
+    @Autowired
+    public ServerInstaller(final Config config)
+    {
+        this.config = config;
+    }
 
     // Modpack id ==> InstallationStatus
     private final Map<Integer, InstallationStatus> modpackInstallationStatus = new HashMap<>();
@@ -50,7 +59,7 @@ public class ServerInstaller
         LOGGER.info("Installing server for modpack id= " + modPack.getId() + " by user " + authenticatedUser.getUsername());
         setInstallationStatus(modPack.getId(), new InstallationStatus(0, "Checking server existence..."));
 
-        final ZipFile zipFile = new ZipFile("downloads" + File.separator + modPack.getName() + "_" + modPack.getVersion());
+        final ZipFile zipFile = new ZipFile(this.config.getDownloadsDir() + File.separator + modPack.getName() + "_" + modPack.getVersion());
         try
         {
             zipFile.extractAll(serverPath.toString());

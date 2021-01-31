@@ -9,9 +9,10 @@ import org.springframework.web.bind.annotation.*;
 import pl.bartlomiejstepien.mcsm.auth.AuthenticatedUser;
 import pl.bartlomiejstepien.mcsm.exception.ServerNotRunningException;
 import pl.bartlomiejstepien.mcsm.model.InstallationStatus;
-import pl.bartlomiejstepien.mcsm.model.ServerDto;
+import pl.bartlomiejstepien.mcsm.dto.ServerDto;
 import pl.bartlomiejstepien.mcsm.model.ServerProperties;
-import pl.bartlomiejstepien.mcsm.model.UserDto;
+import pl.bartlomiejstepien.mcsm.dto.UserDto;
+import pl.bartlomiejstepien.mcsm.process.ServerManager;
 import pl.bartlomiejstepien.mcsm.service.ServerService;
 import pl.bartlomiejstepien.mcsm.service.UserService;
 
@@ -27,11 +28,13 @@ public class ServersRestController
 
     private final ServerService serverService;
     private final UserService userService;
+    private final ServerManager serverManager;
 
-    public ServersRestController(final ServerService serverService, final UserService userService)
+    public ServersRestController(final ServerService serverService, final UserService userService, final ServerManager serverManager)
     {
         this.serverService = serverService;
         this.userService = userService;
+        this.serverManager = serverManager;
     }
 
     @GetMapping("/installation-status/{modpackId}")
@@ -42,10 +45,10 @@ public class ServersRestController
     }
 
     @GetMapping("/{id}/latest-log")
-    public List<String> getLatestServerLog(final @PathVariable("id") int serverId)
+    public List<String> getLatestServerLog(final @PathVariable("id") int serverId, final int numberOfLines)
     {
-        LOGGER.debug("Getting latest server log for server id = " + serverId);
-        return this.serverService.getServerLatestLog(serverId);
+        LOGGER.debug("Getting latest server log for server id =" + serverId + ", numberOfLines =" + numberOfLines);
+        return this.serverService.getServerLatestLog(serverId, numberOfLines);
     }
 
     @PostMapping("/{id}/command")
@@ -63,7 +66,7 @@ public class ServersRestController
 
         try
         {
-            serverDto.postCommand(command);
+            this.serverManager.sendCommand(serverDto, command);
         }
         catch (final ServerNotRunningException exception)
         {
@@ -84,11 +87,14 @@ public class ServersRestController
             throw new RuntimeException("Access denied!");
 
         final ServerDto serverDto = optionalServer.get();
-        if (serverDto.isRunning())
+        if (this.serverManager.isRunning(serverDto))
         {
-            serverDto.stop();
+            this.serverManager.stopServer(serverDto);
         }
-        else serverDto.start();
+        else
+        {
+            this.serverManager.startServer(serverDto);
+        }
     }
 
     @PostMapping(value = "/{id}/settings", consumes = MimeTypeUtils.APPLICATION_JSON_VALUE)

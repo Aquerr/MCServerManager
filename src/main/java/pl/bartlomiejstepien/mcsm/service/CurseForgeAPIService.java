@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import pl.bartlomiejstepien.mcsm.config.Config;
 import pl.bartlomiejstepien.mcsm.config.CurseForgeAPIRoutes;
 import pl.bartlomiejstepien.mcsm.exception.CouldNotDownloadServerFilesException;
 import pl.bartlomiejstepien.mcsm.model.InstallationStatus;
@@ -23,11 +24,13 @@ public class CurseForgeAPIService
 {
     private static final RestTemplate REST_TEMPLATE = new RestTemplate();
 
+    private final Config config;
     private final ServerInstaller serverInstaller;
 
     @Autowired
-    public CurseForgeAPIService(final ServerInstaller serverInstaller)
+    public CurseForgeAPIService(final Config config, final ServerInstaller serverInstaller)
     {
+        this.config = config;
         this.serverInstaller = serverInstaller;
     }
 
@@ -117,7 +120,7 @@ public class CurseForgeAPIService
     /**
      * Downloads the zip file that contains server files.
      *
-     * @param modPack
+     * @param modPack to download
      * @param serverDownloadUrl the link to download from
      * @return the name of the zip file (with .zip extension)
      */
@@ -127,7 +130,7 @@ public class CurseForgeAPIService
         {
             final URL url = new URL(serverDownloadUrl);
             try(BufferedInputStream bufferedInputStream = new BufferedInputStream(url.openStream());
-                FileOutputStream fileOutputStream = new FileOutputStream("downloads" + File.separator + modPack.getName() + "_" + modPack.getVersion()))
+                FileOutputStream fileOutputStream = new FileOutputStream(this.config.getDownloadsDir() + File.separator + modPack.getName() + "_" + modPack.getVersion()))
             {
                 byte[] dataBuffer = new byte[1024];
                 int bytesRead;

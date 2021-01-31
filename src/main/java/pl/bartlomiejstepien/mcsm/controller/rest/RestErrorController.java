@@ -24,10 +24,10 @@ public class RestErrorController
         return ResponseEntity.status(HttpStatus.CONFLICT).body(restErrorResponse);
     }
 
-    @ExceptionHandler(RuntimeException.class)
-    public ResponseEntity<?> handleException(final RuntimeException exception)
-    {
-        final RestErrorResponse restErrorResponse = new RestErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), exception.getMessage());
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(restErrorResponse);
-    }
+//    @ExceptionHandler(RuntimeException.class)
+//    public ResponseEntity<?> handleException(final RuntimeException exception)
+//    {
+//        final RestErrorResponse restErrorResponse = new RestErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), exception.getMessage());
+//        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(restErrorResponse);
+//    }
 }

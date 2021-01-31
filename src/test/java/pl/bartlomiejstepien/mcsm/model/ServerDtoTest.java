@@ -3,6 +3,8 @@ package pl.bartlomiejstepien.mcsm.model;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
+import pl.bartlomiejstepien.mcsm.dto.ServerDto;
+import pl.bartlomiejstepien.mcsm.dto.UserDto;
 import pl.bartlomiejstepien.mcsm.exception.ServerNotRunningException;
 
 import static org.assertj.core.api.Assertions.assertThat;

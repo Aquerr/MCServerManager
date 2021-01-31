@@ -1,4 +1,6 @@
-package pl.bartlomiejstepien.mcsm.model;
+package pl.bartlomiejstepien.mcsm.dto;
+
+import pl.bartlomiejstepien.mcsm.dto.ServerDto;
 
 import java.util.*;
 

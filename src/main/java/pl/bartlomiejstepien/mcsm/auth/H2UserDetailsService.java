@@ -4,7 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import pl.bartlomiejstepien.mcsm.model.UserDto;
+import pl.bartlomiejstepien.mcsm.dto.UserDto;
 import pl.bartlomiejstepien.mcsm.service.UserService;
 
 public class H2UserDetailsService implements UserDetailsService

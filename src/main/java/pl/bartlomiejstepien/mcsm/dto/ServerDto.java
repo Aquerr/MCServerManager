@@ -1,12 +1,10 @@
-package pl.bartlomiejstepien.mcsm.model;
+package pl.bartlomiejstepien.mcsm.dto;
 
-import com.github.t9t.minecraftrconclient.RconClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import pl.bartlomiejstepien.mcsm.exception.ServerNotRunningException;
+import pl.bartlomiejstepien.mcsm.model.ServerProperties;
 import pl.bartlomiejstepien.mcsm.repository.ds.Server;
 import pl.bartlomiejstepien.mcsm.repository.ds.User;
-import pl.bartlomiejstepien.mcsm.util.ProcessUtil;
 
 import java.io.File;
 import java.io.IOException;
@@ -16,16 +14,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 public class ServerDto
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(ServerDto.class);
-    private static final ScheduledExecutorService SCHEDULED_EXECUTOR_SERVICE = Executors.newSingleThreadScheduledExecutor();
-
-    private static final Map<Integer, Process> SERVER_PROCESSES = new HashMap<>();
 
     private int id;
     private String name;
@@ -186,79 +178,6 @@ public class ServerDto
         return serverProperties;
     }
 
-    public void start()
-    {
-        try
-        {
-            final String serverDir = Paths.get(this.serverDir).toAbsolutePath().toString();
-
-            Process process;
-
-            final String osName = System.getProperty("os.name");
-            if (osName.contains("Win") || osName.contains("win"))
-            {
-                process = Runtime.getRuntime().exec("cmd /c start " + this.startFilePath.getFileName().toString() + " title " + this.name, null, new File(serverDir));
-//                process = Runtime.getRuntime().exec(new String[]{"powershell.exe", "(Start-Process .\\" + this.startFilePath.getFileName().toString() + "-passthru).Id"}, null, new File(serverDir));
-
-            }
-            else
-            {
-                process = Runtime.getRuntime().exec("sh " + this.startFilePath.getFileName().toString(), null, new File(serverDir));
-            }
-            SERVER_PROCESSES.put(this.id, process);
-        }
-        catch (IOException e)
-        {
-            LOGGER.error("Could not start server with id=" + this.id, e);
-        }
-    }
-
-    public void stop()
-    {
-        try
-        {
-            postCommand("stop");
-        }
-        catch (ServerNotRunningException exception)
-        {
-            return;
-        }
-
-        SCHEDULED_EXECUTOR_SERVICE.schedule(() -> {
-            final Process process = SERVER_PROCESSES.get(this.id);
-
-            if (process != null)
-            {
-                if (process.isAlive())
-                {
-                    process.destroy();
-                }
-            }
-
-            try
-            {
-                final long processId = ProcessUtil.getProcessID(this.name);
-                Runtime.getRuntime().exec("taskkill /F /T /PID " + processId);
-            }
-            catch (IOException e)
-            {
-                e.printStackTrace();
-            }
-
-            SERVER_PROCESSES.remove(this.id);
-        }, 20, TimeUnit.SECONDS);
-    }
-
-    public boolean isRunning()
-    {
-        final Process serverProcess = SERVER_PROCESSES.get(this.id);
-        if (serverProcess != null && serverProcess.isAlive())
-            return true;
-
-        final long serverProcessId = ProcessUtil.getProcessID(this.name);
-        return serverProcessId != -1;
-    }
-
     public void saveProperties(ServerProperties serverProperties)
     {
         LOGGER.info("Saving server properties for server id=" + this.id);
@@ -319,21 +238,6 @@ public class ServerDto
             serverProperties.setPvp(pvp);
             serverProperties.setRconPort(rconPort);
             serverProperties.setRconPassword(rconPassword);
-        }
-    }
-
-    public void postCommand(final String command) throws ServerNotRunningException
-    {
-        if (!this.isRunning())
-            throw new ServerNotRunningException();
-
-        try(final RconClient rconClient = RconClient.open("localhost", this.serverProperties.getRconPort(), this.serverProperties.getRconPassword()))
-        {
-            rconClient.sendCommand(command);
-        }
-        catch(final Exception exception)
-        {
-            System.out.println("Could not send a command to the server. Server id = " + getId() + " | Server name = " + getName());
         }
     }
 

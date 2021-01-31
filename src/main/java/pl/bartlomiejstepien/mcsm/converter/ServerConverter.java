@@ -1,8 +1,8 @@
 package pl.bartlomiejstepien.mcsm.converter;
 
 import org.springframework.stereotype.Component;
-import pl.bartlomiejstepien.mcsm.model.ServerDto;
-import pl.bartlomiejstepien.mcsm.model.UserDto;
+import pl.bartlomiejstepien.mcsm.dto.ServerDto;
+import pl.bartlomiejstepien.mcsm.dto.UserDto;
 import pl.bartlomiejstepien.mcsm.repository.ds.Server;
 import pl.bartlomiejstepien.mcsm.repository.ds.User;
 
@@ -15,6 +15,7 @@ public class ServerConverter
     {
         if (server == null)
             return new ServerDto();
+
         final ServerDto serverDto = new ServerDto(server.getId(), server.getPath().substring(server.getPath().lastIndexOf(File.separator) + 1), server.getPath());
         for (final User user : server.getUsers())
         {

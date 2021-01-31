@@ -14,8 +14,9 @@ import pl.bartlomiejstepien.mcsm.exception.ServerAlreadyOwnedException;
 import pl.bartlomiejstepien.mcsm.exception.CouldNotDownloadServerFilesException;
 import pl.bartlomiejstepien.mcsm.model.InstallationStatus;
 import pl.bartlomiejstepien.mcsm.model.ModPack;
-import pl.bartlomiejstepien.mcsm.model.ServerDto;
-import pl.bartlomiejstepien.mcsm.model.UserDto;
+import pl.bartlomiejstepien.mcsm.dto.ServerDto;
+import pl.bartlomiejstepien.mcsm.dto.UserDto;
+import pl.bartlomiejstepien.mcsm.process.ServerManager;
 import pl.bartlomiejstepien.mcsm.repository.ServerRepository;
 import pl.bartlomiejstepien.mcsm.repository.ds.Server;
 
@@ -41,6 +42,7 @@ public class ServerService
     private final UserService userService;
     private final ServerInstaller serverInstaller;
     private final ServerConverter serverConverter;
+    private final ServerManager serverManager;
 
     @Autowired
     public ServerService(final Config config,
@@ -48,7 +50,8 @@ public class ServerService
                          final UserService userService,
                          final ServerRepository serverRepository,
                          final ServerInstaller serverInstaller,
-                         final ServerConverter serverConverter)
+                         final ServerConverter serverConverter,
+                         final ServerManager serverManager)
     {
         this.config = config;
         this.curseForgeAPIService = curseForgeAPIService;
@@ -56,6 +59,7 @@ public class ServerService
         this.serverRepository = serverRepository;
         this.serverInstaller = serverInstaller;
         this.serverConverter = serverConverter;
+        this.serverManager = serverManager;
     }
 
     @EventListener(ApplicationReadyEvent.class)
@@ -63,7 +67,7 @@ public class ServerService
     {
         LOGGER.info("Preparing file structure...");
 
-        final Path serversDirectoryPath = Paths.get(".").resolve(config.getServersDir());
+        final Path serversDirectoryPath = this.config.getServersDirPath();
         if (Files.notExists(serversDirectoryPath))
         {
             try
@@ -75,11 +79,11 @@ public class ServerService
                 e.printStackTrace();
             }
         }
-        if (Files.notExists(Paths.get(".").resolve("downloads")))
+        if (Files.notExists(this.config.getDownloadsDirPath()))
         {
             try
             {
-                Files.createDirectory(Paths.get(".").resolve("downloads"));
+                Files.createDirectory(this.config.getDownloadsDirPath());
             }
             catch (IOException e)
             {
@@ -175,48 +179,23 @@ public class ServerService
     @Transactional
     public ServerDto getServer(final int id)
     {
-        return this.serverRepository.find(id).toServer();
+        final Server server = this.serverRepository.find(id);
+        return this.serverConverter.convertToDto(server);
     }
 
     @Transactional
     public List<ServerDto> getServersForUser(final int userId)
     {
         return this.serverRepository.findByUserId(userId).stream()
-                .map(Server::toServer)
+                .map(this.serverConverter::convertToDto)
                 .collect(Collectors.toList());
     }
 
     @Transactional
-    public List<String> getServerLatestLog(int serverId)
+    public List<String> getServerLatestLog(int serverId, int numberOfLines)
     {
         final ServerDto serverDto = getServer(serverId);
-        final String serverPath = serverDto.getServerDir();
-        final Path latestLogPath = Paths.get(serverPath + File.separator + "logs" + File.separator + "latest.log");
-
-        if (Files.notExists(latestLogPath))
-            return Collections.emptyList();
-
-        try
-        {
-//            RandomAccessFile randomAccessFile = new RandomAccessFile(latestLogPath.toFile(), RandomAccessFileMode.READ.getValue());
-//            randomAccessFile.seek();
-            final List<String> lines = Files.readAllLines(latestLogPath);
-            return lines;
-        }
-        catch (IOException e)
-        {
-            e.printStackTrace();
-            try
-            {
-                Files.delete(latestLogPath);
-                Files.createFile(latestLogPath);
-            }
-            catch (IOException ioException)
-            {
-                ioException.printStackTrace();
-            }
-        }
-        return Collections.emptyList();
+        return this.serverManager.getLatestServerLog(serverDto, numberOfLines);
     }
 
     @Transactional
@@ -235,7 +214,7 @@ public class ServerService
     public Optional<ServerDto> getServerByPath(final String path)
     {
         final Server server = this.serverRepository.findByPath(path);
-        return Optional.ofNullable(server).map(Server::toServer);
+        return Optional.ofNullable(server).map(this.serverConverter::convertToDto);
     }
 
     public Optional<InstallationStatus> getInstallationStatus(int serverId)
@@ -247,20 +226,13 @@ public class ServerService
     {
         final int latestServerFileId = modPack.getLatestFiles().get(0).getServerPackFileId();
         String serverDownloadUrl = this.curseForgeAPIService.getLatestServerDownloadUrl(modPack.getId(), latestServerFileId);
-        //TODO: Fix url. ( ) still not work
+        //TODO: Fix url. Parenthesis "(" and ")" still not work
         serverDownloadUrl = serverDownloadUrl.replaceAll(" ", "+");
         this.curseForgeAPIService.downloadServerFile(modPack, serverDownloadUrl);
     }
 
     private boolean isModPackAlreadyDownloaded(final ModPack modPack)
     {
-        if (Files.exists(Paths.get("downloads" + File.separator + modPack.getName() + "_" + modPack.getVersion())))
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
+        return Files.exists(this.config.getDownloadsDirPath().resolve(Paths.get(modPack.getName() + "_" + modPack.getVersion())));
     }
 }

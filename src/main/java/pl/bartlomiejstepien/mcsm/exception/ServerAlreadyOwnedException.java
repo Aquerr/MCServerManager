@@ -1,7 +1,7 @@
 package pl.bartlomiejstepien.mcsm.exception;
 
-import pl.bartlomiejstepien.mcsm.model.ServerDto;
-import pl.bartlomiejstepien.mcsm.model.UserDto;
+import pl.bartlomiejstepien.mcsm.dto.ServerDto;
+import pl.bartlomiejstepien.mcsm.dto.UserDto;
 
 public class ServerAlreadyOwnedException extends RuntimeException
 {

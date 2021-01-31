@@ -2,7 +2,7 @@ package pl.bartlomiejstepien.mcsm.repository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
-import pl.bartlomiejstepien.mcsm.model.UserDto;
+import pl.bartlomiejstepien.mcsm.dto.UserDto;
 import pl.bartlomiejstepien.mcsm.repository.ds.User;
 
 import javax.persistence.EntityManager;
