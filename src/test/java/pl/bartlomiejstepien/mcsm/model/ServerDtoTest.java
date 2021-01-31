@@ -48,11 +48,4 @@ class ServerDtoTest
         assertThat(serverDto.getUsers()).hasSize(0);
         assertThat(serverDto.getUsers()).doesNotContain(userDto);
     }
-
-    @Test
-    public void postCommandThrowsIllegalStateExceptionWhenServerIsNotRunning()
-    {
-        final ServerDto serverDto = new ServerDto(0, "Test Server", "Test Path");
-        assertThrows(ServerNotRunningException.class, () -> serverDto.postCommand("help"));
-    }
 }
