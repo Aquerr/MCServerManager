@@ -15,7 +15,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 class ServerDtoTest
 {
     @Test
-    public void constructedServerShoukdSetItsNameAndPath()
+    public void constructedServerShouldSetItsNameAndPath()
     {
         final String serverName = "Test Server";
         final String serverPath = "Test Path";

@@ -48,7 +48,7 @@ public class ServerManagerImpl implements ServerManager
     {
         try
         {
-            LOGGER.info("Sending stop command to server id = " + serverDto.getId());
+            LOGGER.info("Sending stop command to server id=" + serverDto.getId());
             sendCommand(serverDto, "stop");
         }
         catch (ServerNotRunningException exception)
@@ -60,6 +60,7 @@ public class ServerManagerImpl implements ServerManager
         LOGGER.info("Scheduling kill server process task for server id = " + serverDto.getId());
         LOGGER.info("Server process will be killed in 20 seconds");
         SCHEDULED_EXECUTOR_SERVICE.schedule(() -> {
+            LOGGER.info("Killing process for server id=" + serverDto.getId());
             final Process process = SERVER_PROCESSES.get(serverDto.getId());
 
             if (process != null)

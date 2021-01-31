@@ -44,8 +44,8 @@ public class ServersRestController
         return this.serverService.getInstallationStatus(modpackId).orElse(new InstallationStatus(0, ""));
     }
 
-    @GetMapping("/{id}/latest-log")
-    public List<String> getLatestServerLog(final @PathVariable("id") int serverId, final int numberOfLines)
+    @GetMapping("/{id}/latest-log/{lines}")
+    public List<String> getLatestServerLog(final @PathVariable("id") int serverId, @PathVariable("lines") final int numberOfLines)
     {
         LOGGER.debug("Getting latest server log for server id =" + serverId + ", numberOfLines =" + numberOfLines);
         return this.serverService.getServerLatestLog(serverId, numberOfLines);
@@ -126,5 +126,14 @@ public class ServersRestController
 
         serverService.importServer(authenticatedUser.getId(), serverName, path);
         LOGGER.debug("Server has been imported.");
+    }
+
+    @GetMapping(value = "/status/{id}", produces = MimeTypeUtils.APPLICATION_JSON_VALUE)
+    public String checkServerStatus(@PathVariable final int id)
+    {
+        LOGGER.info("Checking status for server id = " + id);
+
+        final boolean isRunning = this.serverManager.isRunning(this.serverService.getServer(id));
+        return isRunning ? "Running" : "Not Running";
     }
 }
