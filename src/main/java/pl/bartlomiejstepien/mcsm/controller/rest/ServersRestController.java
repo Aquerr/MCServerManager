@@ -56,13 +56,12 @@ public class ServersRestController
     {
         LOGGER.info("Posting command {" + command + "} to server id = " + serverId);
 
-        final UserDto userDto = (UserDto)authentication.getPrincipal();
+        final AuthenticatedUser authenticatedUser = (AuthenticatedUser)authentication.getPrincipal();
 
-        final Optional<ServerDto> optionalServer = userDto.getServerById(serverId);
-        if (!optionalServer.isPresent())
-            throw new RuntimeException("Access denied!");
-
-        final ServerDto serverDto = optionalServer.get();
+        final ServerDto serverDto = this.serverService.getServersForUser(authenticatedUser.getId()).stream()
+                .filter(s -> s.getId() == serverId)
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("Access denied!"));
 
         try
         {
@@ -102,15 +101,14 @@ public class ServersRestController
     {
         LOGGER.info("Saving server settings " + serverProperties + " for server id " + serverId);
 
-        final UserDto userDto = (UserDto)authentication.getPrincipal();
+        final AuthenticatedUser authenticatedUser = (AuthenticatedUser)authentication.getPrincipal();
 
-        final Optional<ServerDto> optionalServer = userDto.getServerById(serverId);
-        if (!optionalServer.isPresent())
-            throw new RuntimeException("Access denied!");
+        final ServerDto serverDto = this.serverService.getServersForUser(authenticatedUser.getId()).stream()
+                .filter(s -> s.getId() == serverId)
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("Access denied!"));
 
-        final ServerDto serverDto = optionalServer.get();
         serverDto.saveProperties(serverProperties);
-
         LOGGER.debug("Saved server settings for server id = " + serverId);
     }
 
