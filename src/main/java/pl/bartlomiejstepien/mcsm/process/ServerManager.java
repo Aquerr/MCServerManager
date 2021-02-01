@@ -2,6 +2,7 @@ package pl.bartlomiejstepien.mcsm.process;
 
 import pl.bartlomiejstepien.mcsm.dto.ServerDto;
 import pl.bartlomiejstepien.mcsm.exception.ServerNotRunningException;
+import pl.bartlomiejstepien.mcsm.model.ServerProperties;
 
 import java.util.List;
 
@@ -20,4 +21,6 @@ public interface ServerManager
     boolean isRunning(ServerDto serverDto);
 
     void loadProperties(final ServerDto serverDto);
+
+    void saveProperties(ServerDto serverDto, ServerProperties serverProperties);
 }

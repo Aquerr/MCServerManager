@@ -1,5 +1,7 @@
 package pl.bartlomiejstepien.mcsm.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.util.*;
@@ -15,16 +17,24 @@ public class ServerProperties
 
     @NotNull
     @NotBlank
+    @JsonProperty(value = "level_name")
     private String levelName;
 
+    @JsonProperty(value = "online_mode")
     private boolean onlineMode;
 
+    @JsonProperty(value = "server_port")
     private int port;
 
+    @JsonProperty(value = "server_pvp")
     private boolean pvp;
+
+    @JsonProperty(value = "rcon_port")
     private int rconPort;
+
     @NotNull
     @NotBlank
+    @JsonProperty(value = "rcon_password")
     private String rconPassword;
 
     public ServerProperties()

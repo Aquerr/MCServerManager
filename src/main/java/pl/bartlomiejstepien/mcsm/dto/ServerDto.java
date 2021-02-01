@@ -178,40 +178,6 @@ public class ServerDto
         return serverProperties;
     }
 
-    public void saveProperties(ServerProperties serverProperties)
-    {
-        LOGGER.info("Saving server properties for server id=" + this.id);
-        final Path propertiesFilePath = Paths.get(this.serverDir).resolve("server.properties");
-
-        try
-        {
-            final Properties properties = new Properties();
-
-            //Load
-            try(final InputStream inputStream = Files.newInputStream(propertiesFilePath))
-            {
-                properties.load(inputStream);
-            }
-
-            //Add new values
-            for (final Map.Entry<String, String> entry : serverProperties.toMap().entrySet())
-            {
-                properties.setProperty(entry.getKey(), entry.getValue());
-            }
-
-            //Save
-            try(final OutputStream outputStream = Files.newOutputStream(propertiesFilePath))
-            {
-                properties.store(outputStream, "");
-            }
-        }
-        catch (IOException e)
-        {
-            e.printStackTrace();
-        }
-        LOGGER.info("Saved server properties for server id=" + this.id);
-    }
-
     public void loadProperties()
     {
 

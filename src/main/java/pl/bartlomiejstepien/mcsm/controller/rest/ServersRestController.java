@@ -108,7 +108,7 @@ public class ServersRestController
                 .findFirst()
                 .orElseThrow(() -> new RuntimeException("Access denied!"));
 
-        serverDto.saveProperties(serverProperties);
+        this.serverManager.saveProperties(serverDto, serverProperties);
         LOGGER.debug("Saved server settings for server id = " + serverId);
     }
 

@@ -9,10 +9,7 @@ import pl.bartlomiejstepien.mcsm.dto.ServerDto;
 import pl.bartlomiejstepien.mcsm.exception.ServerNotRunningException;
 import pl.bartlomiejstepien.mcsm.model.ServerProperties;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.PrintStream;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -187,5 +184,40 @@ public class ServerManagerImpl implements ServerManager
         {
             LOGGER.warn(SERVER_PROPERTIES_FILE_NAME + " file does not exist for server id=" + serverDto.getId());
         }
+    }
+
+    @Override
+    public void saveProperties(ServerDto serverDto, ServerProperties serverProperties)
+    {
+        LOGGER.info("Saving server properties for server id=" + serverDto.getId());
+        final Path propertiesFilePath = Paths.get(serverDto.getServerDir()).resolve(SERVER_PROPERTIES_FILE_NAME);
+
+        try
+        {
+            final Properties properties = new Properties();
+
+            //Load
+            try(final InputStream inputStream = Files.newInputStream(propertiesFilePath))
+            {
+                properties.load(inputStream);
+            }
+
+            //Add new values
+            for (final Map.Entry<String, String> entry : serverProperties.toMap().entrySet())
+            {
+                properties.setProperty(entry.getKey(), entry.getValue());
+            }
+
+            //Save
+            try(final OutputStream outputStream = Files.newOutputStream(propertiesFilePath))
+            {
+                properties.store(outputStream, "");
+            }
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+        LOGGER.info("Saved server properties for server id=" + serverDto.getId());
     }
 }

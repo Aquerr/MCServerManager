@@ -70,6 +70,12 @@
                 let json = {};
                 json["level_name"] = $("#server-level-name").val();
                 json["online_mode"] = $("#server-online-mode").val();
+                json["server_port"] = $("#server-port").val();
+                json["server_pvp"] = $("#server-pvp").val();
+                json["rcon_port"] = $("#rcon-port").val();
+                json["rcon_password"] = $("#rcon-password").val();
+
+                console.log("Saving settings = " + JSON.stringify(json));
 
                 $.ajax({
                     url: "/api/servers/" + serverId + "/settings",
