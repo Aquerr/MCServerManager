@@ -152,6 +152,17 @@
                                 <input name="server-pvp" id="server-pvp" class="form-control" type="text" th:value="${server.getServerProperties().isPvp()}">
                             </div>
                         </div>
+                        <hr>
+                        <div class="row">
+                            <div class="col-sm">
+                                <label for="rcon-port">Rcon Port</label>
+                                <input name="rcon-port" id="rcon-port" class="form-control" type="text" th:value="${server.getServerProperties().getRconPort()}">
+                            </div>
+                            <div class="col-sm">
+                                <label for="rcon-password">Rcon Password</label>
+                                <input name="rcon-password" id="rcon-password" class="form-control" type="text" th:value="${server.getServerProperties().getRconPassword()}">
+                            </div>
+                        </div>
                         <div class="mt-2 float-right">
                             <button id="save-settings" class="btn btn-primary" type="button">Save</button>
                         </div>

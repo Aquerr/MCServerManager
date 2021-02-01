@@ -7,16 +7,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import pl.bartlomiejstepien.mcsm.dto.ServerDto;
 import pl.bartlomiejstepien.mcsm.exception.ServerNotRunningException;
+import pl.bartlomiejstepien.mcsm.model.ServerProperties;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.PrintStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -27,6 +28,7 @@ public class ServerManagerImpl implements ServerManager
     private static final Logger LOGGER = LoggerFactory.getLogger(ServerManagerImpl.class);
     private static final ScheduledExecutorService SCHEDULED_EXECUTOR_SERVICE = Executors.newSingleThreadScheduledExecutor();
     private static final Map<Integer, Process> SERVER_PROCESSES = new HashMap<>();
+    private static final String SERVER_PROPERTIES_FILE_NAME = "server.properties";
 
     private final ServerProcessHandler serverProcessHandler;
 
@@ -53,7 +55,7 @@ public class ServerManagerImpl implements ServerManager
         }
         catch (ServerNotRunningException exception)
         {
-            LOGGER.warn("Server is not running.");
+            LOGGER.warn("Server is not running");
             return;
         }
 
@@ -126,6 +128,7 @@ public class ServerManagerImpl implements ServerManager
     {
         if (!isRunning(serverDto))
             throw new ServerNotRunningException();
+        loadProperties(serverDto);
 
         try(final RconClient rconClient = RconClient.open("localhost", serverDto.getServerProperties().getRconPort(), serverDto.getServerProperties().getRconPassword()))
         {
@@ -133,7 +136,7 @@ public class ServerManagerImpl implements ServerManager
         }
         catch(final Exception exception)
         {
-            LOGGER.error("Could not send a command to the server. Server id = " + serverDto.getId() + " | Server name = " + serverDto.getName());
+            LOGGER.error("Could not send command to the server. Server id=" + serverDto.getId() + " | Server name=" + serverDto.getName());
         }
     }
 
@@ -146,5 +149,43 @@ public class ServerManagerImpl implements ServerManager
 
         final long serverProcessId = this.serverProcessHandler.getServerProcessId(serverDto);
         return serverProcessId != -1;
+    }
+
+    @Override
+    public void loadProperties(ServerDto serverDto)
+    {
+        LOGGER.debug("Getting properties from " + SERVER_PROPERTIES_FILE_NAME + " file for server id=" + serverDto.getId());
+
+        final Path serverPropertiesFilePath = Paths.get(serverDto.getServerDir()).resolve(SERVER_PROPERTIES_FILE_NAME);
+        if (Files.exists(serverPropertiesFilePath))
+        {
+            final Properties properties = new Properties();
+            try(final InputStream inputStream = Files.newInputStream(serverPropertiesFilePath))
+            {
+                properties.load(inputStream);
+            }
+            catch (IOException exception)
+            {
+                exception.printStackTrace();
+            }
+            final String levelName = properties.getProperty(ServerProperties.PROPERTY_NAME_LEVEL_NAME);
+            final boolean onlineMode = Boolean.parseBoolean(properties.getProperty(ServerProperties.PROPERTY_NAME_ONLINE_MODE));
+            final int port = Integer.parseInt(properties.getProperty(ServerProperties.PROPERTY_NAME_SERVER_PORT));
+            final boolean pvp = Boolean.parseBoolean(properties.getProperty(ServerProperties.PROPERTY_NAME_PVP));
+            final int rconPort = properties.getProperty(ServerProperties.PROPERTY_NAME_RCON_PORT) != null ? Integer.parseInt(properties.getProperty(ServerProperties.PROPERTY_NAME_RCON_PORT)) : 0;
+            final String rconPassword = properties.getProperty(ServerProperties.PROPERTY_NAME_RCON_PASSWORD) != null ? properties.getProperty(ServerProperties.PROPERTY_NAME_RCON_PASSWORD) : "";
+
+            final ServerProperties serverProperties = serverDto.getServerProperties();
+            serverProperties.setLevelName(levelName);
+            serverProperties.setOnlineMode(onlineMode);
+            serverProperties.setPort(port);
+            serverProperties.setPvp(pvp);
+            serverProperties.setRconPort(rconPort);
+            serverProperties.setRconPassword(rconPassword);
+        }
+        else
+        {
+            LOGGER.warn(SERVER_PROPERTIES_FILE_NAME + " file does not exist for server id=" + serverDto.getId());
+        }
     }
 }

@@ -18,4 +18,6 @@ public interface ServerManager
     void sendCommand(final ServerDto serverDto, final String command) throws ServerNotRunningException;
 
     boolean isRunning(ServerDto serverDto);
+
+    void loadProperties(final ServerDto serverDto);
 }

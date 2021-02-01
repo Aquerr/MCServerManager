@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import pl.bartlomiejstepien.mcsm.auth.AuthenticatedUser;
 import pl.bartlomiejstepien.mcsm.model.ModPack;
 import pl.bartlomiejstepien.mcsm.dto.ServerDto;
+import pl.bartlomiejstepien.mcsm.process.ServerManager;
 import pl.bartlomiejstepien.mcsm.service.CurseForgeAPIService;
 import pl.bartlomiejstepien.mcsm.service.ServerService;
 
@@ -20,12 +21,14 @@ public class ServersController
 {
     private final CurseForgeAPIService curseForgeAPIService;
     private final ServerService serverService;
+    private final ServerManager serverManager;
 
     @Autowired
-    public ServersController(final CurseForgeAPIService curseForgeAPIService, final ServerService serverService)
+    public ServersController(final CurseForgeAPIService curseForgeAPIService, final ServerService serverService, final ServerManager serverManager)
     {
         this.curseForgeAPIService = curseForgeAPIService;
         this.serverService = serverService;
+        this.serverManager = serverManager;
     }
 
     @GetMapping("/add-server")
@@ -41,14 +44,14 @@ public class ServersController
     {
         final AuthenticatedUser authenticatedUser = (AuthenticatedUser)authentication.getPrincipal();
 
-        Optional<ServerDto> optionalServer = this.serverService.getServersForUser(authenticatedUser.getId()).stream()
-                .filter(serverDto -> serverDto.getId() == id)
-                .findFirst();
+        ServerDto serverDto = this.serverService.getServersForUser(authenticatedUser.getId()).stream()
+                .filter(s -> s.getId() == id)
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("Access denied!"));
 
-        if (!optionalServer.isPresent())
-            throw new RuntimeException("Access denied!");
+        this.serverManager.loadProperties(serverDto);
 
-        model.addAttribute("server", optionalServer.get());
+        model.addAttribute("server", serverDto);
         return "servers/server-panel";
     }
 }

@@ -214,31 +214,7 @@ public class ServerDto
 
     public void loadProperties()
     {
-        if (Files.exists(Paths.get(serverDir).resolve("server.properties")))
-        {
-            final Properties properties = new Properties();
-            try(final InputStream inputStream = Files.newInputStream(Paths.get(serverDir).resolve("server.properties")))
-            {
-                properties.load(inputStream);
-            }
-            catch (IOException exception)
-            {
-                exception.printStackTrace();
-            }
-            final String levelName = properties.getProperty("level-name");
-            final boolean onlineMode = Boolean.parseBoolean(properties.getProperty("online-mode"));
-            final int port = Integer.parseInt(properties.getProperty("server-port"));
-            final boolean pvp = Boolean.parseBoolean(properties.getProperty("pvp"));
-            final int rconPort = properties.getProperty("rcon.port") != null ? Integer.parseInt(properties.getProperty("rcon.port")) : 0;
-            final String rconPassword = properties.getProperty("rcon.password") != null ? properties.getProperty("rcon.password") : "";
 
-            serverProperties.setLevelName(levelName);
-            serverProperties.setOnlineMode(onlineMode);
-            serverProperties.setPort(port);
-            serverProperties.setPvp(pvp);
-            serverProperties.setRconPort(rconPort);
-            serverProperties.setRconPassword(rconPassword);
-        }
     }
 
     @Override

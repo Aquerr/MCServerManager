@@ -6,6 +6,13 @@ import java.util.*;
 
 public class ServerProperties
 {
+    public static final String PROPERTY_NAME_LEVEL_NAME = "level-name";
+    public static final String PROPERTY_NAME_ONLINE_MODE = "online-mode";
+    public static final String PROPERTY_NAME_SERVER_PORT = "server-port";
+    public static final String PROPERTY_NAME_PVP = "pvp";
+    public static final String PROPERTY_NAME_RCON_PORT = "rcon.port";
+    public static final String PROPERTY_NAME_RCON_PASSWORD = "rcon.password";
+
     @NotNull
     @NotBlank
     private String levelName;
@@ -96,19 +103,14 @@ public class ServerProperties
     public Map<String, String> toMap()
     {
         final Map<String, String> properties = new HashMap<>();
-        properties.put("level-name", this.levelName);
-        properties.put("online-mode", String.valueOf(this.onlineMode));
-        properties.put("server-port", String.valueOf(this.port));
-        properties.put("pvp", String.valueOf(this.pvp));
-        properties.put("rcon.port", String.valueOf(this.rconPort));
-        properties.put("rcon.password", String.valueOf(this.rconPassword));
+        properties.put(PROPERTY_NAME_LEVEL_NAME, this.levelName);
+        properties.put(PROPERTY_NAME_ONLINE_MODE, String.valueOf(this.onlineMode));
+        properties.put(PROPERTY_NAME_SERVER_PORT, String.valueOf(this.port));
+        properties.put(PROPERTY_NAME_PVP, String.valueOf(this.pvp));
+        properties.put(PROPERTY_NAME_RCON_PORT, String.valueOf(this.rconPort));
+        properties.put(PROPERTY_NAME_RCON_PASSWORD, String.valueOf(this.rconPassword));
 
         return properties;
-    }
-
-    private void fillProperties()
-    {
-
     }
 
     @Override
