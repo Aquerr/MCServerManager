@@ -171,6 +171,8 @@ public class ServerManagerImpl implements ServerManager
             final boolean pvp = Boolean.parseBoolean(properties.getProperty(ServerProperties.PROPERTY_NAME_PVP));
             final int rconPort = properties.getProperty(ServerProperties.PROPERTY_NAME_RCON_PORT) != null ? Integer.parseInt(properties.getProperty(ServerProperties.PROPERTY_NAME_RCON_PORT)) : 0;
             final String rconPassword = properties.getProperty(ServerProperties.PROPERTY_NAME_RCON_PASSWORD) != null ? properties.getProperty(ServerProperties.PROPERTY_NAME_RCON_PASSWORD) : "";
+            final String motd = properties.getProperty(ServerProperties.PROPERTY_NAME_MOTD) != null ? properties.getProperty(ServerProperties.PROPERTY_NAME_MOTD) : "";
+            final int spawnProtection = Integer.parseInt(properties.getProperty(ServerProperties.PROPERTY_NAME_SPAWN_PROTECTION));
 
             final ServerProperties serverProperties = serverDto.getServerProperties();
             serverProperties.setLevelName(levelName);
@@ -179,6 +181,8 @@ public class ServerManagerImpl implements ServerManager
             serverProperties.setPvp(pvp);
             serverProperties.setRconPort(rconPort);
             serverProperties.setRconPassword(rconPassword);
+            serverProperties.setSpawnProtection(spawnProtection);
+            serverProperties.setMotd(motd);
         }
         else
         {

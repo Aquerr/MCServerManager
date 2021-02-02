@@ -36,11 +36,9 @@ public class HomeController
     {
         final AuthenticatedUser authenticatedUser = (AuthenticatedUser) authentication.getPrincipal();
 
-        LOGGER.info("Accessing url / by user " + authenticatedUser.getUsername() + " " + httpServletRequest.getRemoteAddr());
+        LOGGER.info("Accessing url / by user " + authenticatedUser.getUsername() + " " + httpServletRequest.getLocalAddr());
 
-        // Return user's list of servers here...
-//        List<Server> servers = (user).getServers();
-        List<ServerDto> serverDtos = new ArrayList<>(serverService.getServersForUser(authenticatedUser.getId()));
+        List<ServerDto> serverDtos = new ArrayList<>(this.serverService.getServersForUser(authenticatedUser.getId()));
 
         model.addAttribute("servers", serverDtos);
         return "index";
