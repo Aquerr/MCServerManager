@@ -7,6 +7,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import pl.bartlomiejstepien.mcsm.auth.AuthenticatedUser;
 import pl.bartlomiejstepien.mcsm.curseforge.api.Category;
+import pl.bartlomiejstepien.mcsm.curseforge.api.Versions;
 import pl.bartlomiejstepien.mcsm.model.ModPack;
 import pl.bartlomiejstepien.mcsm.dto.ServerDto;
 import pl.bartlomiejstepien.mcsm.process.ServerManager;
@@ -34,9 +35,10 @@ public class ServersController
     @GetMapping("/add-server")
     public String addServer(final Model model)
     {
-        final List<ModPack> modPacks = this.curseForgeAPIService.getModpacks(0, 24);
+        final List<ModPack> modPacks = this.curseForgeAPIService.getModpacks(0, "", 24);
         model.addAttribute("modpacks", modPacks);
         model.addAttribute("categories", Category.values());
+        model.addAttribute("versions", Versions.VERSIONS);
         return "servers/add-server";
     }
 

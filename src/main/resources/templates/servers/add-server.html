@@ -16,15 +16,11 @@
                         url: "/api/modpacks/" + modpackId + "/description",
                         method: "GET"
                     }).done(function (description) {
-
                         $("#modpack-modal .modal-title").text(modpackTitle);
                         $("#modpack-modal .modal-body").html(description);
-
                         $("#modpack-modal #install-server").attr("modpack-id", modpackId);
-
                         $("#modpack-modal").modal("show");
                     });
-                    // });
                 });
             }
 
@@ -35,10 +31,41 @@
 
             $("#category-filter").on("change", function (){
                 let categoryId = $(this).val();
+                let version = $("#version-filter").val();
                 console.log("Category changed to = " + categoryId);
 
                 $.ajax({
-                    url: "/api/modpacks/search?categoryId=" + categoryId + "&size=24",
+                    url: "/api/modpacks/search?categoryId=" + categoryId + "&size=24&version=" + version,
+                    method: "GET",
+                    success: function (response) {
+                        console.log(response);
+
+                        $("#modpacks-list").empty();
+
+                        for (const modpackObject of response) {
+                            let modpackCardTemplate = $("#modpack-card-template").clone().children().first();
+                            modpackCardTemplate.find(".card-img-top").attr("src", modpackObject["thumbnailUrl"]);
+                            modpackCardTemplate.find(".card-title").text(modpackObject["name"]);
+                            modpackCardTemplate.find(".card-version").text("Version " + modpackObject["version"]);
+                            modpackCardTemplate.find(".modpack-id").val(modpackObject["id"]);
+                            modpackCardTemplate.find(".card-text").text(modpackObject["summary"]);
+                            modpackCardTemplate.attr("hidden", false);
+
+                            $("#modpacks-list").append(modpackCardTemplate);
+
+                            registerCardClickEvent(modpackCardTemplate);
+                        }
+                    }
+                });
+            });
+
+            $("#version-filter").on("change", function (){
+                let version = $(this).val();
+                let categoryId = $("#category-filter").val();
+                console.log("Version changed to = " + categoryId);
+
+                $.ajax({
+                    url: "/api/modpacks/search?categoryId=" + categoryId + "&size=24&version=" + version,
                     method: "GET",
                     success: function (response) {
                         console.log(response);
@@ -161,10 +188,18 @@
     <div>
         <h5 style="display: inline-block;">Select the modpack you would like to install</h5>
         <div class="combo-boxes" style="display: inline-block; float: right;">
-            <div>
+            <div style="display: inline-block;">
                 <label for="category-filter">Filter By</label>
                 <select id="category-filter" class="form-control" style="display: inline-block; width: auto;" th:field="*{categories}">
                     <option th:each="category : ${categories}" th:value="${category.getId()}" th:text="${category.getName()}"></option>
+                </select>
+            </div>
+            <div style="display: inline-block;">
+                <select id="version-filter" class="form-control" style="display: inline-block; width: auto;" th:field="*{versions}">
+                    <th:block th:each="version : ${versions}">
+                        <option th:if="${version == ''}" value="">All Game Versions</option>
+                        <option th:if="${version != ''}" th:value="${version}" th:text="${version}"></option>
+                    </th:block>
                 </select>
             </div>
         </div>

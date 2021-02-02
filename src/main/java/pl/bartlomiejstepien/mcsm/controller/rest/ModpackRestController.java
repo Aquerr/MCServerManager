@@ -50,9 +50,11 @@ public class ModpackRestController
     }
 
     @GetMapping("/search")
-    public List<ModPack> searchModpacksForCategory(@RequestParam(name = "categoryId", defaultValue = "0") Integer categoryId, @RequestParam(name = "size", defaultValue = "24") Integer size)
+    public List<ModPack> searchModpacksForCategory(@RequestParam(name = "categoryId", defaultValue = "0") Integer categoryId,
+                                                   @RequestParam(name = "size", defaultValue = "24") Integer size,
+                                                   @RequestParam(name = "version", defaultValue = "") String version)
     {
-        LOGGER.info("Get " + size + " modpacks for category=" + categoryId);
-        return this.curseForgeAPIService.getModpacks(categoryId, size);
+        LOGGER.info("Get " + size + " modpacks for version=" + version + " and category=" + categoryId);
+        return this.curseForgeAPIService.getModpacks(categoryId, version, size);
     }
 }

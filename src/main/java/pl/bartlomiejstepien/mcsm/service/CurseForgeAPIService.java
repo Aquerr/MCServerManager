@@ -3,6 +3,8 @@ package pl.bartlomiejstepien.mcsm.service;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -22,6 +24,7 @@ import java.util.List;
 @Service
 public class CurseForgeAPIService
 {
+    private static final Logger LOGGER = LoggerFactory.getLogger(CurseForgeAPIService.class);
     private static final RestTemplate REST_TEMPLATE = new RestTemplate();
 
     private final Config config;
@@ -34,9 +37,10 @@ public class CurseForgeAPIService
         this.serverInstaller = serverInstaller;
     }
 
-    public List<ModPack> getModpacks(final int categoryId, final int count)
+    public List<ModPack> getModpacks(final int categoryId, String version, final int count)
     {
-        final String url = CurseForgeAPIRoutes.MODPACKS_SEARCH.replace("{categoryId}", String.valueOf(categoryId)).replace("{size}", String.valueOf(count));
+        final String url = CurseForgeAPIRoutes.MODPACKS_SEARCH.replace("{categoryId}", String.valueOf(categoryId)).replace("${version}", version).replace("{size}", String.valueOf(count));
+        LOGGER.info("GET " + url);
         final ArrayNode modpacksJsonArray = REST_TEMPLATE.getForObject(url, ArrayNode.class);
         final LinkedList<ModPack> modPacks = new LinkedList<>();
         final Iterator<JsonNode> jsonIterator = modpacksJsonArray.elements();
