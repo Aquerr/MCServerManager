@@ -42,6 +42,7 @@ public class CurseForgeAPIService
         final String url = CurseForgeAPIRoutes.MODPACKS_SEARCH.replace("{categoryId}", String.valueOf(categoryId)).replace("${version}", version).replace("{size}", String.valueOf(count));
         LOGGER.info("GET " + url);
         final ArrayNode modpacksJsonArray = REST_TEMPLATE.getForObject(url, ArrayNode.class);
+        LOGGER.debug("Response: " + modpacksJsonArray);
         final LinkedList<ModPack> modPacks = new LinkedList<>();
         final Iterator<JsonNode> jsonIterator = modpacksJsonArray.elements();
         while (jsonIterator.hasNext())
@@ -60,7 +61,9 @@ public class CurseForgeAPIService
     public int getLatestServerFileId(final int modpackId)
     {
         final String url = CurseForgeAPIRoutes.MODPACK_FILES.replace("{modpackId}", String.valueOf(modpackId));
+        LOGGER.info("GET " + url);
         final ArrayNode filesJsonArray = REST_TEMPLATE.getForObject(url, ArrayNode.class);
+        LOGGER.debug("Response: " + filesJsonArray);
 
         Instant instant = Instant.parse(filesJsonArray.get(0).get("fileDate").textValue());
 
@@ -96,7 +99,9 @@ public class CurseForgeAPIService
     public ModPack getModpack(final int id)
     {
         final String url = CurseForgeAPIRoutes.MODPACK_INFO.replace("{modpackId}", String.valueOf(id));
+        LOGGER.info("GET " + url);
         final ObjectNode modpackJson = REST_TEMPLATE.getForObject(url, ObjectNode.class);
+        LOGGER.debug("Response: " + modpackJson);
         if (modpackJson == null)
             throw new RuntimeException("Could not find modpack with id " + id);
 
@@ -107,14 +112,18 @@ public class CurseForgeAPIService
     public String getModpackDescription(final int id)
     {
         final String url = CurseForgeAPIRoutes.MODPACK_DESCRIPTION.replace("{modpackId}", String.valueOf(id));
+        LOGGER.info("GET " + url);
         final String modpackDescription = REST_TEMPLATE.getForObject(url, String.class);
+        LOGGER.debug("Response: " + modpackDescription);
         return modpackDescription;
     }
 
     public String getLatestServerDownloadUrl(final int modpackId,final int latestServerFileId)
     {
         final String url = CurseForgeAPIRoutes.MODPACK_LATEST_SERVER_DOWNLOAD_URL.replace("{modpackId}", String.valueOf(modpackId)).replace("{fileId}", String.valueOf(latestServerFileId));
+        LOGGER.info("GET " + url);
         final String serverDownloadUrl = REST_TEMPLATE.getForObject(url, String.class);
+        LOGGER.debug("Response: " + serverDownloadUrl);
         return serverDownloadUrl;
     }
 
