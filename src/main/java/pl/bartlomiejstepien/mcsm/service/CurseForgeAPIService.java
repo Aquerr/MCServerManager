@@ -34,14 +34,11 @@ public class CurseForgeAPIService
         this.serverInstaller = serverInstaller;
     }
 
-    public List<ModPack> getModpacks()
+    public List<ModPack> getModpacks(final int categoryId, final int count)
     {
-        // Add modpacks to model
-        final String url = CurseForgeAPIRoutes.MODPACKS_SEARCH;
+        final String url = CurseForgeAPIRoutes.MODPACKS_SEARCH.replace("{categoryId}", String.valueOf(categoryId)).replace("{size}", String.valueOf(count));
         final ArrayNode modpacksJsonArray = REST_TEMPLATE.getForObject(url, ArrayNode.class);
-
         final LinkedList<ModPack> modPacks = new LinkedList<>();
-
         final Iterator<JsonNode> jsonIterator = modpacksJsonArray.elements();
         while (jsonIterator.hasNext())
         {

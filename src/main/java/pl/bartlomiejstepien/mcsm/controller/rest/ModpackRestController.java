@@ -7,11 +7,13 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import pl.bartlomiejstepien.mcsm.auth.AuthenticatedUser;
 import pl.bartlomiejstepien.mcsm.controller.HomeController;
+import pl.bartlomiejstepien.mcsm.model.ModPack;
 import pl.bartlomiejstepien.mcsm.service.CurseForgeAPIService;
 import pl.bartlomiejstepien.mcsm.service.ServerService;
 import pl.bartlomiejstepien.mcsm.service.UserService;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/modpacks")
@@ -45,5 +47,12 @@ public class ModpackRestController
         LOGGER.info("Install modpack id=" + id + " by " + authentication.getName() + " " + httpServletRequest.getRemoteAddr());
         final AuthenticatedUser authenticatedUser = (AuthenticatedUser) authentication.getPrincipal();
         return this.serverService.installServer(authenticatedUser, id);
+    }
+
+    @GetMapping("/search")
+    public List<ModPack> searchModpacksForCategory(@RequestParam(name = "categoryId", defaultValue = "0") Integer categoryId, @RequestParam(name = "size", defaultValue = "24") Integer size)
+    {
+        LOGGER.info("Get " + size + " modpacks for category=" + categoryId);
+        return this.curseForgeAPIService.getModpacks(categoryId, size);
     }
 }

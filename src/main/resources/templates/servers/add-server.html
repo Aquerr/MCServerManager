@@ -6,10 +6,11 @@
     <script type="text/javascript">
         $(document).ready(function () {
 
-            $(".card").on("click", function () {
-                $(this).on("click", function () {
+            function registerCardClickEvent(card) {
+                $(card).on("click", function () {
+                    // $(this).on("click", function () {
                     let modpackTitle = $(this).find(".card-title").text();
-                    let modpackId = $(this).find("#modpack-id").val();
+                    let modpackId = $(this).find(".modpack-id").val();
 
                     $.ajax({
                         url: "/api/modpacks/" + modpackId + "/description",
@@ -23,6 +24,41 @@
 
                         $("#modpack-modal").modal("show");
                     });
+                    // });
+                });
+            }
+
+            for (const card of $(".card")) {
+                registerCardClickEvent(card);
+            }
+
+
+            $("#category-filter").on("change", function (){
+                let categoryId = $(this).val();
+                console.log("Category changed to = " + categoryId);
+
+                $.ajax({
+                    url: "/api/modpacks/search?categoryId=" + categoryId + "&size=24",
+                    method: "GET",
+                    success: function (response) {
+                        console.log(response);
+
+                        $("#modpacks-list").empty();
+
+                        for (const modpackObject of response) {
+                            let modpackCardTemplate = $("#modpack-card-template").clone().children().first();
+                            modpackCardTemplate.find(".card-img-top").attr("src", modpackObject["thumbnailUrl"]);
+                            modpackCardTemplate.find(".card-title").text(modpackObject["name"]);
+                            modpackCardTemplate.find(".card-version").text("Version " + modpackObject["version"]);
+                            modpackCardTemplate.find(".modpack-id").val(modpackObject["id"]);
+                            modpackCardTemplate.find(".card-text").text(modpackObject["summary"]);
+                            modpackCardTemplate.attr("hidden", false);
+
+                            $("#modpacks-list").append(modpackCardTemplate);
+
+                            registerCardClickEvent(modpackCardTemplate);
+                        }
+                    }
                 });
             });
 
@@ -117,22 +153,31 @@
 
 <div th:replace="fragments/fragments :: header"></div>
 
-<div class="container mt-4">
+<div class="container mt-6" style="max-width: 1240px;">
 
-
-    <h3>Add server</h3>
+    <h3 class="mt-3">Add server</h3>
     <hr>
 
-    <h4>Select desired modpack</h4>
-    <div class="">
+    <div>
+        <h5 style="display: inline-block;">Select the modpack you would like to install</h5>
+        <div class="combo-boxes" style="display: inline-block; float: right;">
+            <div>
+                <label for="category-filter">Filter By</label>
+                <select id="category-filter" class="form-control" style="display: inline-block; width: auto;" th:field="*{categories}">
+                    <option th:each="category : ${categories}" th:value="${category.getId()}" th:text="${category.getName()}"></option>
+                </select>
+            </div>
+        </div>
+    </div>
+    <div id="modpacks-list" class="text-center" style="display: inline-block;">
         <th:block th:each="modpack : ${modpacks}">
 
-            <div class="card mt-2 mr-2 card-clickable" style="width: 18rem; height: 500px; display: inline-block; text-overflow: ellipsis; overflow: hidden;">
+            <div class="card mt-2 mr-2 card-clickable modpack-card">
                 <img class="card-img-top" th:src="${modpack.getThumbnailUrl()}" alt="Card image cap">
                 <div class="card-body">
                     <h5 class="card-title" th:text="${modpack.getName()}"></h5>
-                    <p th:text="'Version: ' + ${modpack.version}"></p>
-                    <input id="modpack-id" hidden th:value="${modpack.getId()}">
+                    <p class="card-version" th:text="'Version: ' + ${modpack.version}"></p>
+                    <input class="modpack-id" hidden th:value="${modpack.getId()}">
                     <p class="card-text" th:text="${modpack.getSummary()}"></p>
                 </div>
             </div>
@@ -141,6 +186,18 @@
     </div>
 
 
+</div>
+
+<div id="modpack-card-template" hidden>
+    <div class="card mt-2 mr-2 card-clickable modpack-card">
+        <img class="card-img-top" alt="Card image cap">
+        <div class="card-body">
+            <h5 class="card-title"></h5>
+            <p class="card-version"></p>
+            <input class="modpack-id" hidden>
+            <p class="card-text"></p>
+        </div>
+    </div>
 </div>
 
 </body>

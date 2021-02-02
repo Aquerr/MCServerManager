@@ -6,6 +6,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import pl.bartlomiejstepien.mcsm.auth.AuthenticatedUser;
+import pl.bartlomiejstepien.mcsm.curseforge.api.Category;
 import pl.bartlomiejstepien.mcsm.model.ModPack;
 import pl.bartlomiejstepien.mcsm.dto.ServerDto;
 import pl.bartlomiejstepien.mcsm.process.ServerManager;
@@ -13,7 +14,6 @@ import pl.bartlomiejstepien.mcsm.service.CurseForgeAPIService;
 import pl.bartlomiejstepien.mcsm.service.ServerService;
 
 import java.util.List;
-import java.util.Optional;
 
 @Controller
 @RequestMapping("/servers")
@@ -34,8 +34,9 @@ public class ServersController
     @GetMapping("/add-server")
     public String addServer(final Model model)
     {
-        final List<ModPack> modPacks = this.curseForgeAPIService.getModpacks();
+        final List<ModPack> modPacks = this.curseForgeAPIService.getModpacks(0, 24);
         model.addAttribute("modpacks", modPacks);
+        model.addAttribute("categories", Category.values());
         return "servers/add-server";
     }
 
