@@ -7,7 +7,7 @@ import pl.bartlomiejstepien.mcsm.util.IsUnixCondition;
 
 @Component
 @Conditional(IsUnixCondition.class)
-public class LinuxServerProcessHandler implements ServerProcessHandler
+public class UnixServerProcessHandler implements ServerProcessHandler
 {
     @Override
     public Process startServerProcess(ServerDto serverDto)

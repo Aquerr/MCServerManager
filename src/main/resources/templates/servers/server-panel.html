@@ -136,7 +136,7 @@
 
                 <div id="server-settings" class="tab-pane fade" role="tabpanel" aria-labelledby="server-settings-tab">
                     <div class="container mt-2">
-                        <th:block th:each="property : ${server.getServerProperties().toMap().entrySet()}">
+                        <th:block th:each="property : ${server.getServerProperties().getAsMap().entrySet()}">
                             <div class="col-sm server-property">
                                 <label th:for="${property.getKey()}" th:text="${property.getKey()}"></label>
                                 <input class="form-control" th:name="${property.getKey()}" th:id="'property-' + ${property.getKey()}" type="text" th:value="${property.getValue()}">

@@ -165,24 +165,13 @@ public class ServerManagerImpl implements ServerManager
             {
                 exception.printStackTrace();
             }
-            final String levelName = properties.getProperty(ServerProperties.PROPERTY_NAME_LEVEL_NAME);
-            final boolean onlineMode = Boolean.parseBoolean(properties.getProperty(ServerProperties.PROPERTY_NAME_ONLINE_MODE));
-            final int port = Integer.parseInt(properties.getProperty(ServerProperties.PROPERTY_NAME_SERVER_PORT));
-            final boolean pvp = Boolean.parseBoolean(properties.getProperty(ServerProperties.PROPERTY_NAME_PVP));
-            final int rconPort = properties.getProperty(ServerProperties.PROPERTY_NAME_RCON_PORT) != null ? Integer.parseInt(properties.getProperty(ServerProperties.PROPERTY_NAME_RCON_PORT)) : 0;
-            final String rconPassword = properties.getProperty(ServerProperties.PROPERTY_NAME_RCON_PASSWORD) != null ? properties.getProperty(ServerProperties.PROPERTY_NAME_RCON_PASSWORD) : "";
-            final String motd = properties.getProperty(ServerProperties.PROPERTY_NAME_MOTD) != null ? properties.getProperty(ServerProperties.PROPERTY_NAME_MOTD) : "";
-            final int spawnProtection = Integer.parseInt(properties.getProperty(ServerProperties.PROPERTY_NAME_SPAWN_PROTECTION));
 
             final ServerProperties serverProperties = serverDto.getServerProperties();
-            serverProperties.setLevelName(levelName);
-            serverProperties.setOnlineMode(onlineMode);
-            serverProperties.setPort(port);
-            serverProperties.setPvp(pvp);
-            serverProperties.setRconPort(rconPort);
-            serverProperties.setRconPassword(rconPassword);
-            serverProperties.setSpawnProtection(spawnProtection);
-            serverProperties.setMotd(motd);
+            final Properties props = serverProperties.getProperties();
+            for (final Map.Entry<Object, Object> entry : properties.entrySet())
+            {
+                props.put(entry.getKey(), entry.getValue());
+            }
         }
         else
         {
@@ -207,9 +196,9 @@ public class ServerManagerImpl implements ServerManager
             }
 
             //Add new values
-            for (final Map.Entry<String, String> entry : serverProperties.toMap().entrySet())
+            for (final Map.Entry<Object, Object> entry : serverProperties.getProperties().entrySet())
             {
-                properties.setProperty(entry.getKey(), entry.getValue());
+                properties.put(entry.getKey(), entry.getValue());
             }
 
             //Save

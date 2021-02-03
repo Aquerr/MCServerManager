@@ -1,9 +1,5 @@
 package pl.bartlomiejstepien.mcsm.model;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
 import java.util.*;
 
 public class ServerProperties
@@ -17,33 +13,35 @@ public class ServerProperties
     public static final String PROPERTY_NAME_SPAWN_PROTECTION = "spawn-protection";
     public static final String PROPERTY_NAME_MOTD = "motd";
 
-    @NotNull
-    @NotBlank
-    @JsonProperty(value = PROPERTY_NAME_LEVEL_NAME)
-    private String levelName;
+//    @NotNull
+//    @NotBlank
+//    @JsonProperty(value = PROPERTY_NAME_LEVEL_NAME)
+//    private String levelName;
+//
+//    @JsonProperty(value = PROPERTY_NAME_ONLINE_MODE)
+//    private boolean onlineMode;
+//
+//    @JsonProperty(value = PROPERTY_NAME_SERVER_PORT)
+//    private int port;
+//
+//    @JsonProperty(value = PROPERTY_NAME_PVP)
+//    private boolean pvp;
+//
+//    @JsonProperty(value = PROPERTY_NAME_RCON_PORT)
+//    private int rconPort;
+//
+//    @JsonProperty(value = PROPERTY_NAME_SPAWN_PROTECTION)
+//    private int spawnProtection;
+//
+//    @NotNull
+//    @JsonProperty(value = PROPERTY_NAME_MOTD)
+//    private String motd;
+//
+//    @NotNull
+//    @JsonProperty(value = PROPERTY_NAME_RCON_PASSWORD)
+//    private String rconPassword;
 
-    @JsonProperty(value = PROPERTY_NAME_ONLINE_MODE)
-    private boolean onlineMode;
-
-    @JsonProperty(value = PROPERTY_NAME_SERVER_PORT)
-    private int port;
-
-    @JsonProperty(value = PROPERTY_NAME_PVP)
-    private boolean pvp;
-
-    @JsonProperty(value = PROPERTY_NAME_RCON_PORT)
-    private int rconPort;
-
-    @JsonProperty(value = PROPERTY_NAME_SPAWN_PROTECTION)
-    private int spawnProtection;
-
-    @NotNull
-    @JsonProperty(value = PROPERTY_NAME_MOTD)
-    private String motd;
-
-    @NotNull
-    @JsonProperty(value = PROPERTY_NAME_RCON_PASSWORD)
-    private String rconPassword;
+    private final Properties properties = new Properties();
 
     public ServerProperties()
     {
@@ -52,110 +50,147 @@ public class ServerProperties
 
     public String getLevelName()
     {
-        return levelName;
-    }
-
-    public void setLevelName(String levelName)
-    {
-        this.levelName = levelName;
+        return this.getProperty(PROPERTY_NAME_LEVEL_NAME);
     }
 
     public boolean isOnlineMode()
     {
-        return onlineMode;
-    }
-
-    public void setOnlineMode(boolean onlineMode)
-    {
-        this.onlineMode = onlineMode;
+        return this.getProperty(PROPERTY_NAME_ONLINE_MODE);
     }
 
     public int getPort()
     {
-        return port;
-    }
-
-    public void setPort(int port)
-    {
-        this.port = port;
+        return this.getProperty(PROPERTY_NAME_SERVER_PORT);
     }
 
     public boolean isPvp()
     {
-        return pvp;
-    }
-
-    public void setPvp(boolean pvp)
-    {
-        this.pvp = pvp;
+        return this.getProperty(PROPERTY_NAME_PVP);
     }
 
     public int getRconPort()
     {
-        return rconPort;
-    }
-
-    public void setRconPort(int rconPort)
-    {
-        this.rconPort = rconPort;
+        return this.getProperty(PROPERTY_NAME_RCON_PORT);
     }
 
     public String getRconPassword()
     {
-        return rconPassword;
-    }
-
-    public void setRconPassword(String rconPassword)
-    {
-        this.rconPassword = rconPassword;
-    }
-
-    public void setSpawnProtection(int spawnProtection)
-    {
-        this.spawnProtection = spawnProtection;
+        return this.getProperty(PROPERTY_NAME_RCON_PASSWORD);
     }
 
     public int getSpawnProtection()
     {
-        return this.spawnProtection;
-    }
-
-    public void setMotd(String motd)
-    {
-        this.motd = motd;
+        return this.getProperty(PROPERTY_NAME_SPAWN_PROTECTION);
     }
 
     public String getMotd()
     {
-        return this.motd;
+        return this.getProperty(PROPERTY_NAME_MOTD);
     }
 
-    public Map<String, String> toMap()
+//    public void setLevelName(String levelName)
+//    {
+//        this.levelName = levelName;
+//    }
+//
+//    public boolean isOnlineMode()
+//    {
+//        return onlineMode;
+//    }
+//
+//    public void setOnlineMode(boolean onlineMode)
+//    {
+//        this.onlineMode = onlineMode;
+//    }
+//
+//    public int getPort()
+//    {
+//        return port;
+//    }
+//
+//    public void setPort(int port)
+//    {
+//        this.port = port;
+//    }
+//
+//    public boolean isPvp()
+//    {
+//        return pvp;
+//    }
+//
+//    public void setPvp(boolean pvp)
+//    {
+//        this.pvp = pvp;
+//    }
+//
+//    public int getRconPort()
+//    {
+//        return rconPort;
+//    }
+//
+//    public void setRconPort(int rconPort)
+//    {
+//        this.rconPort = rconPort;
+//    }
+//
+//    public String getRconPassword()
+//    {
+//        return rconPassword;
+//    }
+//
+//    public void setRconPassword(String rconPassword)
+//    {
+//        this.rconPassword = rconPassword;
+//    }
+//
+//    public void setSpawnProtection(int spawnProtection)
+//    {
+//        this.spawnProtection = spawnProtection;
+//    }
+//
+//    public int getSpawnProtection()
+//    {
+//        return this.spawnProtection;
+//    }
+//
+//    public void setMotd(String motd)
+//    {
+//        this.motd = motd;
+//    }
+//
+//    public String getMotd()
+//    {
+//        return this.motd;
+//    }
+
+    public Map<String, String> getAsMap()
     {
-        final Map<String, String> properties = new HashMap<>();
-        properties.put(PROPERTY_NAME_LEVEL_NAME, this.levelName);
-        properties.put(PROPERTY_NAME_ONLINE_MODE, String.valueOf(this.onlineMode));
-        properties.put(PROPERTY_NAME_SERVER_PORT, String.valueOf(this.port));
-        properties.put(PROPERTY_NAME_PVP, String.valueOf(this.pvp));
-        properties.put(PROPERTY_NAME_RCON_PORT, String.valueOf(this.rconPort));
-        properties.put(PROPERTY_NAME_RCON_PASSWORD, String.valueOf(this.rconPassword));
-        properties.put(PROPERTY_NAME_SPAWN_PROTECTION, String.valueOf(this.spawnProtection));
-        properties.put(PROPERTY_NAME_MOTD, String.valueOf(this.motd));
-        return properties;
+        final Map<String, String> map = new HashMap<>();
+        for (final String propertyName : this.properties.stringPropertyNames())
+        {
+            map.put(propertyName, this.properties.getProperty(propertyName));
+        }
+        return map;
     }
 
     @Override
     public String toString()
     {
-        return "ServerProperties{" +
-                "levelName='" + levelName + '\'' +
-                ", onlineMode=" + onlineMode +
-                ", port=" + port +
-                ", pvp=" + pvp +
-                ", rconPort=" + rconPort +
-                ", spawnProtection=" + spawnProtection +
-                ", motd='" + motd + '\'' +
-                ", rconPassword='" + rconPassword + '\'' +
-                '}';
+        return "ServerProperties{" + getAsMap().toString() +'}';
+    }
+
+    public void setProperty(final String propertyName, String value)
+    {
+        this.properties.setProperty(propertyName, value);
+    }
+
+    public <T> T getProperty(final String propertyName)
+    {
+        return (T) this.properties.getProperty(propertyName);
+    }
+
+    public Properties getProperties()
+    {
+        return this.properties;
     }
 }
