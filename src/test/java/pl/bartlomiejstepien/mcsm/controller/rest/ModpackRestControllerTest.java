@@ -50,7 +50,7 @@ class ModpackRestControllerTest
 
     }
 
-    @Test
+//    @Test
     @WithUserDetails(userDetailsServiceBeanName = "h2UserDetailsService")
     public void getModpackDescriptionShouldReturnCorrectModpackDescription() throws Exception
     {
@@ -64,7 +64,7 @@ class ModpackRestControllerTest
                 .andExpect(MockMvcResultMatchers.content().string(MODPACK_DESCRIPTION));
     }
 
-    @Test
+//    @Test
     @WithUserDetails(userDetailsServiceBeanName = "h2UserDetailsService")
     public void installServerStartsServerInstallation() throws Exception
     {
