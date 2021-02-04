@@ -37,9 +37,12 @@ public class CurseForgeAPIService
         this.serverInstaller = serverInstaller;
     }
 
-    public List<ModPack> getModpacks(final int categoryId, String version, final int count)
+    public List<ModPack> getModpacks(final int categoryId, String version, final int count, int index)
     {
-        final String url = CurseForgeAPIRoutes.MODPACKS_SEARCH.replace("{categoryId}", String.valueOf(categoryId)).replace("${version}", version).replace("{size}", String.valueOf(count));
+        final String url = CurseForgeAPIRoutes.MODPACKS_SEARCH.replace("{categoryId}", String.valueOf(categoryId))
+                .replace("${version}", version)
+                .replace("{size}", String.valueOf(count))
+                .replace("{index}", String.valueOf(index));
         LOGGER.info("GET " + url);
         final ArrayNode modpacksJsonArray = REST_TEMPLATE.getForObject(url, ArrayNode.class);
         LOGGER.debug("Response: " + modpacksJsonArray);

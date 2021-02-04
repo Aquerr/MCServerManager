@@ -4,6 +4,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import pl.bartlomiejstepien.mcsm.auth.AuthenticatedUser;
 import pl.bartlomiejstepien.mcsm.controller.HomeController;
@@ -42,19 +44,20 @@ public class ModpackRestController
     }
 
     @PostMapping("/{id}/install")
-    public int installModpack(@PathVariable("id") final int id, final Authentication authentication, final HttpServletRequest httpServletRequest)
+    public int installModpack(@PathVariable("id") final int id, @AuthenticationPrincipal final Object test, final HttpServletRequest httpServletRequest)
     {
-        LOGGER.info("Install modpack id=" + id + " by " + authentication.getName() + " " + httpServletRequest.getRemoteAddr());
-        final AuthenticatedUser authenticatedUser = (AuthenticatedUser) authentication.getPrincipal();
+        final AuthenticatedUser authenticatedUser = (AuthenticatedUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        LOGGER.info("Install modpack id=" + id + " by " + authenticatedUser.getUsername() + " " + httpServletRequest.getRemoteAddr());
         return this.serverService.installServer(authenticatedUser, id);
     }
 
     @GetMapping("/search")
     public List<ModPack> searchModpacksForCategory(@RequestParam(name = "categoryId", defaultValue = "0") Integer categoryId,
                                                    @RequestParam(name = "size", defaultValue = "24") Integer size,
-                                                   @RequestParam(name = "version", defaultValue = "") String version)
+                                                   @RequestParam(name = "version", defaultValue = "") String version,
+                                                   @RequestParam(name = "index", defaultValue = "0") Integer index)
     {
-        LOGGER.info("Get " + size + " modpacks for version=" + version + " and category=" + categoryId);
-        return this.curseForgeAPIService.getModpacks(categoryId, version, size);
+        LOGGER.info("Get " + size + " modpacks for version=" + version + " and category=" + categoryId + " starting at index=" + index);
+        return this.curseForgeAPIService.getModpacks(categoryId, version, size, index);
     }
 }
