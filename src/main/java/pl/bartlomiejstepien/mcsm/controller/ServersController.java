@@ -35,7 +35,7 @@ public class ServersController
     @GetMapping("/add-server")
     public String addServer(final Model model)
     {
-        final List<ModPack> modPacks = this.curseForgeAPIService.getModpacks(0, "", 24, 0);
+        final List<ModPack> modPacks = this.curseForgeAPIService.getModpacks(0, "", "", 24, 0);
         model.addAttribute("modpacks", modPacks);
         model.addAttribute("categories", Category.values());
         model.addAttribute("versions", Versions.VERSIONS);

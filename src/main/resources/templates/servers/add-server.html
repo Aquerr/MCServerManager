@@ -77,6 +77,24 @@
                 });
             });
 
+            $("#modpack-name-search").on("keydown", function(event){
+                if (event.keyCode == 13) {
+                    let version = $("#version-filter").val();
+                    let categoryId = $("#category-filter").val();
+                    let modpackName = $("#modpack-name-search").val();
+
+                    $.ajax({
+                        url: "/api/modpacks/search?categoryId=" + categoryId + "&size=20&version=" + version + "&index=0" + "&modpackName=" + modpackName,
+                        method: "GET",
+                        success: function (response) {
+                            console.log(response);
+                            $("#modpacks-list").empty();
+                            appendModpacksToList(response);
+                        }
+                    })
+                }
+            })
+
             $("#install-server").on("click", function () {
                 $("#modpack-modal").modal("hide");
 
@@ -197,6 +215,9 @@
     <div>
         <h5 style="display: inline-block;">Select the modpack you would like to install</h5>
         <div class="combo-boxes" style="display: inline-block; float: right;">
+            <div style="display: inline-block">
+                <input type="text" class="form-control" id="modpack-name-search" placeholder="Search Modpack Name">
+            </div>
             <div style="display: inline-block;">
                 <label for="category-filter">Filter By</label>
                 <select id="category-filter" class="form-control" style="display: inline-block; width: auto;" th:field="*{categories}">
