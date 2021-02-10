@@ -5,6 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.util.FileSystemUtils;
 import pl.bartlomiejstepien.mcsm.dto.ServerDto;
 import pl.bartlomiejstepien.mcsm.exception.ServerNotRunningException;
 import pl.bartlomiejstepien.mcsm.model.ServerProperties;
@@ -15,9 +16,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 @Component
 public class ServerManagerImpl implements ServerManager
@@ -43,7 +42,7 @@ public class ServerManagerImpl implements ServerManager
     }
 
     @Override
-    public void stopServer(ServerDto serverDto)
+    public Future<Boolean> stopServer(ServerDto serverDto)
     {
         try
         {
@@ -53,12 +52,12 @@ public class ServerManagerImpl implements ServerManager
         catch (ServerNotRunningException exception)
         {
             LOGGER.warn("Server is not running");
-            return;
+            return new FutureTask<>(()->true);
         }
 
         LOGGER.info("Scheduling kill server process task for server id = " + serverDto.getId());
         LOGGER.info("Server process will be killed in 20 seconds");
-        SCHEDULED_EXECUTOR_SERVICE.schedule(() -> {
+        ScheduledFuture<Boolean> scheduledFuture = SCHEDULED_EXECUTOR_SERVICE.schedule(() -> {
             LOGGER.info("Killing process for server id=" + serverDto.getId());
             final Process process = SERVER_PROCESSES.get(serverDto.getId());
 
@@ -80,7 +79,27 @@ public class ServerManagerImpl implements ServerManager
             }
 
             SERVER_PROCESSES.remove(serverDto.getId());
+
+//            if (deleteStatus)
+//            {
+//                stopServer(serverDto);
+//                Path path = Paths.get(serverDto.getServerDir());
+//                try
+//                {
+//                    if (!isRunning(serverDto))
+//                    {
+//                        FileSystemUtils.deleteRecursively(path);
+//                        Files.delete(path);
+//                    }
+//                }
+//                catch (IOException e)
+//                {
+//                    e.printStackTrace();
+//                }
+//            }
+            return true;
         }, 20, TimeUnit.SECONDS);
+        return scheduledFuture;
     }
 
     @Override
@@ -212,5 +231,28 @@ public class ServerManagerImpl implements ServerManager
             e.printStackTrace();
         }
         LOGGER.info("Saved server properties for server id=" + serverDto.getId());
+    }
+
+    @Override
+    public void deleteServer(ServerDto serverDto)
+    {
+        CompletableFuture.runAsync(()->{
+            try
+            {
+                boolean status = stopServer(serverDto).get();
+                if(status)
+                {
+                    LOGGER.info("Is server stopped=" + status);
+                    LOGGER.info("Deleting server files");
+                    Path path = Paths.get(serverDto.getServerDir());
+                    FileSystemUtils.deleteRecursively(path);
+                    Files.delete(path);
+                }
+            }
+            catch (InterruptedException | ExecutionException | IOException e)
+            {
+                e.printStackTrace();
+            }
+        });
     }
 }

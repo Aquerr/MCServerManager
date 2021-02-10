@@ -173,6 +173,8 @@ public class ServerService
     @Transactional
     public void deleteServer(final int id)
     {
+        ServerDto serverDto = getServer(id);
+        this.serverManager.deleteServer(serverDto);
         this.serverRepository.delete(id);
     }
 
