@@ -22,10 +22,8 @@ import pl.bartlomiejstepien.mcsm.repository.ds.Server;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.FileVisitOption;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.*;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -141,6 +139,8 @@ public class ServerService
             e.printStackTrace();
         }
 
+        acceptEula(serverPath);
+
         final ServerDto serverDto = new ServerDto(0, modPack.getName(), serverPath.toString());
         final UserDto userDto = this.userService.find(authenticatedUser.getId());
         serverDto.addUser(userDto);
@@ -234,5 +234,18 @@ public class ServerService
     private boolean isModPackAlreadyDownloaded(final ModPack modPack)
     {
         return Files.exists(this.config.getDownloadsDirPath().resolve(Paths.get(modPack.getName() + "_" + modPack.getVersion())));
+    }
+
+    private void acceptEula(Path serverPath) {
+        final Path eulaFilePath = serverPath.resolve("eula.txt");
+        try {
+            if (Files.notExists(eulaFilePath)) {
+                Files.createFile(eulaFilePath);
+            }
+            Files.write(eulaFilePath, "eula=true".getBytes(StandardCharsets.UTF_8), StandardOpenOption.WRITE);
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

@@ -71,8 +71,6 @@ public class ServerInstaller
 
         setInstallationStatus(modPack.getId(), new InstallationStatus(75, "Finishing up..."));
 
-        //TODO: Set eula to true?
-
         setInstallationStatus(modPack.getId(), new InstallationStatus(100, "Server is ready!"));
     }
 }
