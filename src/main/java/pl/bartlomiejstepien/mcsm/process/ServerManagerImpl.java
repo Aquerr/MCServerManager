@@ -97,7 +97,7 @@ public class ServerManagerImpl implements ServerManager
 //            RandomAccessFile randomAccessFile = new RandomAccessFile(latestLogPath.toFile(), RandomAccessFileMode.READ.getValue());
 //            randomAccessFile.seek(randomAccessFile.length() - );
 //            randomAccessFile.readLine();
-            final List<String> lines = Files.readAllLines(latestLogPath);
+            final List<String> lines = Files.readAllLines(latestLogPath, StandardCharsets.ISO_8859_1);
             if (lines.size() < numberOfLines)
                 return lines;
 
