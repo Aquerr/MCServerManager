@@ -3,12 +3,14 @@ package pl.bartlomiejstepien.mcsm.controller.rest;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.web.bind.annotation.*;
 import pl.bartlomiejstepien.mcsm.Routes;
 import pl.bartlomiejstepien.mcsm.auth.AuthenticatedUser;
+import pl.bartlomiejstepien.mcsm.exception.ServerNotOwnedException;
 import pl.bartlomiejstepien.mcsm.exception.ServerNotRunningException;
 import pl.bartlomiejstepien.mcsm.model.InstallationStatus;
 import pl.bartlomiejstepien.mcsm.dto.ServerDto;
@@ -53,7 +55,7 @@ public class ServersRestController
         return this.serverService.getServerLatestLog(serverId, numberOfLines);
     }
 
-    @PostMapping("/{id}/command")
+    @PostMapping(value = "/{id}/command", consumes = MediaType.TEXT_PLAIN_VALUE)
     public void postCommand(final @PathVariable("id") int serverId, @RequestBody String command, final Authentication authentication)
     {
         LOGGER.info("Posting command {" + command + "} to server id = " + serverId);
@@ -144,11 +146,11 @@ public class ServersRestController
         if (this.serverService.getServersForUser(authenticatedUser.getId()).stream().anyMatch(serverDto -> serverDto.getId() == id))
         {
             serverService.deleteServer(id);
+            return "Server has been deleted";
         }
         else
         {
-            return "You don't have access to do this";
+            throw new ServerNotOwnedException("You don't have access to do this");
         }
-        return "Server has been deleted";
     }
 }

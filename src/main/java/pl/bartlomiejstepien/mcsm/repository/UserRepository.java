@@ -7,6 +7,7 @@ import pl.bartlomiejstepien.mcsm.repository.ds.User;
 
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
+import javax.persistence.TypedQuery;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -48,11 +49,9 @@ public class UserRepository
 
     public User findByUsername(final String username)
     {
-        final Query query = this.entityManager.createQuery("SELECT u FROM User u WHERE u.username = :username");
+        final TypedQuery<User> query = this.entityManager.createQuery("SELECT u FROM User u WHERE u.username = :username", User.class);
         query.setParameter("username", username);
-
-        final Object object = query.getSingleResult();
-        final User user = (User) object;
-        return user;
+        final List<User> users = query.getResultList();
+        return users.stream().findFirst().orElse(null);
     }
 }

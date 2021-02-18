@@ -3,6 +3,7 @@ package pl.bartlomiejstepien.mcsm.controller.rest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -37,7 +38,7 @@ public class ModpackRestController
         this.userService = userService;
     }
 
-    @GetMapping("/{id}/description")
+    @GetMapping(value = "/{id}/description", produces = MediaType.TEXT_HTML_VALUE)
     public String getModpackDescription(@PathVariable("id") final int id, final HttpServletRequest httpServletRequest)
     {
         LOGGER.info("Getting modpack description for id=" +id + " from " + httpServletRequest.getRemoteAddr());
@@ -45,14 +46,13 @@ public class ModpackRestController
     }
 
     @PostMapping("/{id}/install")
-    public int installModpack(@PathVariable("id") final int id, @AuthenticationPrincipal final Object test, final HttpServletRequest httpServletRequest)
+    public int installModpack(@PathVariable("id") final int id, @AuthenticationPrincipal final AuthenticatedUser authenticatedUser, final HttpServletRequest httpServletRequest)
     {
-        final AuthenticatedUser authenticatedUser = (AuthenticatedUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         LOGGER.info("Install modpack id=" + id + " by " + authenticatedUser.getUsername() + " " + httpServletRequest.getRemoteAddr());
         return this.serverService.installServer(authenticatedUser, id);
     }
 
-    @GetMapping("/search")
+    @GetMapping(value = "/search", produces = MediaType.APPLICATION_JSON_VALUE)
     public List<ModPack> searchModpacksForCategory(@RequestParam(name = "categoryId", defaultValue = "0") Integer categoryId,
                                                    @RequestParam(name = "size", defaultValue = "24") Integer size,
                                                    @RequestParam(name = "version", defaultValue = "") String version,

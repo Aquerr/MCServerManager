@@ -1,18 +1,26 @@
 package pl.bartlomiejstepien.mcsm.auth;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 import pl.bartlomiejstepien.mcsm.dto.UserDto;
 import pl.bartlomiejstepien.mcsm.repository.UserRepository;
 import pl.bartlomiejstepien.mcsm.repository.ds.User;
 import pl.bartlomiejstepien.mcsm.service.UserService;
 
+import javax.servlet.http.HttpServletRequest;
+
 @Service
 public class H2UserDetailsService implements UserDetailsService
 {
+    private static final Logger LOGGER = LoggerFactory.getLogger(H2UserDetailsService.class);
+
     private final UserRepository userRepository;
 
     @Autowired
@@ -24,6 +32,9 @@ public class H2UserDetailsService implements UserDetailsService
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException
     {
+        HttpServletRequest httpServletRequest = ((ServletRequestAttributes)RequestContextHolder.currentRequestAttributes()).getRequest();
+        LOGGER.info("Login attempt for username '" + username + "' from " + httpServletRequest.getLocalAddr());
+
         final User user = this.userRepository.findByUsername(username);
 
         if (user == null)
