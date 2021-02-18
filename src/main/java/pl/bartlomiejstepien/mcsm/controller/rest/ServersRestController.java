@@ -4,8 +4,10 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.web.bind.annotation.*;
+import pl.bartlomiejstepien.mcsm.Routes;
 import pl.bartlomiejstepien.mcsm.auth.AuthenticatedUser;
 import pl.bartlomiejstepien.mcsm.exception.ServerNotRunningException;
 import pl.bartlomiejstepien.mcsm.model.InstallationStatus;
@@ -21,7 +23,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/api/servers")
+@RequestMapping(Routes.API_SERVERS)
 public class ServersRestController
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(ServersRestController.class);
@@ -133,5 +135,20 @@ public class ServersRestController
 
         final boolean isRunning = this.serverManager.isRunning(this.serverService.getServer(id));
         return isRunning ? "Running" : "Not Running";
+    }
+
+    @DeleteMapping(value = "/{id}")
+    public String deleteServer(@PathVariable final int id, @AuthenticationPrincipal AuthenticatedUser authenticatedUser)
+    {
+        LOGGER.info("Deleting server for id: " + id);
+        if (this.serverService.getServersForUser(authenticatedUser.getId()).stream().anyMatch(serverDto -> serverDto.getId() == id))
+        {
+            serverService.deleteServer(id);
+        }
+        else
+        {
+            return "You don't have access to do this";
+        }
+        return "Server has been deleted";
     }
 }

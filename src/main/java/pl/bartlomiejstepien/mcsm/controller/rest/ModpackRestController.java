@@ -7,6 +7,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import pl.bartlomiejstepien.mcsm.Routes;
 import pl.bartlomiejstepien.mcsm.auth.AuthenticatedUser;
 import pl.bartlomiejstepien.mcsm.controller.HomeController;
 import pl.bartlomiejstepien.mcsm.model.ModPack;
@@ -18,7 +19,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/modpacks")
+@RequestMapping(Routes.API_MODPACKS)
 public class ModpackRestController
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(HomeController.class);
