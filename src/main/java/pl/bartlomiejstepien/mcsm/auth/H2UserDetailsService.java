@@ -9,25 +9,18 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
-import pl.bartlomiejstepien.mcsm.dto.UserDto;
 import pl.bartlomiejstepien.mcsm.repository.UserRepository;
 import pl.bartlomiejstepien.mcsm.repository.ds.User;
-import pl.bartlomiejstepien.mcsm.service.UserService;
 
 import javax.servlet.http.HttpServletRequest;
 
-@Service
+@Service("userDetailsService")
 public class H2UserDetailsService implements UserDetailsService
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(H2UserDetailsService.class);
 
-    private final UserRepository userRepository;
-
     @Autowired
-    public H2UserDetailsService(final UserRepository userRepository)
-    {
-        this.userRepository = userRepository;
-    }
+    private UserRepository userRepository;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException

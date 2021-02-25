@@ -1,0 +1,11 @@
+${AnsiColor.BRIGHT_WHITE} _   .-')               .-')   _   .-')
+( '.( OO )_            ( OO ).( '.( OO )_
+${AnsiColor.GREEN} ,--.   ,--.${AnsiColor.BRIGHT_WHITE})${AnsiColor.GREEN}  .-----.${AnsiColor.BRIGHT_WHITE}(_)${AnsiColor.GREEN}---${AnsiColor.BRIGHT_WHITE}\_)${AnsiColor.GREEN},--.   ,--.${AnsiColor.BRIGHT_WHITE})${AnsiColor.GREEN}
+ |   `.'   |  '  .--.//    _ | |   `.'   |
+ |         |  |  |${AnsiColor.BRIGHT_WHITE}('-.${AnsiColor.GREEN}\  :` `. |         |
+ |  |'.'|  | ${AnsiColor.BRIGHT_WHITE}/_)${AnsiColor.GREEN} |${AnsiColor.BRIGHT_WHITE}OO  )${AnsiColor.GREEN}'..`''.)|  |'.'|  |
+ |  |   |  | ||  |${AnsiColor.BRIGHT_WHITE}`-'|${AnsiColor.GREEN}.-._)   \|  |   |  |
+ |  |   |  |${AnsiColor.BRIGHT_WHITE}(_${AnsiColor.GREEN}'  '--'\\       /|  |   |  |
+ `--'   `--'   `-----' `-----' `--'   `--'
+                                                               
+-- Welcome to Minecraft Server Manager -- ${AnsiColor.BRIGHT_WHITE}

@@ -14,47 +14,57 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import pl.bartlomiejstepien.mcsm.Routes;
+import pl.bartlomiejstepien.mcsm.auth.H2UserDetailsService;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig extends WebSecurityConfigurerAdapter
 {
-    private final ApplicationContext applicationContext;
-    private final UserDetailsService userDetailsService;
-
     @Autowired
-    public SecurityConfig(final ApplicationContext applicationContext, @Qualifier("h2UserDetailsService") final UserDetailsService userDetailsService)
-    {
-        this.applicationContext = applicationContext;
-        this.userDetailsService = userDetailsService;
-    }
+    private UserDetailsService userDetailsService;
 
     @Override
     protected void configure(HttpSecurity http) throws Exception
     {
         http
-            .csrf().ignoringAntMatchers("/api/**")
+            .authorizeRequests()
+            .antMatchers("/css/**", "/js/**", "/webjars/**", "/favicon.ico").permitAll()
             .and()
             .authorizeRequests()
-            .antMatchers("/css/**", "/js/**").permitAll()
-            .antMatchers(Routes.LOGIN, Routes.HOME, Routes.ROOT).authenticated()
-            .antMatchers(HttpMethod.GET, "/api/modpacks/**").authenticated()
-            .antMatchers(HttpMethod.POST, "/api/modpacks/**").authenticated()
-            .antMatchers("/api/servers/**").authenticated()
-            .antMatchers("/servers/**").authenticated()
+            .anyRequest().authenticated()
             .and()
-                .formLogin()
+            .formLogin()
                 .loginPage(Routes.LOGIN)
-                .defaultSuccessUrl("/")
+                .defaultSuccessUrl(Routes.HOME)
                 .permitAll()
             .and()
-                .logout()
+            .logout()
                 .logoutUrl(Routes.LOGOUT)
-                .logoutSuccessUrl(Routes.HOME)
-    //                    .invalidateHttpSession(true)
-    //                    .deleteCookies("JSESSIONID")
-    //                        .logoutUrl(Routes.LOGOUT)
-                    .permitAll();
+                .logoutSuccessUrl(Routes.LOGIN)
+                .invalidateHttpSession(true)
+                .deleteCookies("JSESSIONID")
+                .permitAll();
+
+//        http
+//            .csrf().ignoringAntMatchers("/api/**")
+//            .and()
+//            .authorizeRequests()
+//            .antMatchers("/css/**", "/js/**").permitAll()
+//            .antMatchers(Routes.LOGIN, Routes.HOME, Routes.ROOT).authenticated()
+//            .antMatchers(HttpMethod.GET, "/api/modpacks/**").authenticated()
+//            .antMatchers(HttpMethod.POST, "/api/modpacks/**").authenticated()
+//            .antMatchers("/api/servers/**").authenticated()
+//            .antMatchers("/servers/**").authenticated()
+//            .and()
+//                .formLogin()
+//                .loginPage(Routes.LOGIN)
+//                .defaultSuccessUrl("/")
+//                .permitAll()
+//            .and()
+//                .logout()
+//                .logoutUrl(Routes.LOGOUT)
+//                .logoutSuccessUrl(Routes.HOME)
+//                .permitAll();
     }
 
     @Override
