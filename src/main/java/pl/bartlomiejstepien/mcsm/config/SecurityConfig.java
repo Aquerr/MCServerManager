@@ -1,11 +1,8 @@
 package pl.bartlomiejstepien.mcsm.config;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -14,7 +11,6 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import pl.bartlomiejstepien.mcsm.Routes;
-import pl.bartlomiejstepien.mcsm.auth.H2UserDetailsService;
 
 @Configuration
 @EnableWebSecurity
@@ -28,10 +24,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter
     {
         http
             .authorizeRequests()
-            .antMatchers("/css/**", "/js/**", "/webjars/**", "/favicon.ico").permitAll()
+                .antMatchers("/css/**", "/js/**", "/webjars/**", "/favicon.ico").permitAll()
             .and()
-            .authorizeRequests()
-            .anyRequest().authenticated()
+                .csrf().ignoringAntMatchers("/api/**")
             .and()
             .formLogin()
                 .loginPage(Routes.LOGIN)
@@ -43,28 +38,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter
                 .logoutSuccessUrl(Routes.LOGIN)
                 .invalidateHttpSession(true)
                 .deleteCookies("JSESSIONID")
-                .permitAll();
-
-//        http
-//            .csrf().ignoringAntMatchers("/api/**")
-//            .and()
-//            .authorizeRequests()
-//            .antMatchers("/css/**", "/js/**").permitAll()
-//            .antMatchers(Routes.LOGIN, Routes.HOME, Routes.ROOT).authenticated()
-//            .antMatchers(HttpMethod.GET, "/api/modpacks/**").authenticated()
-//            .antMatchers(HttpMethod.POST, "/api/modpacks/**").authenticated()
-//            .antMatchers("/api/servers/**").authenticated()
-//            .antMatchers("/servers/**").authenticated()
-//            .and()
-//                .formLogin()
-//                .loginPage(Routes.LOGIN)
-//                .defaultSuccessUrl("/")
-//                .permitAll()
-//            .and()
-//                .logout()
-//                .logoutUrl(Routes.LOGOUT)
-//                .logoutSuccessUrl(Routes.HOME)
-//                .permitAll();
+                .permitAll()
+            .and()
+            .authorizeRequests()
+            .anyRequest().authenticated()
+            .and();
     }
 
     @Override

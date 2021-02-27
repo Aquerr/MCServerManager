@@ -5,8 +5,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import pl.bartlomiejstepien.mcsm.Routes;
 import pl.bartlomiejstepien.mcsm.auth.AuthenticatedUser;
@@ -46,10 +44,11 @@ public class ModpackRestController
     }
 
     @PostMapping("/{id}/install")
-    public int installModpack(@PathVariable("id") final int id, @AuthenticationPrincipal final AuthenticatedUser authenticatedUser, final HttpServletRequest httpServletRequest)
+    public int installModpack(@PathVariable("id") final int id, Authentication authentication, final HttpServletRequest httpServletRequest)
     {
+        final AuthenticatedUser authenticatedUser = (AuthenticatedUser)authentication.getPrincipal();
         LOGGER.info("Install modpack id=" + id + " by " + authenticatedUser.getUsername() + " " + httpServletRequest.getRemoteAddr());
-        return this.serverService.installServer(authenticatedUser, id);
+        return this.serverService.installServerForModpack(authenticatedUser, id);
     }
 
     @GetMapping(value = "/search", produces = MediaType.APPLICATION_JSON_VALUE)

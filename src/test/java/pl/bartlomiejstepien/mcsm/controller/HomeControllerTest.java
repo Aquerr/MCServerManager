@@ -1,57 +1,56 @@
 package pl.bartlomiejstepien.mcsm.controller;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers;
-import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.context.WebApplicationContext;
-import pl.bartlomiejstepien.mcsm.process.ServerManager;
-import pl.bartlomiejstepien.mcsm.service.CurseForgeAPIService;
+import pl.bartlomiejstepien.mcsm.auth.AuthenticationFacade;
+import pl.bartlomiejstepien.mcsm.dto.ServerDto;
 import pl.bartlomiejstepien.mcsm.service.ServerService;
-import pl.bartlomiejstepien.mcsm.service.UserService;
 
-@WebMvcTest(HomeController.class)
+import java.util.Arrays;
+import java.util.List;
+
+import static org.mockito.Mockito.when;
+
 @ExtendWith(MockitoExtension.class)
-class HomeControllerTest
+class HomeControllerTest extends BaseIntegrationTest
 {
-    @Autowired
-    private WebApplicationContext webApplicationContext;
-
-    private MockMvc mockMvc;
-
-    @MockBean
-    private CurseForgeAPIService curseForgeAPIService;
-
-    @MockBean
-    private ServerManager serverManager;
-
     @MockBean
     private ServerService serverService;
 
     @MockBean
-    private UserService userService;
+    private AuthenticationFacade authenticationFacade;
 
-    @BeforeEach
-    public void setup()
+    @Test
+    @WithUserDetails(value = USER_USERNAME, userDetailsServiceBeanName = "userDetailsServiceTest")
+    public void homePageShouldRequireAuthentication() throws Exception
     {
-        mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext)
-                .apply(SecurityMockMvcConfigurers.springSecurity())
-                .build();
+        when(authenticationFacade.getCurrentUser()).thenReturn(getTestUser());
+
+        mockMvc.perform(MockMvcRequestBuilders.get("/"))
+            .andExpect(MockMvcResultMatchers.status().isOk());
     }
 
     @Test
-    public void homePageShouldRequireAuthentication() throws Exception
+    @WithUserDetails(value = USER_USERNAME, userDetailsServiceBeanName = "userDetailsServiceTest")
+    public void homePageShouldShowUserServers() throws Exception
     {
+        when(authenticationFacade.getCurrentUser()).thenReturn(getTestUser());
+        when(serverService.getServersForUser(getTestUser().getId())).thenReturn(prepareServerDtos());
+
         mockMvc.perform(MockMvcRequestBuilders.get("/"))
-            .andExpect(MockMvcResultMatchers.status().isFound());
+                .andExpect(MockMvcResultMatchers.model().attribute("servers", prepareServerDtos()))
+                .andExpect(MockMvcResultMatchers.status().isOk());
+    }
+
+    private List<ServerDto> prepareServerDtos()
+    {
+        return Arrays.asList(new ServerDto(1, "Test1", "Test2"), new ServerDto(2, "Test3", "Test4"));
     }
 }

@@ -3,15 +3,13 @@ package pl.bartlomiejstepien.mcsm.controller;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
 import pl.bartlomiejstepien.mcsm.auth.AuthenticatedUser;
+import pl.bartlomiejstepien.mcsm.auth.AuthenticationFacade;
 import pl.bartlomiejstepien.mcsm.dto.ServerDto;
 import pl.bartlomiejstepien.mcsm.service.ServerService;
-import pl.bartlomiejstepien.mcsm.service.UserService;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
@@ -23,19 +21,19 @@ public class HomeController
     private static final Logger LOGGER = LoggerFactory.getLogger(HomeController.class);
 
     private final ServerService serverService;
-    private final UserService userService;
+    private AuthenticationFacade authenticationFacade;
 
     @Autowired
-    public HomeController(final ServerService serverService, final UserService userService)
+    public HomeController(final AuthenticationFacade authenticationFacade, final ServerService serverService)
     {
+        this.authenticationFacade = authenticationFacade;
         this.serverService = serverService;
-        this.userService = userService;
     }
 
     @GetMapping("/")
-    public String root(final Model model, final Authentication authentication, HttpServletRequest httpServletRequest)
+    public String root(final Model model, HttpServletRequest httpServletRequest)
     {
-        final AuthenticatedUser authenticatedUser = (AuthenticatedUser) authentication.getPrincipal();
+        final AuthenticatedUser authenticatedUser = authenticationFacade.getCurrentUser();
 
         LOGGER.info("Accessing url / by user " + authenticatedUser.getUsername() + " " + httpServletRequest.getLocalAddr());
 

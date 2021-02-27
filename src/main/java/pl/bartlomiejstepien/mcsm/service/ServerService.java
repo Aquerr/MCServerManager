@@ -100,7 +100,7 @@ public class ServerService
      * @return newly generated server id
      */
     @Transactional
-    public int installServer(final AuthenticatedUser authenticatedUser, final int modpackId)
+    public int installServerForModpack(final AuthenticatedUser authenticatedUser, final int modpackId)
     {
         final ModPack modPack = this.curseForgeAPIService.getModpack(modpackId);
         Path serverPath = Paths.get(config.getServersDir()).resolve(authenticatedUser.getUsername()).resolve(modPack.getName());
