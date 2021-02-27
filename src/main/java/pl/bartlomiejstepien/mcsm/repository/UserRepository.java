@@ -2,11 +2,10 @@ package pl.bartlomiejstepien.mcsm.repository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
-import pl.bartlomiejstepien.mcsm.dto.UserDto;
+import pl.bartlomiejstepien.mcsm.domain.dto.UserDto;
 import pl.bartlomiejstepien.mcsm.repository.ds.User;
 
 import javax.persistence.EntityManager;
-import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 import java.util.List;
 import java.util.stream.Collectors;

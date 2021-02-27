@@ -1,8 +1,8 @@
 package pl.bartlomiejstepien.mcsm.repository.ds;
 
 import org.springframework.security.core.GrantedAuthority;
-import pl.bartlomiejstepien.mcsm.dto.ServerDto;
-import pl.bartlomiejstepien.mcsm.dto.UserDto;
+import pl.bartlomiejstepien.mcsm.domain.dto.ServerDto;
+import pl.bartlomiejstepien.mcsm.domain.dto.UserDto;
 
 import javax.persistence.*;
 import java.util.*;

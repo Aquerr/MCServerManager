@@ -8,12 +8,12 @@
             let consoleUpdateIntervalId = null;
 
             $("#delete-button").on("click", function () {
-                console.log("Delete server action");
+                console.log("Showing delete server confirmation...");
                 $("#delete-confirmation-modal").modal("show");
             });
 
-            $("#destroy").on("click", function (){
-                console.log("destroy click action");
+            $("#delete").on("click", function (){
+                console.log("Deleting server...");
                 let serverId = $("#server-id").val()
                 $.ajax({
                 url: "/api/servers/" + serverId,
@@ -140,7 +140,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-danger" id="destroy">Destroy</button>
+                    <button type="button" class="btn btn-danger" id="delete">Delete</button>
                 </div>
             </div>
         </div>

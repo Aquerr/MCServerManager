@@ -10,9 +10,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import pl.bartlomiejstepien.mcsm.config.Config;
 import pl.bartlomiejstepien.mcsm.config.CurseForgeAPIRoutes;
-import pl.bartlomiejstepien.mcsm.exception.CouldNotDownloadServerFilesException;
-import pl.bartlomiejstepien.mcsm.model.InstallationStatus;
-import pl.bartlomiejstepien.mcsm.model.ModPack;
+import pl.bartlomiejstepien.mcsm.domain.exception.CouldNotDownloadServerFilesException;
+import pl.bartlomiejstepien.mcsm.domain.model.InstallationStatus;
+import pl.bartlomiejstepien.mcsm.domain.model.ModPack;
+import pl.bartlomiejstepien.mcsm.domain.server.ServerInstaller;
+import pl.bartlomiejstepien.mcsm.integration.curseforge.CurseforgeModpackConverter;
 
 import java.io.*;
 import java.net.*;
@@ -27,14 +29,16 @@ public class CurseForgeAPIService
     private static final Logger LOGGER = LoggerFactory.getLogger(CurseForgeAPIService.class);
     private static final RestTemplate REST_TEMPLATE = new RestTemplate();
 
+    private final CurseforgeModpackConverter curseforgeModpackConverter;
     private final Config config;
     private final ServerInstaller serverInstaller;
 
     @Autowired
-    public CurseForgeAPIService(final Config config, final ServerInstaller serverInstaller)
+    public CurseForgeAPIService(final Config config, final ServerInstaller serverInstaller, final CurseforgeModpackConverter curseforgeModpackConverter)
     {
         this.config = config;
         this.serverInstaller = serverInstaller;
+        this.curseforgeModpackConverter = curseforgeModpackConverter;
     }
 
     public List<ModPack> getModpacks(final int categoryId, String modpackName, String version, final int count, int index)
@@ -55,7 +59,7 @@ public class CurseForgeAPIService
             if (!jsonNode.isObject())
                 continue;
 
-            final ModPack modPack = ModPack.fromJson((ObjectNode) jsonNode);
+            final ModPack modPack = this.curseforgeModpackConverter.convertToModpack((ObjectNode) jsonNode);
             modPacks.add(modPack);
         }
 
@@ -109,7 +113,7 @@ public class CurseForgeAPIService
         if (modpackJson == null)
             throw new RuntimeException("Could not find modpack with id " + id);
 
-        final ModPack modPack = ModPack.fromJson(modpackJson);
+        final ModPack modPack = this.curseforgeModpackConverter.convertToModpack(modpackJson);
         return modPack;
     }
 

@@ -15,7 +15,7 @@ public class SpringFoxConfig
     {
         return new Docket(DocumentationType.SWAGGER_2)
                 .select()
-                .apis(RequestHandlerSelectors.basePackage("pl.bartlomiejstepien.mcsm.controller.rest"))
+                .apis(RequestHandlerSelectors.basePackage("pl.bartlomiejstepien.mcsm.web.controller.rest"))
                 .paths(PathSelectors.any())
                 .build();
     }

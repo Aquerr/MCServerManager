@@ -3,7 +3,7 @@ package pl.bartlomiejstepien.mcsm.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import pl.bartlomiejstepien.mcsm.dto.UserDto;
+import pl.bartlomiejstepien.mcsm.domain.dto.UserDto;
 import pl.bartlomiejstepien.mcsm.repository.UserRepository;
 import pl.bartlomiejstepien.mcsm.repository.ds.User;
 
