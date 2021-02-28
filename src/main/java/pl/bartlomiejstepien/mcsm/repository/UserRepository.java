@@ -3,6 +3,7 @@ package pl.bartlomiejstepien.mcsm.repository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import pl.bartlomiejstepien.mcsm.domain.dto.UserDto;
+import pl.bartlomiejstepien.mcsm.repository.converter.UserConverter;
 import pl.bartlomiejstepien.mcsm.repository.ds.User;
 
 import javax.persistence.EntityManager;
@@ -21,17 +22,14 @@ public class UserRepository
         this.entityManager = entityManager;
     }
 
-    public UserDto find(final int id)
+    public User find(final int id)
     {
-        final User user = this.entityManager.find(User.class, id);
-        if (user != null)
-            return user.toUser();
-        else return null;
+        return this.entityManager.find(User.class, id);
     }
 
-    public List<UserDto> findAll()
+    public List<User> findAll()
     {
-        return ((List<User>)this.entityManager.createQuery("from user").getResultList()).stream().map(User::toUser).collect(Collectors.toList());
+        return ((List<User>)this.entityManager.createQuery("from user").getResultList());
     }
 
     public void save(final User user)

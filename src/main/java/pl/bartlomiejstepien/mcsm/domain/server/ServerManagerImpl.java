@@ -6,19 +6,20 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.FileSystemUtils;
+import pl.bartlomiejstepien.mcsm.auth.AuthenticatedUser;
 import pl.bartlomiejstepien.mcsm.domain.dto.ServerDto;
 import pl.bartlomiejstepien.mcsm.domain.exception.ServerNotRunningException;
 import pl.bartlomiejstepien.mcsm.domain.model.InstalledServer;
+import pl.bartlomiejstepien.mcsm.domain.model.ModPack;
 import pl.bartlomiejstepien.mcsm.domain.model.ServerProperties;
 import pl.bartlomiejstepien.mcsm.domain.process.ServerProcessHandler;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.nio.file.*;
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.stream.Stream;
 
 @Component
 public class ServerManagerImpl implements ServerManager
@@ -26,21 +27,33 @@ public class ServerManagerImpl implements ServerManager
     private static final Logger LOGGER = LoggerFactory.getLogger(ServerManagerImpl.class);
     private static final ScheduledExecutorService SCHEDULED_EXECUTOR_SERVICE = Executors.newSingleThreadScheduledExecutor();
     private static final Map<Integer, Process> SERVER_PROCESSES = new HashMap<>();
-    private static final Map<Integer, InstalledServer> INSTALLED_SERVERS = new HashMap<>();
+    private static final Map<Integer, InstalledServer> RUNNING_SERVERS = new HashMap<>();
     private static final String SERVER_PROPERTIES_FILE_NAME = "server.properties";
 
     private final ServerProcessHandler serverProcessHandler;
+    private final ServerInstaller serverInstaller;
+    private final ServerStartFileFinder serverStartFileFinder;
 
     @Autowired
-    public ServerManagerImpl(ServerProcessHandler serverProcessHandler)
+    public ServerManagerImpl(ServerProcessHandler serverProcessHandler, final ServerInstaller serverInstaller, final ServerStartFileFinder serverStartFileFinder)
     {
         this.serverProcessHandler = serverProcessHandler;
+        this.serverInstaller = serverInstaller;
+        this.serverStartFileFinder = serverStartFileFinder;
     }
 
     @Override
     public void startServer(ServerDto serverDto)
     {
-        final Process process = serverProcessHandler.startServerProcess(serverDto);
+        if (RUNNING_SERVERS.containsKey(serverDto.getId()))
+            throw new RuntimeException("Server is already running!");
+
+        final InstalledServer installedServer = prepareServer(serverDto);
+        final Process process = serverProcessHandler.startServerProcess(installedServer);
+        if (process == null)
+            throw new RuntimeException("Could not start server with id= " + serverDto.getId());
+
+        RUNNING_SERVERS.put(installedServer.getId(), installedServer);
         SERVER_PROCESSES.put(serverDto.getId(), process);
     }
 
@@ -82,24 +95,8 @@ public class ServerManagerImpl implements ServerManager
             }
 
             SERVER_PROCESSES.remove(serverDto.getId());
+            RUNNING_SERVERS.remove(serverDto.getId());
 
-//            if (deleteStatus)
-//            {
-//                stopServer(serverDto);
-//                Path path = Paths.get(serverDto.getServerDir());
-//                try
-//                {
-//                    if (!isRunning(serverDto))
-//                    {
-//                        FileSystemUtils.deleteRecursively(path);
-//                        Files.delete(path);
-//                    }
-//                }
-//                catch (IOException e)
-//                {
-//                    e.printStackTrace();
-//                }
-//            }
             return true;
         }, 20, TimeUnit.SECONDS);
         return scheduledFuture;
@@ -257,5 +254,61 @@ public class ServerManagerImpl implements ServerManager
                 e.printStackTrace();
             }
         });
+    }
+
+    @Override
+    public InstalledServer installServerForModPack(AuthenticatedUser authenticatedUser, ModPack modPack, Path serverPath)
+    {
+        this.serverInstaller.installServerForModpack(authenticatedUser, modPack, serverPath);
+
+        LOGGER.info("Accepting EULA...");
+        acceptEula(serverPath);
+
+        return prepareServer(new ServerDto(0, modPack.getName(), serverPath.toString()));
+    }
+
+    private InstalledServer prepareServer(final ServerDto serverDto)
+    {
+        LOGGER.info("Looking for server start file...");
+        Path serverPath = Paths.get(serverDto.getServerDir());
+        Path serverRootDirectory = findServerRootDirectory(serverPath);
+        Path serverStartFilePath = serverStartFileFinder.findServerStartFile(serverRootDirectory);
+        if (serverStartFilePath == null)
+            throw new RuntimeException("Could not find server start file!");
+
+        return new InstalledServer(0, serverDto.getName(), serverPath, serverStartFilePath);
+    }
+
+    private Path findServerRootDirectory(Path serverPath)
+    {
+        try
+        {
+            final Stream<Path> walkStream = Files.walk(serverPath, FileVisitOption.FOLLOW_LINKS);
+            final Path newServerPath = walkStream.filter(path -> path.getFileName().toString().contains("minecraft_server"))
+                    .findFirst()
+                    .orElse(null);
+            if (newServerPath != null)
+            {
+                serverPath = serverPath.resolve(newServerPath.getName(newServerPath.getNameCount() - 2));
+            }
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+        return serverPath;
+    }
+
+    private void acceptEula(Path serverPath) {
+        final Path eulaFilePath = serverPath.resolve("eula.txt");
+        try {
+            if (Files.notExists(eulaFilePath)) {
+                Files.createFile(eulaFilePath);
+            }
+            Files.write(eulaFilePath, "eula=true".getBytes(StandardCharsets.UTF_8), StandardOpenOption.WRITE);
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

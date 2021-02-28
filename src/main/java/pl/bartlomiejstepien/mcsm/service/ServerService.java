@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pl.bartlomiejstepien.mcsm.auth.AuthenticatedUser;
 import pl.bartlomiejstepien.mcsm.config.Config;
+import pl.bartlomiejstepien.mcsm.domain.model.InstalledServer;
 import pl.bartlomiejstepien.mcsm.domain.server.ServerInstaller;
 import pl.bartlomiejstepien.mcsm.domain.server.ServerManager;
 import pl.bartlomiejstepien.mcsm.repository.converter.ServerConverter;
@@ -22,11 +23,9 @@ import pl.bartlomiejstepien.mcsm.repository.ServerRepository;
 import pl.bartlomiejstepien.mcsm.repository.ds.Server;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Service
 public class ServerService
@@ -103,8 +102,8 @@ public class ServerService
     public int installServerForModpack(final AuthenticatedUser authenticatedUser, final int modpackId)
     {
         final ModPack modPack = this.curseForgeAPIService.getModpack(modpackId);
-        Path serverPath = Paths.get(config.getServersDir()).resolve(authenticatedUser.getUsername()).resolve(modPack.getName());
-        if (Files.exists(serverPath))
+        Path serverPath = prepareServerPathForNewModpack(authenticatedUser, modPack);
+        if (isServerPathOccupied(serverPath))
             throw new RuntimeException("Server for this modpack already exists!");
 
         if (!isModPackAlreadyDownloaded(modPack))
@@ -121,34 +120,23 @@ public class ServerService
             }
         }
 
-        this.serverInstaller.installServerForModpack(authenticatedUser, modPack, serverPath);
-
-        try
-        {
-            final Stream<Path> walkStream = Files.walk(serverPath, FileVisitOption.FOLLOW_LINKS);
-            final Path newServerPath = walkStream.filter(path -> path.getFileName().toString().contains("minecraft_server"))
-                    .findFirst()
-                    .orElse(null);
-            if (newServerPath != null)
-            {
-                serverPath = serverPath.resolve(newServerPath.getName(newServerPath.getNameCount() - 2));
-            }
-        }
-        catch (IOException e)
-        {
-            e.printStackTrace();
-        }
-
-        acceptEula(serverPath);
-
-        final ServerDto serverDto = new ServerDto(0, modPack.getName(), serverPath.toString());
+        final InstalledServer installedServer = this.serverManager.installServerForModPack(authenticatedUser, modPack, serverPath);
+        final ServerDto serverDto = new ServerDto(installedServer.getId(), installedServer.getName(), installedServer.getServerDir().toString());
         final UserDto userDto = this.userService.find(authenticatedUser.getId());
         serverDto.addUser(userDto);
         userDto.addServer(serverDto);
-
         int serverId = addServer(serverDto);
         serverDto.setId(serverId);
         return serverId;
+    }
+
+    private Path prepareServerPathForNewModpack(AuthenticatedUser authenticatedUser, ModPack modPack) {
+        return Paths.get(config.getServersDir()).resolve(authenticatedUser.getUsername()).resolve(modPack.getName());
+    }
+
+    private boolean isServerPathOccupied(Path serverPath)
+    {
+        return Files.exists(serverPath);
     }
 
     @Transactional
@@ -167,7 +155,7 @@ public class ServerService
     @Transactional
     public List<ServerDto> getServers()
     {
-        return this.serverRepository.findAll().stream().map(ServerDto::fromServer).collect(Collectors.toList());
+        return this.serverRepository.findAll().stream().map(serverConverter::convertToDto).collect(Collectors.toList());
     }
 
     @Transactional
@@ -236,18 +224,5 @@ public class ServerService
     private boolean isModPackAlreadyDownloaded(final ModPack modPack)
     {
         return Files.exists(this.config.getDownloadsDirPath().resolve(Paths.get(modPack.getName() + "_" + modPack.getVersion())));
-    }
-
-    private void acceptEula(Path serverPath) {
-        final Path eulaFilePath = serverPath.resolve("eula.txt");
-        try {
-            if (Files.notExists(eulaFilePath)) {
-                Files.createFile(eulaFilePath);
-            }
-            Files.write(eulaFilePath, "eula=true".getBytes(StandardCharsets.UTF_8), StandardOpenOption.WRITE);
-        }
-        catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 }

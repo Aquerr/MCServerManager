@@ -1,4 +1,4 @@
-package pl.bartlomiejstepien.mcsm.domain.process.util;
+package pl.bartlomiejstepien.mcsm.util;
 
 import java.io.BufferedReader;
 import java.io.IOException;

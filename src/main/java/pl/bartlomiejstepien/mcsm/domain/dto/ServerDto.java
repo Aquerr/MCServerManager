@@ -39,68 +39,25 @@ public class ServerDto
 //    private int rconPort;
 //    private String rconPassword;
 
-    public static ServerDto fromServer(final Server server)
-    {
-        //TODO: Load server information from server.properties.
-        final String serverPath = server.getPath();
-//        final User user = serverDto.getUser().toUser();
-        final ServerDto serverDto = new ServerDto(server.getId(), server.getPath().substring(serverPath.lastIndexOf(File.separator) + 1), serverPath);
-
-        for (final User user : server.getUsers())
-        {
-            final UserDto userDto = new UserDto(user.getId(), user.getUsername(), user.getPassword());
-            userDto.addServer(serverDto);
-            serverDto.addUser(userDto);
-        }
-
-        // Find start file. BATCH or SHELL depending on operating system.
-        Path startFilePath = null;
-
-        final String osName = System.getProperty("os.name");
-        if (osName.contains("win") || osName.contains("Win"))
-        {
-            try
-            {
-                startFilePath = Files.list(Paths.get(serverPath)).filter(file ->
-                {
-                    String fileName = file.getFileName().toString();
-                    if(fileName.endsWith(".bat") && (fileName.contains("start") || fileName.contains("Start") || fileName.contains("launch") || fileName.contains("Launch") || fileName.contains("Run") || fileName.contains("run")))
-                        return true;
-                    else return false;
-                }).findFirst().orElse(null);
-            }
-            catch (IOException e)
-            {
-                e.printStackTrace();
-            }
-        }
-        else
-        {
-            try
-            {
-                startFilePath = Files.list(Paths.get(serverPath)).filter(file ->
-                {
-                    String fileName = file.getFileName().toString();
-                    if(fileName.endsWith(".sh") && (fileName.contains("start") || fileName.contains("launch") || fileName.contains("run")))
-                        return true;
-                    else return false;
-                }).findFirst().orElse(null);
-            }
-            catch (IOException e)
-            {
-                e.printStackTrace();
-            }
-        }
-
-        if (startFilePath != null)
-            serverDto.setStartFilePath(startFilePath);
-
-
-        //Load server.properties
-        serverDto.loadProperties();
-
-        return serverDto;
-    }
+//    public static ServerDto fromServer(final Server server)
+//    {
+//        //TODO: Load server information from server.properties.
+//        final String serverPath = server.getPath();
+////        final User user = serverDto.getUser().toUser();
+//        final ServerDto serverDto = new ServerDto(server.getId(), server.getPath().substring(serverPath.lastIndexOf(File.separator) + 1), serverPath);
+//
+//        for (final User user : server.getUsers())
+//        {
+//            final UserDto userDto = new UserDto(user.getId(), user.getUsername(), user.getPassword());
+//            userDto.addServer(serverDto);
+//            serverDto.addUser(userDto);
+//        }
+//
+//        //Load server.properties
+//        serverDto.loadProperties();
+//
+//        return serverDto;
+//    }
 
     public void setStartFilePath(Path startFilePath)
     {

@@ -5,7 +5,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.stereotype.Component;
 import pl.bartlomiejstepien.mcsm.domain.dto.ServerDto;
-import pl.bartlomiejstepien.mcsm.domain.process.util.IsWindowsCondition;
+import pl.bartlomiejstepien.mcsm.domain.model.InstalledServer;
+import pl.bartlomiejstepien.mcsm.util.IsWindowsCondition;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -25,16 +26,16 @@ public class WindowsServerProcessHandler implements ServerProcessHandler
     private static final Pattern PATTERN = Pattern.compile("^[0-9]+.*$");
 
     @Override
-    public Process startServerProcess(ServerDto serverDto)
+    public Process startServerProcess(InstalledServer installedServer)
     {
         try
         {
-            final String serverDir = Paths.get(serverDto.getServerDir()).toAbsolutePath().toString();
-            return Runtime.getRuntime().exec("cmd /c start " + serverDto.getStartFilePath().getFileName().toString() + " title " + serverDto.getName(), null, new File(serverDir));
+            final String serverDir = installedServer.getServerDir().toAbsolutePath().toString();
+            return Runtime.getRuntime().exec("cmd /c start " + installedServer.getStartFilePath().getFileName().toString() + " title " + installedServer.getName(), null, new File(serverDir));
         }
         catch (IOException e)
         {
-            LOGGER.error("Could not start server with id=" + serverDto.getId(), e);
+            LOGGER.error("Could not start server with id=" + installedServer.getId(), e);
         }
         return null;
     }

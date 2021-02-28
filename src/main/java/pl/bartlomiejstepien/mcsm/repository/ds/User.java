@@ -113,17 +113,17 @@ public class User
         return this.servers.stream().filter(serverDto -> serverDto.getId() == id).findFirst();
     }
 
-    public UserDto toUser()
-    {
-        final UserDto userDto = new UserDto(this.id, this.username, this.password);
-        for (final Server server : this.servers)
-        {
-            final ServerDto serverDto = ServerDto.fromServer(server);
-            serverDto.addUser(userDto);
-            userDto.addServer(serverDto);
-        }
-        return userDto;
-    }
+//    public UserDto toUser()
+//    {
+//        final UserDto userDto = new UserDto(this.id, this.username, this.password);
+//        for (final Server server : this.servers)
+//        {
+//            final ServerDto serverDto = ServerDto.fromServer(server);
+//            serverDto.addUser(userDto);
+//            userDto.addServer(serverDto);
+//        }
+//        return userDto;
+//    }
 
     //    public List<Server> getServers()
 //    {

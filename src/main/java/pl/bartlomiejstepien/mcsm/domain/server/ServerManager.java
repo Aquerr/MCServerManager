@@ -1,9 +1,13 @@
 package pl.bartlomiejstepien.mcsm.domain.server;
 
+import pl.bartlomiejstepien.mcsm.auth.AuthenticatedUser;
 import pl.bartlomiejstepien.mcsm.domain.dto.ServerDto;
 import pl.bartlomiejstepien.mcsm.domain.exception.ServerNotRunningException;
+import pl.bartlomiejstepien.mcsm.domain.model.InstalledServer;
+import pl.bartlomiejstepien.mcsm.domain.model.ModPack;
 import pl.bartlomiejstepien.mcsm.domain.model.ServerProperties;
 
+import java.nio.file.Path;
 import java.util.List;
 import java.util.concurrent.Future;
 
@@ -24,4 +28,6 @@ public interface ServerManager
     void saveProperties(ServerDto serverDto, ServerProperties serverProperties);
 
     void deleteServer(final ServerDto serverDto);
+
+    InstalledServer installServerForModPack(final AuthenticatedUser authenticatedUser, ModPack modPack, Path serverPath);
 }

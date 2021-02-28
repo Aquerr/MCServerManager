@@ -1,4 +1,4 @@
-package pl.bartlomiejstepien.mcsm.domain.process.util;
+package pl.bartlomiejstepien.mcsm.util;
 
 import org.springframework.context.annotation.Condition;
 import org.springframework.context.annotation.ConditionContext;

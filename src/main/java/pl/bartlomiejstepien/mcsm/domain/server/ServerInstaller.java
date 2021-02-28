@@ -9,15 +9,17 @@ import org.springframework.stereotype.Component;
 import pl.bartlomiejstepien.mcsm.auth.AuthenticatedUser;
 import pl.bartlomiejstepien.mcsm.config.Config;
 import pl.bartlomiejstepien.mcsm.domain.model.InstallationStatus;
+import pl.bartlomiejstepien.mcsm.domain.model.InstalledServer;
 import pl.bartlomiejstepien.mcsm.domain.model.ModPack;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.*;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 @Component
 public class ServerInstaller
@@ -45,7 +47,7 @@ public class ServerInstaller
         return Optional.ofNullable(this.modpackInstallationStatus.get(serverId));
     }
 
-    public void installServerForModpack(AuthenticatedUser authenticatedUser, ModPack modPack, Path serverPath)
+    public boolean installServerForModpack(AuthenticatedUser authenticatedUser, ModPack modPack, Path serverPath)
     {
         try
         {
@@ -70,7 +72,8 @@ public class ServerInstaller
         }
 
         setInstallationStatus(modPack.getId(), new InstallationStatus(75, "Finishing up..."));
-
         setInstallationStatus(modPack.getId(), new InstallationStatus(100, "Server is ready!"));
+
+        return true;
     }
 }
