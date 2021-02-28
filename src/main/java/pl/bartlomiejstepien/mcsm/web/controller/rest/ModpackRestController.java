@@ -43,7 +43,7 @@ public class ModpackRestController
         return this.curseForgeAPIService.getModpackDescription(id);
     }
 
-    @PostMapping("/{id}/install")
+    @PostMapping(value = "/{id}/install", produces = MediaType.TEXT_PLAIN_VALUE)
     public int installModpack(@PathVariable("id") final int id, Authentication authentication, final HttpServletRequest httpServletRequest)
     {
         final AuthenticatedUser authenticatedUser = (AuthenticatedUser)authentication.getPrincipal();

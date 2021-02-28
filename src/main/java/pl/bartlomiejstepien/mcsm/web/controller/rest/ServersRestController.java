@@ -41,14 +41,14 @@ public class ServersRestController
         this.serverManager = serverManager;
     }
 
-    @GetMapping("/installation-status/{modpackId}")
+    @GetMapping(value = "/installation-status/{modpackId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public InstallationStatus getInstallationStatus(@PathVariable final int modpackId)
     {
         LOGGER.info("Getting installation status for id = " + modpackId);
         return this.serverService.getInstallationStatus(modpackId).orElse(new InstallationStatus(0, ""));
     }
 
-    @GetMapping("/{id}/latest-log/{lines}")
+    @GetMapping(value = "/{id}/latest-log/{lines}", produces = MediaType.TEXT_PLAIN_VALUE)
     public List<String> getLatestServerLog(final @PathVariable("id") int serverId, @PathVariable("lines") final int numberOfLines)
     {
         LOGGER.debug("Getting latest server log for server id =" + serverId + ", numberOfLines =" + numberOfLines);
@@ -65,7 +65,7 @@ public class ServersRestController
         final ServerDto serverDto = this.serverService.getServersForUser(authenticatedUser.getId()).stream()
                 .filter(s -> s.getId() == serverId)
                 .findFirst()
-                .orElseThrow(() -> new RuntimeException("Access denied!"));
+                .orElseThrow(() -> new ServerNotOwnedException("Access denied!"));
 
         try
         {
@@ -130,7 +130,7 @@ public class ServersRestController
         LOGGER.debug("Server has been imported.");
     }
 
-    @GetMapping(value = "/status/{id}", produces = MimeTypeUtils.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/status/{id}", produces = MediaType.TEXT_PLAIN_VALUE)
     public String checkServerStatus(@PathVariable final int id)
     {
         LOGGER.info("Checking status for server id = " + id);
@@ -139,7 +139,7 @@ public class ServersRestController
         return isRunning ? "Running" : "Not Running";
     }
 
-    @DeleteMapping(value = "/{id}")
+    @DeleteMapping(value = "/{id}", produces = MediaType.TEXT_PLAIN_VALUE)
     public String deleteServer(@PathVariable final int id, @AuthenticationPrincipal AuthenticatedUser authenticatedUser)
     {
         LOGGER.info("Deleting server for id: " + id);
