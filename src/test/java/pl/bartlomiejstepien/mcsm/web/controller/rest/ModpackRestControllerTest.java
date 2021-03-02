@@ -1,16 +1,20 @@
 package pl.bartlomiejstepien.mcsm.web.controller.rest;
 
 import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+import pl.bartlomiejstepien.mcsm.auth.AuthenticatedUser;
 import pl.bartlomiejstepien.mcsm.web.controller.BaseIntegrationTest;
 import pl.bartlomiejstepien.mcsm.service.CurseForgeAPIService;
 import pl.bartlomiejstepien.mcsm.service.ServerService;
 import pl.bartlomiejstepien.mcsm.service.UserService;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -30,6 +34,9 @@ class ModpackRestControllerTest extends BaseIntegrationTest
     private ServerService serverService;
     @MockBean
     private UserService userService;
+
+    @InjectMocks
+    private ModpackRestController modpackRestController;
 
     @Test
     @WithUserDetails(value = USER_USERNAME, userDetailsServiceBeanName = "userDetailsServiceTest")
@@ -52,7 +59,7 @@ class ModpackRestControllerTest extends BaseIntegrationTest
         final String url = POST_INSTALL_SERVER.replace("{id}", String.valueOf(MODPACK_ID));
         final Integer serverId = 1;
 
-        when(this.serverService.installServerForModpack(getTestUser(), MODPACK_ID)).thenReturn(serverId);
+        when(this.serverService.installServerForModpack(any(AuthenticatedUser.class), anyInt())).thenReturn(serverId);
 
         //when
         this.mockMvc.perform(MockMvcRequestBuilders.post(url))

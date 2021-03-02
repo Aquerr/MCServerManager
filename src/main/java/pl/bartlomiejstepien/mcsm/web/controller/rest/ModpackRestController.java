@@ -44,11 +44,11 @@ public class ModpackRestController
     }
 
     @PostMapping(value = "/{id}/install", produces = MediaType.TEXT_PLAIN_VALUE)
-    public int installModpack(@PathVariable("id") final int id, Authentication authentication, final HttpServletRequest httpServletRequest)
+    public String installModpack(@PathVariable("id") final int id, Authentication authentication, final HttpServletRequest httpServletRequest)
     {
         final AuthenticatedUser authenticatedUser = (AuthenticatedUser)authentication.getPrincipal();
         LOGGER.info("Install modpack id=" + id + " by " + authenticatedUser.getUsername() + " " + httpServletRequest.getRemoteAddr());
-        return this.serverService.installServerForModpack(authenticatedUser, id);
+        return String.valueOf(this.serverService.installServerForModpack(authenticatedUser, id));
     }
 
     @GetMapping(value = "/search", produces = MediaType.APPLICATION_JSON_VALUE)
