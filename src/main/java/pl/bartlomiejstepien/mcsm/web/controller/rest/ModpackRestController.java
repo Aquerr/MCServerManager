@@ -49,7 +49,7 @@ public class ModpackRestController
     public List<ServerPack> getServerPacksForModPack(@PathVariable("modpackId") final int modpackId)
     {
         final AuthenticatedUser authenticatedUser = authenticationFacade.getCurrentUser();
-        LOGGER.info("Get server packs for modpack id=" + modpackId + " by " + authenticatedUser.getUsername() + " " + authenticatedUser.getLocalIpAddress());
+        LOGGER.info("Get server packs for modpack id=" + modpackId + " by " + authenticatedUser.getUsername() + " " + authenticatedUser.getRemoteIpAddress());
         return this.curseForgeAPIService.getServerPacks(modpackId);
     }
 

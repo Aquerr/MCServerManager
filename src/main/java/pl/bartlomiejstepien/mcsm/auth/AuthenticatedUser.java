@@ -12,14 +12,14 @@ public class AuthenticatedUser implements UserDetails
     private final String username;
     private final String password;
 
-    private final String localIpAddress;
+    private final String remoteIpAddress;
 
-    public AuthenticatedUser(int id, String username, String password, String localIpAddress)
+    public AuthenticatedUser(int id, String username, String password, String remoteIpAddress)
     {
         this.id = id;
         this.username = username;
         this.password = password;
-        this.localIpAddress = localIpAddress;
+        this.remoteIpAddress = remoteIpAddress;
     }
 
     public int getId()
@@ -69,8 +69,8 @@ public class AuthenticatedUser implements UserDetails
         return true;
     }
 
-    public String getLocalIpAddress()
+    public String getRemoteIpAddress()
     {
-        return localIpAddress;
+        return remoteIpAddress;
     }
 }
