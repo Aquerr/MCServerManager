@@ -12,11 +12,14 @@ public class AuthenticatedUser implements UserDetails
     private final String username;
     private final String password;
 
-    public AuthenticatedUser(int id, String username, String password)
+    private final String localIpAddress;
+
+    public AuthenticatedUser(int id, String username, String password, String localIpAddress)
     {
         this.id = id;
         this.username = username;
         this.password = password;
+        this.localIpAddress = localIpAddress;
     }
 
     public int getId()
@@ -64,5 +67,10 @@ public class AuthenticatedUser implements UserDetails
     public boolean isEnabled()
     {
         return true;
+    }
+
+    public String getLocalIpAddress()
+    {
+        return localIpAddress;
     }
 }

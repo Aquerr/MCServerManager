@@ -4,27 +4,30 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
-import pl.bartlomiejstepien.mcsm.domain.dto.UserDto;
-import pl.bartlomiejstepien.mcsm.service.UserService;
+import org.springframework.transaction.annotation.Transactional;
+import pl.bartlomiejstepien.mcsm.repository.UserRepository;
+import pl.bartlomiejstepien.mcsm.repository.ds.User;
+
 
 @Component
 public class DataLoader
 {
-    private final UserService userService;
+    private final UserRepository userRepository;
 
     @Autowired
-    public DataLoader(final UserService userService)
+    public DataLoader(final UserRepository userRepository)
     {
-        this.userService = userService;
+        this.userRepository = userRepository;
     }
 
     @EventListener(ApplicationReadyEvent.class)
+    @Transactional
     public void loadData()
     {
-        final UserDto userDto = this.userService.find(1);
-        if (userDto == null || !userDto.getUsername().equals("Nerdi"))
+        final User user = this.userRepository.find(1);
+        if (user == null || !user.getUsername().equals("Nerdi"))
         {
-            this.userService.save(new UserDto(0, "Nerdi", "$2a$10$RsBi7zEwsAHxTgQO8cBX5Oe7iCPvIkGN3ichuibM9uGzmvx6TzFC6"));
+            this.userRepository.save(new User(0, "Nerdi", "$2a$10$RsBi7zEwsAHxTgQO8cBX5Oe7iCPvIkGN3ichuibM9uGzmvx6TzFC6"));
         }
     }
 }

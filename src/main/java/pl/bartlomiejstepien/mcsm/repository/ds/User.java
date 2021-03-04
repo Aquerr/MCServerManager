@@ -22,7 +22,7 @@ public class User
     @Column(name = "password")
     private String password;
 
-    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @ManyToMany(cascade = {CascadeType.ALL}, fetch = FetchType.EAGER)
     @JoinTable(name = "user_server", joinColumns = {@JoinColumn(name = "user_id")}, inverseJoinColumns = {@JoinColumn(name = "server_id")})
     private final List<Server> servers = new ArrayList<>();
 
@@ -90,6 +90,7 @@ public class User
 
     public void addServer(final Server server)
     {
+        server.getUsers().add(this);
         this.servers.add(server);
     }
 

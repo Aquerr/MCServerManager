@@ -7,21 +7,22 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 import pl.bartlomiejstepien.mcsm.config.Config;
 import pl.bartlomiejstepien.mcsm.config.CurseForgeAPIRoutes;
 import pl.bartlomiejstepien.mcsm.domain.exception.CouldNotDownloadServerFilesException;
 import pl.bartlomiejstepien.mcsm.domain.model.InstallationStatus;
 import pl.bartlomiejstepien.mcsm.domain.model.ModPack;
+import pl.bartlomiejstepien.mcsm.domain.model.ServerPack;
 import pl.bartlomiejstepien.mcsm.domain.server.ServerInstaller;
 import pl.bartlomiejstepien.mcsm.integration.curseforge.CurseforgeModpackConverter;
 
 import java.io.*;
 import java.net.*;
 import java.time.Instant;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class CurseForgeAPIService
@@ -126,9 +127,9 @@ public class CurseForgeAPIService
         return modpackDescription;
     }
 
-    public String getLatestServerDownloadUrl(final int modpackId,final int latestServerFileId)
+    public String getServerDownloadUrl(final int modpackId, final int serverFileId)
     {
-        final String url = CurseForgeAPIRoutes.MODPACK_LATEST_SERVER_DOWNLOAD_URL.replace("{modpackId}", String.valueOf(modpackId)).replace("{fileId}", String.valueOf(latestServerFileId));
+        final String url = CurseForgeAPIRoutes.MODPACK_LATEST_SERVER_DOWNLOAD_URL.replace("{modpackId}", String.valueOf(modpackId)).replace("{fileId}", String.valueOf(serverFileId));
         LOGGER.info("GET " + url);
         final String serverDownloadUrl = REST_TEMPLATE.getForObject(url, String.class);
         LOGGER.debug("Response: " + serverDownloadUrl);
@@ -142,8 +143,9 @@ public class CurseForgeAPIService
      * @param serverDownloadUrl the link to download from
      * @return the name of the zip file (with .zip extension)
      */
-    public String downloadServerFile(final ModPack modPack, String serverDownloadUrl) throws CouldNotDownloadServerFilesException
+    public boolean downloadServerFile(final ModPack modPack, String serverDownloadUrl) throws CouldNotDownloadServerFilesException
     {
+        LOGGER.info("Downloading server files for modpack {id=" + modPack.getId() + ", name=" + modPack.getName() + "}");
         try
         {
             final URL url = new URL(serverDownloadUrl);
@@ -178,6 +180,41 @@ public class CurseForgeAPIService
 //            e.printStackTrace();
 //        }
 
-        return modPack.getName();
+        return true;
+    }
+
+    public List<ModPack.ModpackFile> getModPackFiles(int modpackId)
+    {
+        final String url = CurseForgeAPIRoutes.MODPACK_FILES.replace("{modpackId}", String.valueOf(modpackId));
+        LOGGER.info("GET " + url);
+        final ArrayNode filesJsonArray = REST_TEMPLATE.getForObject(url, ArrayNode.class);
+        LOGGER.debug("Response: " + filesJsonArray);
+        return this.curseforgeModpackConverter.convertToModPackFiles(filesJsonArray);
+    }
+
+    /**
+     * Gets server packs for the given modpack
+     * @param modpackId the modpack id
+     * @return list of serverpacks
+     */
+    public List<ServerPack> getServerPacks(int modpackId)
+    {
+        final List<ModPack.ModpackFile> modpackFiles = getModPackFiles(modpackId);
+        return modpackFiles.stream()
+                .filter(modpackFile -> !StringUtils.isEmpty(modpackFile.getServerPackFileId()))
+                .sorted(Comparator.comparing(ModPack.ModpackFile::getFileDate).reversed())
+                .map(modpackFile -> new ServerPack(modpackFile.getServerPackFileId(), modpackFile.getDisplayName()))
+                .collect(Collectors.toList());
+    }
+
+    public ModPack.ModpackFile getModPackFile(ModPack modPack, int fileId)
+    {
+        final String url = CurseForgeAPIRoutes.MODPACK_FILE
+                .replace("{modpackId}", String.valueOf(modPack.getId()))
+                .replace("{fileId}", String.valueOf(fileId));
+        LOGGER.info("GET " + url);
+        final ObjectNode modpackFileJson = REST_TEMPLATE.getForObject(url, ObjectNode.class);
+        LOGGER.debug("Response: " + modpackFileJson);
+        return this.curseforgeModpackConverter.convertToModPackFile(modpackFileJson);
     }
 }

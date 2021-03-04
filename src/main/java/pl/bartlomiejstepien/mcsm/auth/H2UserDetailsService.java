@@ -33,6 +33,6 @@ public class H2UserDetailsService implements UserDetailsService
         if (user == null)
             throw new UsernameNotFoundException("Could not find user with username = " + username);
 
-        return new AuthenticatedUser(user.getId(), user.getUsername(), user.getPassword());
+        return new AuthenticatedUser(user.getId(), user.getUsername(), user.getPassword(), httpServletRequest.getLocalAddr());
     }
 }

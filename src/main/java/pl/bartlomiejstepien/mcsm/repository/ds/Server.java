@@ -9,17 +9,17 @@ import java.util.List;
 public class Server
 {
     @Id
-    @Column(name = "id", nullable = false, updatable = false, unique = true, insertable = false)
+    @Column(name = "id", nullable = false, updatable = false, unique = true)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    @Column(name = "path")
+    @Column(name = "path", nullable = false, unique = true)
     private String path;
 
-    @Column(name = "name")
+    @Column(name = "name", nullable = false)
     private String name;
 
-    @ManyToMany(mappedBy = "servers", cascade = CascadeType.ALL)
+    @ManyToMany(mappedBy = "servers", cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH, CascadeType.REFRESH})
     private final List<User> users = new ArrayList<>();
 
     public Server()

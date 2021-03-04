@@ -8,6 +8,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import pl.bartlomiejstepien.mcsm.auth.AuthenticatedUser;
+import pl.bartlomiejstepien.mcsm.domain.server.ServerManager;
 import pl.bartlomiejstepien.mcsm.web.controller.BaseIntegrationTest;
 import pl.bartlomiejstepien.mcsm.service.CurseForgeAPIService;
 import pl.bartlomiejstepien.mcsm.service.ServerService;
@@ -22,12 +23,15 @@ class ModpackRestControllerTest extends BaseIntegrationTest
 {
     private static final Integer MODPACK_ID = 1;
     private static final Integer CATEGORY_ID = 2;
+    private static final Integer SERVER_PACK_ID = 3;
 
     private static final String MODPACK_DESCRIPTION = "This is a test <p>description</p>";
 
     private static final String GET_MODPACK_DESCRIPTION_URL = "/api/modpacks/{id}/description";
-    private static final String POST_INSTALL_SERVER = "/api/modpacks/{id}/install";
+    private static final String POST_INSTALL_SERVER = "/api/modpacks/{modpackId}/serverpacks/{serverPackId}/install";
 
+    @MockBean
+    private ServerManager serverManager;
     @MockBean
     private CurseForgeAPIService curseForgeAPIService;
     @MockBean
@@ -56,10 +60,11 @@ class ModpackRestControllerTest extends BaseIntegrationTest
     @WithUserDetails(value = USER_USERNAME, userDetailsServiceBeanName = "userDetailsServiceTest")
     public void installServerStartsServerInstallation() throws Exception
     {
-        final String url = POST_INSTALL_SERVER.replace("{id}", String.valueOf(MODPACK_ID));
+        final String url = POST_INSTALL_SERVER.replace("{modpackId}", String.valueOf(MODPACK_ID))
+                .replace("{serverPackId}", String.valueOf(SERVER_PACK_ID));
         final Integer serverId = 1;
 
-        when(this.serverService.installServerForModpack(any(AuthenticatedUser.class), anyInt())).thenReturn(serverId);
+        when(this.serverManager.installServerForModpack(any(AuthenticatedUser.class), anyInt(), anyInt())).thenReturn(serverId);
 
         //when
         this.mockMvc.perform(MockMvcRequestBuilders.post(url))
@@ -67,6 +72,6 @@ class ModpackRestControllerTest extends BaseIntegrationTest
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.content().string(String.valueOf(1)));
 
-        verify(this.serverService).installServerForModpack(getTestUser(), MODPACK_ID);
+        verify(this.serverManager).installServerForModpack(getTestUser(), MODPACK_ID, SERVER_PACK_ID);
     }
 }

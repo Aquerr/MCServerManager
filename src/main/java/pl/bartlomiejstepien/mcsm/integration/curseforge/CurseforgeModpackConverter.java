@@ -9,6 +9,7 @@ import pl.bartlomiejstepien.mcsm.domain.model.ModPack;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 
 @Component
@@ -32,18 +33,34 @@ public class CurseforgeModpackConverter
         while (filesIterator.hasNext())
         {
             final JsonNode fileNode = filesIterator.next();
-
-            final int fileId = fileNode.get("id").intValue();
-            final String displayName = fileNode.get("displayName").textValue();
-            final String fileName = fileNode.get("fileName").textValue();
-            final Instant fileDate = Instant.parse(fileNode.get("fileDate").textValue());
-            final String downloadUrl = fileNode.get("downloadUrl").textValue();
-            final int serverPackFileId = fileNode.get("serverPackFileId").intValue();
-
-            final ModPack.ModpackFile modpackFile = new ModPack.ModpackFile(fileId, displayName, fileName, fileDate, downloadUrl, serverPackFileId);
+            final ModPack.ModpackFile modpackFile = convertToModPackFile((ObjectNode) fileNode);
             latestFiles.add(modpackFile);
         }
 
         return new ModPack(id, name, summary, thumbnail, version, latestFiles);
+    }
+
+    public ModPack.ModpackFile convertToModPackFile(final ObjectNode objectNode)
+    {
+        if (objectNode == null)
+            return null;
+
+        final int fileId = objectNode.get("id").intValue();
+        final String displayName = objectNode.get("displayName").textValue();
+        final String fileName = objectNode.get("fileName").textValue();
+        final Instant fileDate = Instant.parse(objectNode.get("fileDate").textValue());
+        final String downloadUrl = objectNode.get("downloadUrl").textValue();
+        final int serverPackFileId = objectNode.get("serverPackFileId").intValue();
+        return new ModPack.ModpackFile(fileId, displayName, fileName, fileDate, downloadUrl, serverPackFileId);
+    }
+
+    public List<ModPack.ModpackFile> convertToModPackFiles(ArrayNode modPackFilesJsonArray)
+    {
+        final List<ModPack.ModpackFile> modPackFiles = new ArrayList<>(modPackFilesJsonArray.size());
+        for (final JsonNode jsonNode : modPackFilesJsonArray)
+        {
+            modPackFiles.add(convertToModPackFile((ObjectNode) jsonNode));
+        }
+        return modPackFiles;
     }
 }

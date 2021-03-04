@@ -34,7 +34,7 @@ public class UserRepository
 
     public void save(final User user)
     {
-        this.entityManager.merge(user);
+        this.entityManager.persist(user);
     }
 
     public void delete(final int id)

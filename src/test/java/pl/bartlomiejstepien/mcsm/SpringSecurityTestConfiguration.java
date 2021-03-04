@@ -16,7 +16,7 @@ public class SpringSecurityTestConfiguration
     public static final String USER_USERNAME = "mcsm";
     public static final String USER_PASSWORD = "test123";
 
-    public static final AuthenticatedUser TEST_USER = new AuthenticatedUser(USER_ID, USER_USERNAME, USER_PASSWORD);
+    public static final AuthenticatedUser TEST_USER = new AuthenticatedUser(USER_ID, USER_USERNAME, USER_PASSWORD, "");
 
     @Bean("userDetailsServiceTest")
     @Primary

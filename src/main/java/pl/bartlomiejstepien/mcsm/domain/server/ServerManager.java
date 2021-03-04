@@ -17,7 +17,7 @@ public interface ServerManager
 
     Future<Boolean> stopServer(final ServerDto serverDto);
 
-    List<String> getLatestServerLog(ServerDto serverDto, int numberOfLines);
+    List<String> getLatestServerLog(int serverId, int numberOfLines);
 
     void sendCommand(final ServerDto serverDto, final String command) throws ServerNotRunningException;
 
@@ -30,4 +30,6 @@ public interface ServerManager
     void deleteServer(final ServerDto serverDto);
 
     InstalledServer installServerForModPack(final AuthenticatedUser authenticatedUser, ModPack modPack, Path serverPath);
+
+    int installServerForModpack(AuthenticatedUser authenticatedUser, int modpackId, int serverPackId);
 }

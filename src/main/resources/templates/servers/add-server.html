@@ -18,7 +18,7 @@
                     }).done(function (description) {
                         $("#modpack-modal .modal-title").text(modpackTitle);
                         $("#modpack-modal .modal-body").html(description);
-                        $("#modpack-modal #install-server").attr("modpack-id", modpackId);
+                        $("#modpack-modal #select-server-version").attr("modpack-id", modpackId);
                         $("#modpack-modal").modal("show");
                     });
                 });
@@ -93,32 +93,67 @@
                         }
                     })
                 }
-            })
+            });
 
-            $("#install-server").on("click", function () {
+            $("#select-server-version").on("click", function () {
+
+                let modpackId = $("#select-server-version").attr("modpack-id");
                 $("#modpack-modal").modal("hide");
 
-                $("#server-install-modal .modal-title").text("Server installation");
+                let selectServerVersionModal = $("#server-version-modal");
+                selectServerVersionModal.find("#install-server").attr("modpack-id", modpackId);
+                selectServerVersionModal.modal("show");
+
+                $("#modpack-modal #select-server-version").attr("modpack-id", modpackId);
+
+                console.log("Getting avaialble server packs for modpack id = " + modpackId);
+                $.ajax({
+                    url: "/api/modpacks/" + modpackId + "/serverpacks",
+                    method: "GET",
+                    success: function (response) {
+                        console.log(response);
+                        let serverVersionsList = $("#server-versions-list");
+                        serverVersionsList.empty();
+                        for (const serverpack of response) {
+                            serverVersionsList.append(new Option(serverpack["name"], serverpack["id"]));
+                        }
+                    }
+                });
+            });
+
+            $("#install-server").on("click", function () {
+                $("#server-version-modal").modal("hide");
                 $("#server-install-modal").modal("show");
 
                 let installationStatusMessageInterval;
-
                 let modpackId = $("#install-server").attr("modpack-id");
+                let serverPackId = $("#server-versions-list").val();
+
+                $("#server-install-modal #open-server").hide();
+                $("#server-install-modal .modal-body").html("                <div class=\"text-center\">\n" +
+                    "                    <p>Your modpack is being installed. Please wait!</p>\n" +
+                    "                    <div class=\"loader\" role=\"status\">\n" +
+                    "                        <span class=\"sr-only\">Loading...</span>\n" +
+                    "                    </div>\n" +
+                    "                    <p id=\"installation-status\"></p>\n" +
+                    "                </div>");
 
                 //TODO: Fire installation on the server...
                 $.ajax({
-                    url: "/api/modpacks/" + modpackId + "/install",
-                    method: "POST"
-                }).done(function (response) {
-                    console.log(response);
-                    clearInterval(installationStatusMessageInterval);
-                    $("#server-install-modal .modal-body").text("Your server is ready!");
-                    $("#server-install-modal #open-server").removeAttr("hidden");
-                    $("#server-install-modal #open-server").attr("href", "/servers/" + response);
-                }).fail(function (response) {
-                    console.log(response);
-                    clearInterval(installationStatusMessageInterval);
-                    $("#server-install-modal .modal-body").text(response["responseJSON"]["message"]);
+                    url: "/api/modpacks/" + modpackId + "/serverpacks/" + serverPackId + "/install",
+                    method: "POST",
+                    success: function (response) {
+                        console.log(response);
+                        clearInterval(installationStatusMessageInterval);
+                        $("#server-install-modal .modal-body").text("Your server is ready!");
+                        $("#server-install-modal #open-server").show();
+                        $("#server-install-modal #open-server").attr("href", "/servers/" + response);
+                    },
+                    error: function (errorResponse) {
+                        console.log(errorResponse);
+                        clearInterval(installationStatusMessageInterval);
+                        $("#server-install-modal .modal-body").text(errorResponse["responseJSON"]["message"]);
+                    }
                 });
 
                 function showInstallationStatus() {
@@ -164,7 +199,7 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Modal title</h5>
+                <h5 class="modal-title">Server installation</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
@@ -179,13 +214,33 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <a type="button" class="btn btn-primary" hidden id="open-server">Go to server</a>
+                <a type="button" class="btn btn-primary" style="display: none;" id="open-server">Go to server</a>
             </div>
         </div>
     </div>
 </div>
 
-<div class="modal fade bd-exmaple-modal-lg" tabindex="-1" role="dialog" id="modpack-modal">
+<div class="modal fade" tabindex="-1" role="dialog" id="server-version-modal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Select server version</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <select id="server-versions-list" class="form-control" ></select>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="install-server">Install</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" tabindex="-1" role="dialog" id="modpack-modal">
     <div class="modal-dialog modal-xl">
         <div class="modal-content">
             <div class="modal-header">
@@ -199,7 +254,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary" id="install-server">Install</button>
+                <button type="button" class="btn btn-primary" id="select-server-version">Install</button>
             </div>
         </div>
     </div>

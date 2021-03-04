@@ -7,24 +7,23 @@ import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import pl.bartlomiejstepien.mcsm.auth.AuthenticatedUser;
 import pl.bartlomiejstepien.mcsm.config.Config;
-import pl.bartlomiejstepien.mcsm.domain.model.InstalledServer;
-import pl.bartlomiejstepien.mcsm.domain.server.ServerInstaller;
-import pl.bartlomiejstepien.mcsm.domain.server.ServerManager;
-import pl.bartlomiejstepien.mcsm.repository.converter.ServerConverter;
-import pl.bartlomiejstepien.mcsm.domain.exception.ServerAlreadyOwnedException;
-import pl.bartlomiejstepien.mcsm.domain.exception.CouldNotDownloadServerFilesException;
-import pl.bartlomiejstepien.mcsm.domain.model.InstallationStatus;
-import pl.bartlomiejstepien.mcsm.domain.model.ModPack;
 import pl.bartlomiejstepien.mcsm.domain.dto.ServerDto;
 import pl.bartlomiejstepien.mcsm.domain.dto.UserDto;
+import pl.bartlomiejstepien.mcsm.domain.exception.ServerAlreadyOwnedException;
+import pl.bartlomiejstepien.mcsm.domain.model.InstallationStatus;
+import pl.bartlomiejstepien.mcsm.domain.server.ServerInstaller;
 import pl.bartlomiejstepien.mcsm.repository.ServerRepository;
+import pl.bartlomiejstepien.mcsm.repository.UserRepository;
+import pl.bartlomiejstepien.mcsm.repository.converter.ServerConverter;
 import pl.bartlomiejstepien.mcsm.repository.ds.Server;
+import pl.bartlomiejstepien.mcsm.repository.ds.User;
 
 import java.io.IOException;
-import java.nio.file.*;
-import java.util.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -34,29 +33,23 @@ public class ServerService
 
     private final Config config;
 
-    private final CurseForgeAPIService curseForgeAPIService;
     private final ServerRepository serverRepository;
-    private final UserService userService;
     private final ServerInstaller serverInstaller;
     private final ServerConverter serverConverter;
-    private final ServerManager serverManager;
+    private final UserRepository userRepository;
 
     @Autowired
     public ServerService(final Config config,
-                         final CurseForgeAPIService curseForgeAPIService,
-                         final UserService userService,
+                         final UserRepository userRepository,
                          final ServerRepository serverRepository,
                          final ServerInstaller serverInstaller,
-                         final ServerConverter serverConverter,
-                         final ServerManager serverManager)
+                         final ServerConverter serverConverter)
     {
         this.config = config;
-        this.curseForgeAPIService = curseForgeAPIService;
-        this.userService = userService;
+        this.userRepository = userRepository;
         this.serverRepository = serverRepository;
         this.serverInstaller = serverInstaller;
         this.serverConverter = serverConverter;
-        this.serverManager = serverManager;
     }
 
     @EventListener(ApplicationReadyEvent.class)
@@ -91,59 +84,11 @@ public class ServerService
         LOGGER.info("Structure generated!");
     }
 
-    /**
-     * Installs the server with the given modpack.
-     *
-     * @param authenticatedUser the username
-     * @param modpackId the modpack id
-     * @return newly generated server id
-     */
     @Transactional
-    public int installServerForModpack(final AuthenticatedUser authenticatedUser, final int modpackId)
+    public void addServer(final int userId, final ServerDto serverDto)
     {
-        final ModPack modPack = this.curseForgeAPIService.getModpack(modpackId);
-        Path serverPath = prepareServerPathForNewModpack(authenticatedUser, modPack);
-        if (isServerPathOccupied(serverPath))
-            throw new RuntimeException("Server for this modpack already exists!");
-
-        if (!isModPackAlreadyDownloaded(modPack))
-        {
-            try
-            {
-                //TODO: Add download status...
-                downloadServerFilesForModpack(modPack);
-            }
-            catch (CouldNotDownloadServerFilesException e)
-            {
-                e.printStackTrace();
-                return -1;
-            }
-        }
-
-        final InstalledServer installedServer = this.serverManager.installServerForModPack(authenticatedUser, modPack, serverPath);
-        final ServerDto serverDto = new ServerDto(installedServer.getId(), installedServer.getName(), installedServer.getServerDir().toString());
-        final UserDto userDto = this.userService.find(authenticatedUser.getId());
-        serverDto.addUser(userDto);
-        userDto.addServer(serverDto);
-        int serverId = addServer(serverDto);
-        serverDto.setId(serverId);
-        return serverId;
-    }
-
-    private Path prepareServerPathForNewModpack(AuthenticatedUser authenticatedUser, ModPack modPack) {
-        return Paths.get(config.getServersDir()).resolve(authenticatedUser.getUsername()).resolve(modPack.getName());
-    }
-
-    private boolean isServerPathOccupied(Path serverPath)
-    {
-        return Files.exists(serverPath);
-    }
-
-    @Transactional
-    public int addServer(final ServerDto serverDto)
-    {
-        final Server server = this.serverConverter.convertToServer(serverDto);
-        return this.serverRepository.save(server);
+        final User user = this.userRepository.find(userId);
+        user.addServer(this.serverConverter.convertToServer(serverDto));
     }
 
     @Transactional
@@ -161,8 +106,6 @@ public class ServerService
     @Transactional
     public void deleteServer(final int id)
     {
-        ServerDto serverDto = getServer(id);
-        this.serverManager.deleteServer(serverDto);
         this.serverRepository.delete(id);
     }
 
@@ -182,22 +125,14 @@ public class ServerService
     }
 
     @Transactional
-    public List<String> getServerLatestLog(int serverId, int numberOfLines)
-    {
-        final ServerDto serverDto = getServer(serverId);
-        return this.serverManager.getLatestServerLog(serverDto, numberOfLines);
-    }
-
-    @Transactional
     public void importServer(final int userId, final String serverName, final String path)
     {
-        final UserDto userDto = this.userService.find(userId);
-        final ServerDto serverDto = getServerByPath(path).orElse(new ServerDto(0, serverName, path));
-        if (serverDto.getId() != 0 && userDto.getServers().stream().anyMatch(x -> path.equals(x.getServerDir())))
-            throw new ServerAlreadyOwnedException(userDto, serverDto);
-        userDto.addServer(serverDto);
-        serverDto.addUser(userDto);
-        this.userService.save(userDto);
+        final User user = this.userRepository.find(userId);
+        final Server server = Optional.ofNullable(this.serverRepository.findByPath(path)).orElse(new Server(0, serverName, path));
+        if (server.getId() != 0 && user.getServers().stream().anyMatch(x -> path.equals(x.getPath())))
+            throw new ServerAlreadyOwnedException(new UserDto(user.getId(), user.getUsername(), user.getPassword()), new ServerDto(server.getId(), server.getName(), server.getPath()));
+        user.addServer(server);
+        this.userRepository.save(user);
     }
 
     @Transactional
@@ -210,19 +145,5 @@ public class ServerService
     public Optional<InstallationStatus> getInstallationStatus(int serverId)
     {
         return this.serverInstaller.getInstallationStatus(serverId);
-    }
-
-    public void downloadServerFilesForModpack(final ModPack modPack) throws CouldNotDownloadServerFilesException
-    {
-        final int latestServerFileId = modPack.getLatestFiles().get(0).getServerPackFileId();
-        String serverDownloadUrl = this.curseForgeAPIService.getLatestServerDownloadUrl(modPack.getId(), latestServerFileId);
-        //TODO: Fix url. Parenthesis "(" and ")" still not work
-        serverDownloadUrl = serverDownloadUrl.replaceAll(" ", "+");
-        this.curseForgeAPIService.downloadServerFile(modPack, serverDownloadUrl);
-    }
-
-    private boolean isModPackAlreadyDownloaded(final ModPack modPack)
-    {
-        return Files.exists(this.config.getDownloadsDirPath().resolve(Paths.get(modPack.getName() + "_" + modPack.getVersion())));
     }
 }

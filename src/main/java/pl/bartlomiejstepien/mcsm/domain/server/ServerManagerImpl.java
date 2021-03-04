@@ -7,19 +7,25 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.FileSystemUtils;
 import pl.bartlomiejstepien.mcsm.auth.AuthenticatedUser;
+import pl.bartlomiejstepien.mcsm.config.Config;
 import pl.bartlomiejstepien.mcsm.domain.dto.ServerDto;
+import pl.bartlomiejstepien.mcsm.domain.exception.CouldNotDownloadServerFilesException;
 import pl.bartlomiejstepien.mcsm.domain.exception.ServerNotRunningException;
 import pl.bartlomiejstepien.mcsm.domain.model.InstalledServer;
 import pl.bartlomiejstepien.mcsm.domain.model.ModPack;
 import pl.bartlomiejstepien.mcsm.domain.model.ServerProperties;
 import pl.bartlomiejstepien.mcsm.domain.process.ServerProcessHandler;
+import pl.bartlomiejstepien.mcsm.service.CurseForgeAPIService;
+import pl.bartlomiejstepien.mcsm.service.ServerService;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.util.*;
 import java.util.concurrent.*;
-import java.util.stream.Stream;
 
 @Component
 public class ServerManagerImpl implements ServerManager
@@ -30,16 +36,27 @@ public class ServerManagerImpl implements ServerManager
     private static final Map<Integer, InstalledServer> RUNNING_SERVERS = new HashMap<>();
     private static final String SERVER_PROPERTIES_FILE_NAME = "server.properties";
 
+    private final Config config;
+    private final ServerService serverService;
     private final ServerProcessHandler serverProcessHandler;
     private final ServerInstaller serverInstaller;
     private final ServerStartFileFinder serverStartFileFinder;
+    private final CurseForgeAPIService curseForgeAPIService;
 
     @Autowired
-    public ServerManagerImpl(ServerProcessHandler serverProcessHandler, final ServerInstaller serverInstaller, final ServerStartFileFinder serverStartFileFinder)
+    public ServerManagerImpl(final Config config,
+                             final ServerProcessHandler serverProcessHandler,
+                             final ServerService serverService,
+                             final ServerInstaller serverInstaller,
+                             final ServerStartFileFinder serverStartFileFinder,
+                             final CurseForgeAPIService curseForgeAPIService)
     {
+        this.config = config;
         this.serverProcessHandler = serverProcessHandler;
+        this.serverService = serverService;
         this.serverInstaller = serverInstaller;
         this.serverStartFileFinder = serverStartFileFinder;
+        this.curseForgeAPIService = curseForgeAPIService;
     }
 
     @Override
@@ -103,8 +120,10 @@ public class ServerManagerImpl implements ServerManager
     }
 
     @Override
-    public List<String> getLatestServerLog(final ServerDto serverDto, final int numberOfLines)
+    public List<String> getLatestServerLog(final int serverId, final int numberOfLines)
     {
+        final ServerDto serverDto = this.serverService.getServer(serverId);
+
         final String serverPath = serverDto.getServerDir();
         final Path latestLogPath = Paths.get(serverPath + File.separator + "logs" + File.separator + "latest.log");
 
@@ -254,6 +273,7 @@ public class ServerManagerImpl implements ServerManager
                 e.printStackTrace();
             }
         });
+        this.serverService.deleteServer(serverDto.getId());
     }
 
     @Override
@@ -265,6 +285,43 @@ public class ServerManagerImpl implements ServerManager
         acceptEula(serverPath);
 
         return prepareServer(new ServerDto(0, modPack.getName(), serverPath.toString()));
+    }
+
+    @Override
+    public int installServerForModpack(AuthenticatedUser authenticatedUser, int modpackId, int serverPackId)
+    {
+        final ModPack modPack = this.curseForgeAPIService.getModpack(modpackId);
+        Path serverPath = prepareServerPathForNewModpack(authenticatedUser, modPack);
+        if (isServerPathOccupied(serverPath))
+            throw new RuntimeException("Server for this modpack already exists!");
+
+        if (!isModPackAlreadyDownloaded(modPack))
+        {
+            try
+            {
+                //TODO: Add download status...
+                downloadServerFilesForModpack(modPack, serverPackId);
+            }
+            catch (CouldNotDownloadServerFilesException e)
+            {
+                e.printStackTrace();
+                return -1;
+            }
+        }
+
+        final InstalledServer installedServer = installServerForModPack(authenticatedUser, modPack, serverPath);
+        this.serverService.addServer(authenticatedUser.getId(), new ServerDto(installedServer.getId(), installedServer.getName(), installedServer.getServerDir().toString()));
+        final int serverId = this.serverService.getServerByPath(installedServer.getServerDir().toString())
+                .map(ServerDto::getId)
+                .orElse(-1);
+
+//        final User user = this.userRepository.find(authenticatedUser.getId());
+//        final Server server = new Server(0, installedServer.getName(), installedServer.getServerDir().toString());
+//        user.addServer(server);
+//        this.serverRepository.save(server);
+
+        LOGGER.info("Server id=" + serverId + " is ready!");
+        return serverId;
     }
 
     private InstalledServer prepareServer(final ServerDto serverDto)
@@ -283,13 +340,13 @@ public class ServerManagerImpl implements ServerManager
     {
         try
         {
-            final Stream<Path> walkStream = Files.walk(serverPath, FileVisitOption.FOLLOW_LINKS);
-            final Path newServerPath = walkStream.filter(path -> path.getFileName().toString().contains("minecraft_server"))
+            final Path newServerPath = Files.walk(serverPath, FileVisitOption.FOLLOW_LINKS)
+                    .filter(path -> path.getFileName().toString().contains("minecraft_server"))
                     .findFirst()
                     .orElse(null);
             if (newServerPath != null)
             {
-                serverPath = serverPath.resolve(newServerPath.getName(newServerPath.getNameCount() - 2));
+                serverPath = newServerPath.getParent();
             }
         }
         catch (IOException e)
@@ -310,5 +367,27 @@ public class ServerManagerImpl implements ServerManager
         catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    private Path prepareServerPathForNewModpack(AuthenticatedUser authenticatedUser, ModPack modPack) {
+        return Paths.get(config.getServersDir()).resolve(authenticatedUser.getUsername()).resolve(modPack.getName());
+    }
+
+    private boolean isServerPathOccupied(Path serverPath)
+    {
+        return Files.exists(serverPath);
+    }
+
+    private boolean isModPackAlreadyDownloaded(final ModPack modPack)
+    {
+        return Files.exists(this.config.getDownloadsDirPath().resolve(Paths.get(modPack.getName() + "_" + modPack.getVersion())));
+    }
+
+    private void downloadServerFilesForModpack(final ModPack modPack, int serverPackId) throws CouldNotDownloadServerFilesException
+    {
+        String serverDownloadUrl = this.curseForgeAPIService.getServerDownloadUrl(modPack.getId(), serverPackId);
+        //TODO: Fix url. Parenthesis "(" and ")" still not work
+        serverDownloadUrl = serverDownloadUrl.replaceAll(" ", "%20");
+        this.curseForgeAPIService.downloadServerFile(modPack, serverDownloadUrl);
     }
 }

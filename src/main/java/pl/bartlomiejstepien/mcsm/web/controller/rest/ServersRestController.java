@@ -52,7 +52,7 @@ public class ServersRestController
     public List<String> getLatestServerLog(final @PathVariable("id") int serverId, @PathVariable("lines") final int numberOfLines)
     {
         LOGGER.debug("Getting latest server log for server id =" + serverId + ", numberOfLines =" + numberOfLines);
-        return this.serverService.getServerLatestLog(serverId, numberOfLines);
+        return this.serverManager.getLatestServerLog(serverId, numberOfLines);
     }
 
     @PostMapping(value = "/{id}/command", consumes = MediaType.TEXT_PLAIN_VALUE)
