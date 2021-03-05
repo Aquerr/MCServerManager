@@ -21,7 +21,7 @@ public class HomeController
     private static final Logger LOGGER = LoggerFactory.getLogger(HomeController.class);
 
     private final ServerService serverService;
-    private AuthenticationFacade authenticationFacade;
+    private final AuthenticationFacade authenticationFacade;
 
     @Autowired
     public HomeController(final AuthenticationFacade authenticationFacade, final ServerService serverService)
@@ -31,7 +31,7 @@ public class HomeController
     }
 
     @GetMapping("/")
-    public String root(final Model model, HttpServletRequest httpServletRequest)
+    public String root(final Model model)
     {
         final AuthenticatedUser authenticatedUser = authenticationFacade.getCurrentUser();
 
