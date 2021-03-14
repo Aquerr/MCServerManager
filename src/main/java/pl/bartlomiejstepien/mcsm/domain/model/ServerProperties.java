@@ -1,5 +1,8 @@
 package pl.bartlomiejstepien.mcsm.domain.model;
 
+import com.fasterxml.jackson.annotation.JsonAnyGetter;
+import com.fasterxml.jackson.annotation.JsonAnySetter;
+
 import java.util.*;
 
 public class ServerProperties
@@ -76,11 +79,13 @@ public class ServerProperties
         return "ServerProperties{" + getAsMap().toString() +'}';
     }
 
+    @JsonAnySetter
     public void setProperty(final String propertyName, String value)
     {
         this.properties.setProperty(propertyName, value);
     }
 
+    @JsonAnyGetter
     public <T> T getProperty(final String propertyName)
     {
         return (T) this.properties.getProperty(propertyName);
