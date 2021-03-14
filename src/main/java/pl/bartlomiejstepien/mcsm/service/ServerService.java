@@ -52,38 +52,6 @@ public class ServerService
         this.serverConverter = serverConverter;
     }
 
-    @EventListener(ApplicationReadyEvent.class)
-    public void startup()
-    {
-        LOGGER.info("Preparing file structure...");
-
-        final Path serversDirectoryPath = this.config.getServersDirPath();
-        if (Files.notExists(serversDirectoryPath))
-        {
-            try
-            {
-                Files.createDirectory(serversDirectoryPath);
-            }
-            catch (IOException e)
-            {
-                e.printStackTrace();
-            }
-        }
-        if (Files.notExists(this.config.getDownloadsDirPath()))
-        {
-            try
-            {
-                Files.createDirectory(this.config.getDownloadsDirPath());
-            }
-            catch (IOException e)
-            {
-                e.printStackTrace();
-            }
-        }
-
-        LOGGER.info("Structure generated!");
-    }
-
     @Transactional
     public void addServer(final int userId, final ServerDto serverDto)
     {

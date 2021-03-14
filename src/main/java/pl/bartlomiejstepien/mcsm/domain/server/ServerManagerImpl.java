@@ -4,6 +4,8 @@ import com.github.t9t.minecraftrconclient.RconClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 import org.springframework.util.FileSystemUtils;
 import pl.bartlomiejstepien.mcsm.auth.AuthenticatedUser;
@@ -45,7 +47,7 @@ public class ServerManagerImpl implements ServerManager
 
     @Autowired
     public ServerManagerImpl(final Config config,
-                             final ServerProcessHandler serverProcessHandler,
+                             @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection") final ServerProcessHandler serverProcessHandler,
                              final ServerService serverService,
                              final ServerInstaller serverInstaller,
                              final ServerStartFileFinder serverStartFileFinder,
@@ -58,6 +60,39 @@ public class ServerManagerImpl implements ServerManager
         this.serverStartFileFinder = serverStartFileFinder;
         this.curseForgeAPIService = curseForgeAPIService;
     }
+
+    @EventListener(ApplicationReadyEvent.class)
+    public void startup()
+    {
+        LOGGER.info("Preparing file structure...");
+
+        final Path serversDirectoryPath = this.config.getServersDirPath();
+        if (Files.notExists(serversDirectoryPath))
+        {
+            try
+            {
+                Files.createDirectory(serversDirectoryPath);
+            }
+            catch (IOException e)
+            {
+                e.printStackTrace();
+            }
+        }
+        if (Files.notExists(this.config.getDownloadsDirPath()))
+        {
+            try
+            {
+                Files.createDirectory(this.config.getDownloadsDirPath());
+            }
+            catch (IOException e)
+            {
+                e.printStackTrace();
+            }
+        }
+
+        LOGGER.info("Structure generated!");
+    }
+
 
     @Override
     public void startServer(ServerDto serverDto)
