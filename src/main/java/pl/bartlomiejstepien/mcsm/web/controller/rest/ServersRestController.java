@@ -4,12 +4,11 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.web.bind.annotation.*;
 import pl.bartlomiejstepien.mcsm.Routes;
 import pl.bartlomiejstepien.mcsm.auth.AuthenticatedUser;
+import pl.bartlomiejstepien.mcsm.auth.AuthenticationFacade;
 import pl.bartlomiejstepien.mcsm.domain.exception.ServerNotOwnedException;
 import pl.bartlomiejstepien.mcsm.domain.exception.ServerNotRunningException;
 import pl.bartlomiejstepien.mcsm.domain.model.InstallationStatus;
@@ -30,12 +29,14 @@ public class ServersRestController
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(ServersRestController.class);
 
+    private final AuthenticationFacade authenticationFacade;
     private final ServerService serverService;
     private final UserService userService;
     private final ServerManager serverManager;
 
-    public ServersRestController(final ServerService serverService, final UserService userService, final ServerManager serverManager)
+    public ServersRestController(final AuthenticationFacade authenticationFacade, final ServerService serverService, final UserService userService, final ServerManager serverManager)
     {
+        this.authenticationFacade = authenticationFacade;
         this.serverService = serverService;
         this.userService = userService;
         this.serverManager = serverManager;
@@ -56,12 +57,11 @@ public class ServersRestController
     }
 
     @PostMapping(value = "/{id}/command", consumes = MediaType.TEXT_PLAIN_VALUE)
-    public void postCommand(final @PathVariable("id") int serverId, @RequestBody String command, final Authentication authentication)
+    public void postCommand(final @PathVariable("id") int serverId, @RequestBody String command)
     {
         LOGGER.info("Posting command {" + command + "} to server id = " + serverId);
 
-        final AuthenticatedUser authenticatedUser = (AuthenticatedUser)authentication.getPrincipal();
-
+        final AuthenticatedUser authenticatedUser = authenticationFacade.getCurrentUser();
         final ServerDto serverDto = this.serverService.getServersForUser(authenticatedUser.getId()).stream()
                 .filter(s -> s.getId() == serverId)
                 .findFirst()
@@ -73,16 +73,16 @@ public class ServersRestController
         }
         catch (final ServerNotRunningException exception)
         {
-
+            LOGGER.warn("Server is not running!", exception);
         }
     }
 
     @PostMapping("/{id}/toggle")
-    public void toggleServer(final @PathVariable("id") int serverId, final Authentication authentication)
+    public void toggleServer(final @PathVariable("id") int serverId)
     {
         LOGGER.info("Toggling server. Server Id = " + serverId);
 
-        final AuthenticatedUser authenticatedUser = (AuthenticatedUser) authentication.getPrincipal();
+        AuthenticatedUser authenticatedUser = authenticationFacade.getCurrentUser();
         final UserDto userDto = this.userService.find(authenticatedUser.getId());
 
         final Optional<ServerDto> optionalServer = userDto.getServerById(serverId);
@@ -101,12 +101,11 @@ public class ServersRestController
     }
 
     @PostMapping(value = "/{id}/settings", consumes = MimeTypeUtils.APPLICATION_JSON_VALUE)
-    public void saveSettings(final @PathVariable("id") int serverId, @RequestBody @Valid ServerProperties serverProperties, final Authentication authentication)
+    public void saveSettings(final @PathVariable("id") int serverId, @RequestBody @Valid ServerProperties serverProperties)
     {
         LOGGER.info("Saving server settings " + serverProperties + " for server id " + serverId);
 
-        final AuthenticatedUser authenticatedUser = (AuthenticatedUser)authentication.getPrincipal();
-
+        AuthenticatedUser authenticatedUser = authenticationFacade.getCurrentUser();
         final ServerDto serverDto = this.serverService.getServersForUser(authenticatedUser.getId()).stream()
                 .filter(s -> s.getId() == serverId)
                 .findFirst()
@@ -117,14 +116,15 @@ public class ServersRestController
     }
 
     @PostMapping(value = "/import-server", consumes = MimeTypeUtils.APPLICATION_JSON_VALUE)
-    public void importServer(final @RequestBody ObjectNode json, final Authentication authentication)
+    public void importServer(final @RequestBody ObjectNode json)
     {
         LOGGER.info("importServer request: " + json.toString());
 
         String serverName = json.get("server-name").textValue();
         String path = json.get("path").textValue();
         LOGGER.info("Importing server. Server name: " + serverName + ", server path: " + path);
-        final AuthenticatedUser authenticatedUser = (AuthenticatedUser)authentication.getPrincipal();
+
+        AuthenticatedUser authenticatedUser = authenticationFacade.getCurrentUser();
 
         serverService.importServer(authenticatedUser.getId(), serverName, path);
         LOGGER.debug("Server has been imported.");
@@ -140,9 +140,10 @@ public class ServersRestController
     }
 
     @DeleteMapping(value = "/{id}", produces = MediaType.TEXT_PLAIN_VALUE)
-    public String deleteServer(@PathVariable final int id, @AuthenticationPrincipal AuthenticatedUser authenticatedUser)
+    public String deleteServer(@PathVariable final int id)
     {
         LOGGER.info("Deleting server for id: " + id);
+        AuthenticatedUser authenticatedUser = authenticationFacade.getCurrentUser();
         if (this.serverService.getServersForUser(authenticatedUser.getId()).stream().anyMatch(serverDto -> serverDto.getId() == id))
         {
             serverService.deleteServer(id);

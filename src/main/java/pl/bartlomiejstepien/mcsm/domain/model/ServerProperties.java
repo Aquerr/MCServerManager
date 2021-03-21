@@ -30,22 +30,22 @@ public class ServerProperties
 
     public boolean isOnlineMode()
     {
-        return this.getProperty(PROPERTY_NAME_ONLINE_MODE);
+        return Boolean.parseBoolean(this.properties.getProperty(PROPERTY_NAME_ONLINE_MODE));
     }
 
     public int getPort()
     {
-        return this.getProperty(PROPERTY_NAME_SERVER_PORT);
+        return Integer.parseInt(this.properties.getProperty(PROPERTY_NAME_SERVER_PORT));
     }
 
     public boolean isPvp()
     {
-        return this.getProperty(PROPERTY_NAME_PVP);
+        return Boolean.parseBoolean(this.properties.getProperty(PROPERTY_NAME_PVP));
     }
 
     public int getRconPort()
     {
-        return this.getProperty(PROPERTY_NAME_RCON_PORT);
+        return Integer.parseInt(this.properties.getProperty(PROPERTY_NAME_RCON_PORT));
     }
 
     public String getRconPassword()
