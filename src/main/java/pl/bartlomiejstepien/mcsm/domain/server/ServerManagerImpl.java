@@ -158,9 +158,7 @@ public class ServerManagerImpl implements ServerManager
     public List<String> getLatestServerLog(final int serverId, final int numberOfLines)
     {
         final ServerDto serverDto = this.serverService.getServer(serverId);
-
-        final String serverPath = serverDto.getServerDir();
-        final Path latestLogPath = Paths.get(serverPath + File.separator + "logs" + File.separator + "latest.log");
+        final Path latestLogPath = serverDto.getLatestLogFilePath();
 
         if (Files.notExists(latestLogPath))
             return Collections.emptyList();
@@ -202,7 +200,10 @@ public class ServerManagerImpl implements ServerManager
 
         try(final RconClient rconClient = RconClient.open("localhost", serverDto.getServerProperties().getRconPort(), serverDto.getServerProperties().getRconPassword()))
         {
-            rconClient.sendCommand(command);
+            final String response = rconClient.sendCommand(command);
+
+            // Put the response in the log file so that it is visible in the browser.
+            Files.write(serverDto.getLatestLogFilePath(), response.getBytes(), StandardOpenOption.APPEND);
         }
         catch(final Exception exception)
         {

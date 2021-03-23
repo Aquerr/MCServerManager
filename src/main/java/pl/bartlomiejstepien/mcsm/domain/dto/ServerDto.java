@@ -131,9 +131,9 @@ public class ServerDto
         return serverProperties;
     }
 
-    public void loadProperties()
+    public Path getLatestLogFilePath()
     {
-
+        return Paths.get(this.serverDir).resolve("logs").resolve("latest.log");
     }
 
     @Override
