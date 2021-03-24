@@ -11,5 +11,9 @@ public interface ServerProcessHandler
 
     void stopServerProcess(final ServerDto serverDto) throws IOException;
 
+
+    /**
+     * Implementations are expected to return -1 if the server is not running.
+     */
     long getServerProcessId(final ServerDto serverDto);
 }
