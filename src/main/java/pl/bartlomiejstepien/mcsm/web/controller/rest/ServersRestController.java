@@ -15,6 +15,7 @@ import pl.bartlomiejstepien.mcsm.domain.model.InstallationStatus;
 import pl.bartlomiejstepien.mcsm.domain.dto.ServerDto;
 import pl.bartlomiejstepien.mcsm.domain.model.ServerProperties;
 import pl.bartlomiejstepien.mcsm.domain.dto.UserDto;
+import pl.bartlomiejstepien.mcsm.domain.platform.Platform;
 import pl.bartlomiejstepien.mcsm.domain.server.ServerManager;
 import pl.bartlomiejstepien.mcsm.service.ServerService;
 import pl.bartlomiejstepien.mcsm.service.UserService;
@@ -118,15 +119,15 @@ public class ServersRestController
     @PostMapping(value = "/import-server", consumes = MimeTypeUtils.APPLICATION_JSON_VALUE)
     public void importServer(final @RequestBody ObjectNode json)
     {
-        LOGGER.info("importServer request: " + json.toString());
+        LOGGER.info("/importServer: " + json.toString());
 
         String serverName = json.get("server-name").textValue();
         String path = json.get("path").textValue();
-        LOGGER.info("Importing server. Server name: " + serverName + ", server path: " + path);
+        String platform = json.get("platform").textValue();
 
         AuthenticatedUser authenticatedUser = authenticationFacade.getCurrentUser();
 
-        serverService.importServer(authenticatedUser.getId(), serverName, path);
+        serverService.importServer(authenticatedUser.getId(), serverName, path, Platform.valueOf(platform.toUpperCase()));
         LOGGER.debug("Server has been imported.");
     }
 

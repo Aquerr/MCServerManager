@@ -12,6 +12,7 @@ import pl.bartlomiejstepien.mcsm.domain.dto.ServerDto;
 import pl.bartlomiejstepien.mcsm.domain.dto.UserDto;
 import pl.bartlomiejstepien.mcsm.domain.exception.ServerAlreadyOwnedException;
 import pl.bartlomiejstepien.mcsm.domain.model.InstallationStatus;
+import pl.bartlomiejstepien.mcsm.domain.platform.Platform;
 import pl.bartlomiejstepien.mcsm.domain.server.ServerInstaller;
 import pl.bartlomiejstepien.mcsm.repository.ServerRepository;
 import pl.bartlomiejstepien.mcsm.repository.UserRepository;
@@ -93,12 +94,13 @@ public class ServerService
     }
 
     @Transactional
-    public void importServer(final int userId, final String serverName, final String path)
+    public void importServer(final int userId, final String serverName, final String path, Platform platform)
     {
         final User user = this.userRepository.find(userId);
         final Server server = Optional.ofNullable(this.serverRepository.findByPath(path)).orElse(new Server(0, serverName, path));
         if (server.getId() != 0 && user.getServers().stream().anyMatch(x -> path.equals(x.getPath())))
             throw new ServerAlreadyOwnedException(new UserDto(user.getId(), user.getUsername(), user.getPassword()), new ServerDto(server.getId(), server.getName(), server.getPath()));
+        server.setPlatform(platform.getName());
         user.addServer(server);
         this.userRepository.save(user);
     }

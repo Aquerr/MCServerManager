@@ -18,6 +18,7 @@
                 var data = {};
                 data["server-name"] = $("#server-name").val();
                 data["path"] = $("#path").val();
+                data["platform"] = $("#platform").val();
                 $.ajax({
                     url: "/api/servers/import-server",
                     method: "POST",
@@ -52,6 +53,14 @@
                     <div class="form-group">
                         <label for="path">Path</label>
                         <input id="path" type="text" name="path" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="platform">Platform</label>
+                        <select id="platform" class="form-control" required>
+                            <th:block th:each="platform : ${T(pl.bartlomiejstepien.mcsm.domain.platform.Platform).values()}">
+                                <option th:value="${platform.getName()}" th:text="${platform.getName()}"></option>
+                            </th:block>
+                        </select>
                     </div>
                 </div>
                 <div class="modal-footer">
