@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/fragments :: head (pageTitle='Select platform')">
+</head>
+<script type="text/javascript" th:src="@{/js/select-platform.js}"></script>
+<body>
+    <div th:replace="fragments/fragments :: header"></div>
+
+    <div class="container mt-4">
+        <h3>Select platform</h3>
+        <hr>
+
+        <th:block th:each="platform : ${T(pl.bartlomiejstepien.mcsm.domain.platform.Platform).values()}">
+            <div th:if="${platform.isAvailable()}" class="card mt-2 mr-2 card-clickable" style="flex-direction: row">
+                <div style="padding: 1rem; margin: auto;">
+                    <img class="platform-img" th:src="@{${platform.getImagePath()}}" alt="No platform image" style="display: inline-block;">
+                </div>
+                <div class="card-body" style="display:inline-block; padding: 0.5rem;">
+                    <h3 class="card-title" th:text="${platform.getName()}"></h3>
+                    <pre th:text="${platform.getDescription()}"></pre>
+                </div>
+            </div>
+
+            <div th:if="!${platform.isAvailable()}" class="card mt-2 mr-2" style="flex-direction: row; opacity: 35%">
+                <div style="padding: 1rem; margin: auto;">
+                    <img class="platform-img" th:src="@{${platform.getImagePath()}}" alt="No platform image" style="display: inline-block;">
+                </div>
+                <div class="card-body" style="display:inline-block; padding: 0.5rem;">
+                    <h3 class="card-title" th:text="${platform.getName()}"></h3>
+                    <pre th:text="${platform.getDescription()}"></pre>
+                </div>
+            </div>
+
+        </th:block>
+    </div>
+</body>
+</html>

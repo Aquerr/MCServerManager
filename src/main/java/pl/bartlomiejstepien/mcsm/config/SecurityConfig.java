@@ -24,7 +24,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter
     {
         http
             .authorizeRequests()
-                .antMatchers("/css/**", "/js/**", "/webjars/**", "/favicon.ico").permitAll()
+                .antMatchers("/css/**", "icons/**", "/js/**", "/webjars/**", "/favicon.ico").permitAll()
             .and()
                 .csrf().ignoringAntMatchers("/api/**")
             .and()

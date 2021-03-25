@@ -4,8 +4,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.ModelAndView;
 import pl.bartlomiejstepien.mcsm.auth.AuthenticatedUser;
+import pl.bartlomiejstepien.mcsm.domain.platform.Platform;
 import pl.bartlomiejstepien.mcsm.integration.curseforge.Category;
 import pl.bartlomiejstepien.mcsm.integration.curseforge.Versions;
 import pl.bartlomiejstepien.mcsm.domain.model.ModPack;
@@ -15,6 +18,7 @@ import pl.bartlomiejstepien.mcsm.service.CurseForgeAPIService;
 import pl.bartlomiejstepien.mcsm.service.ServerService;
 
 import java.util.List;
+import java.util.Map;
 
 @Controller
 @RequestMapping("/servers")
@@ -33,14 +37,29 @@ public class ServersController
     }
 
     @GetMapping("/add-server")
-    public String addServer(final Model model)
+    public ModelAndView addServer(final ModelAndView modelAndView, @RequestParam("platform") String platformName)
     {
-        final List<ModPack> modPacks = this.curseForgeAPIService.getModpacks(0, "", "", 24, 0);
-        model.addAttribute("modpacks", modPacks);
-        model.addAttribute("categories", Category.values());
-        model.addAttribute("versions", Versions.VERSIONS);
-        return "servers/add-server";
+        Platform platform = Platform.valueOf(platformName.toUpperCase());
+
+        switch (platform)
+        {
+            case BUKKIT:
+            case SPIGOT:
+            case FORGE:
+                return prepareForgeModelAndView(modelAndView);
+            case SPONGE:
+
+            default:
+                throw new IllegalArgumentException("No platform specified!");
+        }
     }
+
+    @GetMapping("/select-platform")
+    public String selectPlatform()
+    {
+        return "servers/select-platform";
+    }
+
 
     @GetMapping("/{id}")
     public String showServer(final @PathVariable("id") int id, final Model model, final Authentication authentication)
@@ -56,5 +75,16 @@ public class ServersController
 
         model.addAttribute("server", serverDto);
         return "servers/server-panel";
+    }
+
+    private ModelAndView prepareForgeModelAndView(ModelAndView modelAndView)
+    {
+        ModelMap model = modelAndView.getModelMap();
+        final List<ModPack> modPacks = this.curseForgeAPIService.getModpacks(0, "", "", 24, 0);
+        model.addAttribute("modpacks", modPacks);
+        model.addAttribute("categories", Category.values());
+        model.addAttribute("versions", Versions.VERSIONS);
+        modelAndView.setViewName("servers/select-modpack");
+        return modelAndView;
     }
 }
