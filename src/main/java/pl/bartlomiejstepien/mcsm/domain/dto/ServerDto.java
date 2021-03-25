@@ -1,17 +1,13 @@
 package pl.bartlomiejstepien.mcsm.domain.dto;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import pl.bartlomiejstepien.mcsm.domain.model.ServerProperties;
-import pl.bartlomiejstepien.mcsm.repository.ds.Server;
-import pl.bartlomiejstepien.mcsm.repository.ds.User;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Objects;
 
 public class ServerDto
 {
@@ -20,49 +16,10 @@ public class ServerDto
     private String serverDir;
 
     private final List<UserDto> userDtos = new ArrayList<>();
-
     private final List<String> players = new LinkedList<>();
-
     private Path startFilePath;
-
-    // Properties
-//    private String levelName;
-//    private boolean onlineMode;
-//    private int port;
-//    private boolean pvp;
-
+    private String platform;
     private final ServerProperties serverProperties = new ServerProperties();
-
-    //Query
-
-    //Rcon
-//    private int rconPort;
-//    private String rconPassword;
-
-//    public static ServerDto fromServer(final Server server)
-//    {
-//        //TODO: Load server information from server.properties.
-//        final String serverPath = server.getPath();
-////        final User user = serverDto.getUser().toUser();
-//        final ServerDto serverDto = new ServerDto(server.getId(), server.getPath().substring(serverPath.lastIndexOf(File.separator) + 1), serverPath);
-//
-//        for (final User user : server.getUsers())
-//        {
-//            final UserDto userDto = new UserDto(user.getId(), user.getUsername(), user.getPassword());
-//            userDto.addServer(serverDto);
-//            serverDto.addUser(userDto);
-//        }
-//
-//        //Load server.properties
-//        serverDto.loadProperties();
-//
-//        return serverDto;
-//    }
-
-    public void setStartFilePath(Path startFilePath)
-    {
-        this.startFilePath = startFilePath;
-    }
 
     public ServerDto()
     {
@@ -134,6 +91,21 @@ public class ServerDto
     public Path getLatestLogFilePath()
     {
         return Paths.get(this.serverDir).resolve("logs").resolve("latest.log");
+    }
+
+    public void setStartFilePath(Path startFilePath)
+    {
+        this.startFilePath = startFilePath;
+    }
+
+    public String getPlatform()
+    {
+        return platform;
+    }
+
+    public void setPlatform(String platform)
+    {
+        this.platform = platform;
     }
 
     @Override

@@ -5,10 +5,45 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.2.xsd">
 
-    <changeSet  author="Nerdi"  id="changelog-001">
-        <createTable  tableName="TablesAndTables">
-            <column  name="COLUMN1"  type="TEXT">
-                <constraints  nullable="true"  primaryKey="false"  unique="false"/>
+    <changeSet id="create_mcsm_user" author="Nerdi">
+        <sqlFile path="createMcsmUser.sql" relativeToChangelogFile="true"/>
+    </changeSet>
+    <changeSet id="create_user" author="Nerdi">
+        <createTable tableName="mcsm_user">
+            <column name="id" autoIncrement="true" type="int">
+                <constraints primaryKey="true" nullable="false" unique="true"/>
+            </column>
+            <column name="username" type="VARCHAR(100)">
+                <constraints unique="true" nullable="false"/>
+            </column>
+            <column name="password" type="VARCHAR(200)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet id="create_server" author="Nerdi">
+        <createTable tableName="server">
+            <column name="id" autoIncrement="true" type="int">
+                <constraints primaryKey="true" nullable="false" unique="true"/>
+            </column>
+            <column name="name" type="VARCHAR(250)">
+                <constraints nullable="false" unique="false"/>
+            </column>
+            <column name="path" type="VARCHAR(250)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="platform" type="VARCHAR(20)">
+                <constraints nullable="false" unique="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet id="create_user_server" author="Nerdi">
+        <createTable tableName="user_server">
+            <column name="user_id" type="int">
+                <constraints nullable="false" foreignKeyName="fk_user" references="mcsm_user(id)"/>
+            </column>
+            <column name="server_id" type="int">
+                <constraints nullable="false" foreignKeyName="fk_server" references="server(id)"/>
             </column>
         </createTable>
     </changeSet>

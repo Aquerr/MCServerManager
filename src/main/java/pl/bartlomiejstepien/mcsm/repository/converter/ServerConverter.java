@@ -17,6 +17,7 @@ public class ServerConverter
             return new ServerDto();
 
         final ServerDto serverDto = new ServerDto(server.getId(), server.getPath().substring(server.getPath().lastIndexOf(File.separator) + 1), server.getPath());
+        serverDto.setPlatform(server.getPlatform());
         for (final User user : server.getUsers())
         {
             final UserDto userDto = new UserDto(user.getId(), user.getUsername(), user.getPassword());
@@ -32,6 +33,7 @@ public class ServerConverter
             return new Server();
 
         final Server server = new Server(serverDto.getId(), serverDto.getName(), serverDto.getServerDir());
+        server.setPlatform(serverDto.getPlatform());
         for (final UserDto userDto : serverDto.getUsers())
         {
             final User user = new User(userDto.getId(), userDto.getUsername(), userDto.getPassword());

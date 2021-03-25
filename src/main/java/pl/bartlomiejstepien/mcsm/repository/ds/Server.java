@@ -19,6 +19,9 @@ public class Server
     @Column(name = "name", nullable = false)
     private String name;
 
+    @Column(name = "platform", nullable = false)
+    private String platform;
+
     @ManyToMany(mappedBy = "servers", cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH, CascadeType.REFRESH})
     private final List<User> users = new ArrayList<>();
 
@@ -74,8 +77,13 @@ public class Server
         this.users.addAll(users);
     }
 
-//    public ServerDto toServer()
-//    {
-//        return ServerDto.fromServer(this);
-//    }
+    public String getPlatform()
+    {
+        return platform;
+    }
+
+    public void setPlatform(String platform)
+    {
+        this.platform = platform;
+    }
 }
