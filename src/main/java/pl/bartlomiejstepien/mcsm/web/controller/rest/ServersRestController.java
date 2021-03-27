@@ -167,6 +167,7 @@ public class ServersRestController
     @GetMapping("/{id}/file-structure")
     public ResponseEntity<?> fileStructure(final @PathVariable("id") int serverId)
     {
+        LOGGER.info("/{}/file-structure", serverId);
         final AuthenticatedUser authenticatedUser = this.authenticationFacade.getCurrentUser();
         if (!hasAccessToServer(authenticatedUser, serverId))
         {
@@ -174,6 +175,7 @@ public class ServersRestController
         }
 
         List<FancyTreeNode> nodes = this.fileService.getServerFileStructure(this.serverService.getServer(serverId));
+        LOGGER.info("Returning file tree = " + Arrays.toString(nodes.toArray()));
         return ResponseEntity.ok(nodes);
     }
 
