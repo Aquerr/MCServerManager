@@ -73,7 +73,7 @@ public class FileServiceImpl implements FileService
             Files.walk(Paths.get(serverDto.getServerDir()))
                     .filter(path -> !Files.isDirectory(path))
                     .filter(path -> path.getFileName().toString().equals(fileName))
-                    .filter(this::filterRestrictedFiles)
+                    .filter(path -> !isRestrictedFile(path))
                     .findFirst()
                     .ifPresent(path -> {
                         try
@@ -180,7 +180,7 @@ public class FileServiceImpl implements FileService
         }
     }
 
-    private boolean filterRestrictedFiles(Path path)
+    private boolean isRestrictedFile(Path path)
     {
         String pathFileName = path.getFileName().toString();
         return Files.isDirectory(path)
