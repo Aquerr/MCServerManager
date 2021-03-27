@@ -153,16 +153,18 @@
             <input id="server-id" type="text" th:value="${server.getId()}" hidden>
 
             <ul class="nav nav-tabs" id="tabs" role="tablist" style="display: inline-flex">
+                <li class="nav-item float-right" role="presentation" id="server-li-item">
+                    <!--                    <a th:if="${!server.isRunning()}" id="toggle-button" class="nav-link" style="color: #007bff;text-decoration: none;background-color: transparent; cursor: pointer;">Start Server</a>-->
+                    <!--                    <a th:if="${server.isRunning()}" id="toggle-button" class="nav-link" style="color: #007bff;text-decoration: none;background-color: transparent; cursor: pointer;">Stop Server</a>-->
+                </li>
                 <li class="nav-item" role="presentation">
                     <a class="nav-link active" id="server-console-tab" data-toggle="tab" href="#server-console" role="tab" aria-controls="server-console" aria-selected="true">Console</a>
                 </li>
                 <li class="nav-item" role="presentation">
                     <a class="nav-link" id="server-settings-tab" data-toggle="tab" href="#server-settings" role="tab" aria-controls="server-settings" aria-selected="false">Settings</a>
                 </li>
-
-                <li class="nav-item float-right" role="presentation" id="server-li-item">
-<!--                    <a th:if="${!server.isRunning()}" id="toggle-button" class="nav-link" style="color: #007bff;text-decoration: none;background-color: transparent; cursor: pointer;">Start Server</a>-->
-<!--                    <a th:if="${server.isRunning()}" id="toggle-button" class="nav-link" style="color: #007bff;text-decoration: none;background-color: transparent; cursor: pointer;">Stop Server</a>-->
+                <li class="nav-item" role="presentation">
+                    <a class="nav-link" id="server-files" th:href="'/servers/' + ${server.getId()} + '/files'" aria-selected="false">Files</a>
                 </li>
             </ul>
             <div style="float: right; display: inline-flex">

@@ -77,6 +77,13 @@ public class ServersController
         return "servers/server-panel";
     }
 
+    @GetMapping("/{id}/files")
+    public String files(Model model, @PathVariable("id") int serverId)
+    {
+        model.addAttribute("serverId", serverId);
+        return "servers/server-files";
+    }
+
     private ModelAndView prepareForgeModelAndView(ModelAndView modelAndView)
     {
         ModelMap model = modelAndView.getModelMap();

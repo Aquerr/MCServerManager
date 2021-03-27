@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/fragments :: head (pageTitle='Select platform')">
+</head>
+<script src="//code.jquery.com/jquery-3.4.1.min.js"></script>
+<link href="//cdn.jsdelivr.net/npm/jquery.fancytree@2.27/dist/skin-win8/ui.fancytree.min.css" rel="stylesheet">
+<script src="//cdn.jsdelivr.net/npm/jquery.fancytree@2.27/dist/jquery.fancytree-all-deps.min.js"></script>
+<script type="text/javascript" th:src="@{/js/server-files.js}"></script>
+<script type="text/javascript" th:src="@{/js/ace.min.js}"></script>
+<body>
+    <div th:replace="fragments/fragments :: header"></div>
+
+    <div class="container mt-4">
+
+        <h3>File Browser</h3>
+        <hr>
+
+        <input id="server-id" hidden th:value="${serverId}">
+
+        <div class="mt-3 mb-3">
+            <a id="back-button" class="btn btn-primary" type="button" th:href="'/servers/' + ${serverId}">Go back</a>
+        </div>
+
+        <div style="display: flex;">
+            <div id="tree" style="width: 25%; display: inline-block;"></div>
+
+            <div id="file-editor-parent" style="width: 75%; height: 600px; display: none;">
+                <div id="file-editor" style="width: 100%; height: 100%"></div>
+                <hr>
+                <button id="save-file" class="btn btn-primary float-right" type="button" onclick="saveFile()">Save</button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

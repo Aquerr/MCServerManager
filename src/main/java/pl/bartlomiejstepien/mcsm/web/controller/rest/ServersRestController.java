@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.web.bind.annotation.*;
 import pl.bartlomiejstepien.mcsm.Routes;
@@ -11,18 +12,19 @@ import pl.bartlomiejstepien.mcsm.auth.AuthenticatedUser;
 import pl.bartlomiejstepien.mcsm.auth.AuthenticationFacade;
 import pl.bartlomiejstepien.mcsm.domain.exception.ServerNotOwnedException;
 import pl.bartlomiejstepien.mcsm.domain.exception.ServerNotRunningException;
+import pl.bartlomiejstepien.mcsm.domain.model.FancyTreeNode;
 import pl.bartlomiejstepien.mcsm.domain.model.InstallationStatus;
 import pl.bartlomiejstepien.mcsm.domain.dto.ServerDto;
 import pl.bartlomiejstepien.mcsm.domain.model.ServerProperties;
 import pl.bartlomiejstepien.mcsm.domain.dto.UserDto;
 import pl.bartlomiejstepien.mcsm.domain.platform.Platform;
 import pl.bartlomiejstepien.mcsm.domain.server.ServerManager;
+import pl.bartlomiejstepien.mcsm.service.FileService;
 import pl.bartlomiejstepien.mcsm.service.ServerService;
 import pl.bartlomiejstepien.mcsm.service.UserService;
 
 import javax.validation.Valid;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @RestController
 @RequestMapping(Routes.API_SERVERS)
@@ -34,13 +36,19 @@ public class ServersRestController
     private final ServerService serverService;
     private final UserService userService;
     private final ServerManager serverManager;
+    private final FileService fileService;
 
-    public ServersRestController(final AuthenticationFacade authenticationFacade, final ServerService serverService, final UserService userService, final ServerManager serverManager)
+    public ServersRestController(final AuthenticationFacade authenticationFacade,
+                                 final ServerService serverService,
+                                 final UserService userService,
+                                 final ServerManager serverManager,
+                                 final FileService fileService)
     {
         this.authenticationFacade = authenticationFacade;
         this.serverService = serverService;
         this.userService = userService;
         this.serverManager = serverManager;
+        this.fileService = fileService;
     }
 
     @GetMapping(value = "/installation-status/{modpackId}", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -154,5 +162,47 @@ public class ServersRestController
         {
             throw new ServerNotOwnedException("You don't have access to do this");
         }
+    }
+
+    @GetMapping("/{id}/file-structure")
+    public ResponseEntity<?> fileStructure(final @PathVariable("id") int serverId)
+    {
+        final AuthenticatedUser authenticatedUser = this.authenticationFacade.getCurrentUser();
+        if (!hasAccessToServer(authenticatedUser, serverId))
+        {
+            throw new ServerNotOwnedException("You don't have access to do this");
+        }
+
+        List<FancyTreeNode> nodes = this.fileService.getServerFileStructure(this.serverService.getServer(serverId));
+        return ResponseEntity.ok(nodes);
+    }
+
+    @GetMapping("/{id}/file-content/{fileName}")
+    public ResponseEntity<?> getFileContent(final @PathVariable("id") int serverId, final @PathVariable("fileName") String fileName)
+    {
+        final AuthenticatedUser authenticatedUser = this.authenticationFacade.getCurrentUser();
+        if (!hasAccessToServer(authenticatedUser, serverId))
+        {
+            throw new ServerNotOwnedException("You don't have access to do this");
+        }
+
+        return ResponseEntity.ok(this.fileService.getFileContent(fileName, this.serverService.getServer(serverId)));
+    }
+
+    @PostMapping(value = "/{id}/file-content/{fileName}", consumes = MediaType.TEXT_PLAIN_VALUE)
+    public ResponseEntity<?> saveFileContent(final @PathVariable("id") int serverId, final @PathVariable("fileName") String fileName, @RequestBody String content)
+    {
+        final AuthenticatedUser authenticatedUser = this.authenticationFacade.getCurrentUser();
+        if (!hasAccessToServer(authenticatedUser, serverId))
+        {
+            throw new ServerNotOwnedException("You don't have access to do this");
+        }
+
+        return ResponseEntity.ok(this.fileService.saveFileContent(fileName, content, this.serverService.getServer(serverId)));
+    }
+
+    private boolean hasAccessToServer(final AuthenticatedUser authenticatedUser, final int serverId)
+    {
+        return this.serverService.getServersForUser(authenticatedUser.getId()).stream().anyMatch(serverDto -> serverDto.getId() == serverId);
     }
 }
