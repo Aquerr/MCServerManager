@@ -16,6 +16,7 @@ import pl.bartlomiejstepien.mcsm.domain.exception.ServerNotRunningException;
 import pl.bartlomiejstepien.mcsm.domain.model.InstalledServer;
 import pl.bartlomiejstepien.mcsm.domain.model.ModPack;
 import pl.bartlomiejstepien.mcsm.domain.model.ServerProperties;
+import pl.bartlomiejstepien.mcsm.domain.platform.Platform;
 import pl.bartlomiejstepien.mcsm.domain.process.ServerProcessHandler;
 import pl.bartlomiejstepien.mcsm.service.CurseForgeAPIService;
 import pl.bartlomiejstepien.mcsm.service.ServerService;
@@ -346,7 +347,9 @@ public class ServerManagerImpl implements ServerManager
         }
 
         final InstalledServer installedServer = installServerForModPack(authenticatedUser, modPack, serverPath);
-        this.serverService.addServer(authenticatedUser.getId(), new ServerDto(installedServer.getId(), installedServer.getName(), installedServer.getServerDir().toString()));
+        ServerDto serverDto = new ServerDto(installedServer.getId(), installedServer.getName(), installedServer.getServerDir().toString());
+        serverDto.setPlatform(Platform.FORGE.getName());
+        this.serverService.addServer(authenticatedUser.getId(), serverDto);
         final int serverId = this.serverService.getServerByPath(installedServer.getServerDir().toString())
                 .map(ServerDto::getId)
                 .orElse(-1);
