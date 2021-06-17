@@ -1,5 +1,8 @@
 package pl.bartlomiejstepien.mcsm.integration.curseforge;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
+@JsonFormat(shape = JsonFormat.Shape.OBJECT)
 public enum Category
 {
     ALL_CATEGORIES(0, "All Categories"),

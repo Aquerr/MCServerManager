@@ -1,5 +1,8 @@
 package pl.bartlomiejstepien.mcsm.domain.platform;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
+@JsonFormat(shape = JsonFormat.Shape.OBJECT)
 public enum Platform
 {
     BUKKIT("Bukkit", "Server that allows installation of plugins", "/icons/Bukkit@2x.png", false),

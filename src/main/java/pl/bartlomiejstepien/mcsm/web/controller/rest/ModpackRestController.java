@@ -11,18 +11,21 @@ import pl.bartlomiejstepien.mcsm.auth.AuthenticatedUser;
 import pl.bartlomiejstepien.mcsm.auth.AuthenticationFacade;
 import pl.bartlomiejstepien.mcsm.domain.model.ServerPack;
 import pl.bartlomiejstepien.mcsm.domain.server.ServerManager;
-import pl.bartlomiejstepien.mcsm.web.controller.HomeController;
+import pl.bartlomiejstepien.mcsm.integration.curseforge.Category;
+import pl.bartlomiejstepien.mcsm.integration.curseforge.Versions;
 import pl.bartlomiejstepien.mcsm.domain.model.ModPack;
 import pl.bartlomiejstepien.mcsm.service.CurseForgeAPIService;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping(Routes.API_MODPACKS)
 public class ModpackRestController
 {
-    private static final Logger LOGGER = LoggerFactory.getLogger(HomeController.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ModpackRestController.class);
 
     private final AuthenticationFacade authenticationFacade;
     private final CurseForgeAPIService curseForgeAPIService;
@@ -73,5 +76,19 @@ public class ModpackRestController
     {
         LOGGER.info("Get " + size + " modpacks named=" + modpackName + " for version=" + version + " and category=" + categoryId + " starting at index=" + index);
         return this.curseForgeAPIService.getModpacks(categoryId, modpackName, version, size, index);
+    }
+
+    @GetMapping(value = "/categories", produces = MediaType.APPLICATION_JSON_VALUE)
+    public List<Category> getCategories()
+    {
+        LOGGER.info("GET /categories");
+        return Arrays.stream(Category.values()).collect(Collectors.toList());
+    }
+
+    @GetMapping(value = "/versions", produces = MediaType.APPLICATION_JSON_VALUE)
+    public List<String> getVersions()
+    {
+        LOGGER.info("GET /versions");
+        return Arrays.stream(Versions.VERSIONS).collect(Collectors.toList());
     }
 }

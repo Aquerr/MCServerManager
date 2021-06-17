@@ -1,0 +1,27 @@
+<div class="container mt-4">
+  <h3>Select platform</h3>
+  <hr>
+
+  <div *ngFor="let platform of platforms | async">
+    <div *ngIf="platform.available" class="card mt-2 mr-2 card-clickable" style="flex-direction: row" [routerLink]="['/servers/add-server']" [queryParams]="{platform: platform.name.toLowerCase()}">
+      <div style="padding: 1rem; margin: auto;">
+        <img class="platform-img" [src]="'assets/' + platform.imagePath" alt="No platform image" style="display: inline-block;">
+      </div>
+      <div class="card-body" style="display:inline-block; padding: 0.5rem;">
+        <h3 class="card-title" [textContent]="platform.name"></h3>
+        <pre>{{platform.description}}</pre>
+      </div>
+    </div>
+
+    <div *ngIf="!platform.available" class="card mt-2 mr-2" style="flex-direction: row; opacity: 35%">
+      <div style="padding: 1rem; margin: auto;">
+        <img class="platform-img" [src]="'assets/' + platform.imagePath" alt="No platform image" style="display: inline-block;">
+      </div>
+      <div class="card-body" style="display:inline-block; padding: 0.5rem;">
+        <h3 class="card-title" [textContent]="platform.name"></h3>
+        <pre [textContent]="platform.description"></pre>
+      </div>
+    </div>
+  </div>
+
+</div>

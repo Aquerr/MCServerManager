@@ -1,0 +1,130 @@
+<div class="modal" tabindex="-1" role="dialog" id="server-install-modal">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Server installation</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body text-center">
+        <div class="text-center">
+          <p>Your modpack is being installed. Please wait!</p>
+          <div class="loader" role="status">
+            <span class="sr-only">Loading...</span>
+          </div>
+          <p id="installation-status"></p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <a type="button" class="btn btn-primary" style="display: none;" id="open-server">Go to server</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" tabindex="-1" role="dialog" id="server-version-modal">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Select server version</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <select id="server-versions-list" class="form-control" ></select>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" id="install-server">Install</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" tabindex="-1" role="dialog" id="modpack-modal">
+  <div class="modal-dialog modal-xl">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Modal title</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p>Modal body text goes here.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" id="select-server-version">Install</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container mt-4" style="max-width: 1240px;">
+
+  <h3>Add server</h3>
+  <hr>
+
+  <div>
+    <h5 style="display: inline-block;">Select the modpack you would like to install</h5>
+    <div class="combo-boxes" style="display: inline-block; float: right;">
+      <div style="display: inline-block">
+        <input type="text" class="form-control" id="modpack-name-search" placeholder="Search Modpack Name" [(ngModel)]="searchedModPackName" (keydown.enter)="loadModpacks()">
+      </div>
+      <div style="display: inline-block;">
+        <mat-form-field>
+          <mat-label>Favorite food</mat-label>
+          <mat-select>
+            <mat-option *ngFor="let category of categories | async" [value]="category.id">
+              {{category.name}}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+<!--        <label for="category-filter">Filter By</label>-->
+<!--        <select id="category-filter" class="form-control" style="display: inline-block; width: auto;" (ngModelChange)="onCategoryChange($event)" [ngModel]="selectedCategoryId">-->
+<!--          <ng-container *ngFor="let category of categories | async">-->
+<!--            <option [value]="category.id" [text]="category.name"></option>-->
+<!--          </ng-container>-->
+<!--        </select>-->
+      </div>
+      <div style="display: inline-block;">
+        <select id="version-filter" class="form-control" style="display: inline-block; width: auto;" (ngModelChange)="onVersionChange($event)" [ngModel]="selectedVersion">
+          <ng-container *ngFor="let version of versions | async">
+            <option *ngIf="version == ''" value="">All Game Versions</option>
+            <option *ngIf="version != ''" [value]="version" [text]="version"></option>
+          </ng-container>
+        </select>
+      </div>
+    </div>
+  </div>
+  <div id="modpacks-list" class="text-center" style="display: inline-block;">
+    <ng-container *ngFor="let modpack of modpacks">
+      <div class="card mt-2 mr-2 card-clickable modpack-card" (click)="onModpackCardClick(modpack)">
+        <img class="card-img-top" [src]="modpack.thumbnailUrl" alt="Card image cap">
+        <div class="card-body">
+          <h5 class="card-title">{{modpack.name}}</h5>
+          <p class="card-version">{{'Version: ' + modpack.version}}</p>
+          <input class="modpack-id" hidden [value]="modpack.id">
+          <p class="card-text">{{modpack.summary}}</p>
+        </div>
+      </div>
+    </ng-container>
+  </div>
+
+
+</div>
+
+<div id="modpack-card-template" hidden>
+  <div class="card mt-2 mr-2 card-clickable modpack-card">
+    <img class="card-img-top" alt="Card image cap">
+    <div class="card-body">
+      <h5 class="card-title"></h5>
+      <p class="card-version"></p>
+      <input class="modpack-id" hidden>
+      <p class="card-text"></p>
+    </div>
+  </div>
+</div>

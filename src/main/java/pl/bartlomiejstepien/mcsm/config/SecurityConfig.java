@@ -10,14 +10,25 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import pl.bartlomiejstepien.mcsm.Routes;
 
 @Configuration
 @EnableWebSecurity
-public class SecurityConfig extends WebSecurityConfigurerAdapter
+public class SecurityConfig extends WebSecurityConfigurerAdapter implements WebMvcConfigurer
 {
     @Autowired
     private UserDetailsService userDetailsService;
+
+    @Override
+    public void addCorsMappings(CorsRegistry registry)
+    {
+        registry.addMapping("/**")
+                .allowedOrigins("http://localhost:4200")
+                .allowedMethods("GET", "DELETE", "POST", "PUT");
+    }
 
     @Override
     protected void configure(HttpSecurity http) throws Exception
@@ -41,6 +52,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter
                 .permitAll()
             .and()
             .authorizeRequests()
+                .antMatchers("/api/**/*").permitAll()
+//                .antMatchers("/api/platforms").permitAll()
+//                .antMatchers("/api/modpacks/categories").permitAll()
+//                .antMatchers("/api/modpacks/versions").permitAll()
             .anyRequest().authenticated()
             .and();
     }
