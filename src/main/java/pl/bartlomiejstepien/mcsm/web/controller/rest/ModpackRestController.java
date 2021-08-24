@@ -11,7 +11,6 @@ import pl.bartlomiejstepien.mcsm.auth.AuthenticatedUser;
 import pl.bartlomiejstepien.mcsm.auth.AuthenticationFacade;
 import pl.bartlomiejstepien.mcsm.domain.model.ServerPack;
 import pl.bartlomiejstepien.mcsm.domain.server.ServerManager;
-import pl.bartlomiejstepien.mcsm.web.controller.HomeController;
 import pl.bartlomiejstepien.mcsm.domain.model.ModPack;
 import pl.bartlomiejstepien.mcsm.service.CurseForgeAPIService;
 
@@ -22,7 +21,7 @@ import java.util.List;
 @RequestMapping(Routes.API_MODPACKS)
 public class ModpackRestController
 {
-    private static final Logger LOGGER = LoggerFactory.getLogger(HomeController.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ModpackRestController.class);
 
     private final AuthenticationFacade authenticationFacade;
     private final CurseForgeAPIService curseForgeAPIService;
