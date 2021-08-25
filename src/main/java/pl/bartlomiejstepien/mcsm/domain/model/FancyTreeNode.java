@@ -41,4 +41,14 @@ public class FancyTreeNode
     {
         return children;
     }
+
+    @Override
+    public String toString() {
+        return "FancyTreeNode{" +
+                "title='" + title + '\'' +
+                ", key='" + key + '\'' +
+                ", folder=" + folder +
+                ", children=" + children +
+                '}';
+    }
 }

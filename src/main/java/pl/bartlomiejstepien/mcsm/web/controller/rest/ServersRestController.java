@@ -175,7 +175,7 @@ public class ServersRestController
         }
 
         List<FancyTreeNode> nodes = this.fileService.getServerFileStructure(this.serverService.getServer(serverId));
-        LOGGER.info("Returning file tree = " + Arrays.toString(nodes.toArray()));
+        LOGGER.info("Returning file tree = " + Arrays.deepToString(nodes.toArray()));
         return ResponseEntity.ok(nodes);
     }
 
