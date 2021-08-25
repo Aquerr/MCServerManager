@@ -2,128 +2,8 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="fragments/fragments :: head (pageTitle='Server Panel')">
 </head>
+<script type="text/javascript" th:src="@{/js/server-panel.js}" defer></script>
 <body>
-    <script type="text/javascript">
-        $(document).ready(function () {
-            let consoleUpdateIntervalId = null;
-
-            $("#delete-button").on("click", function () {
-                console.log("Showing delete server confirmation...");
-                $("#delete-confirmation-modal").modal("show");
-            });
-
-            $("#delete").on("click", function (){
-                console.log("Deleting server...");
-                let serverId = $("#server-id").val()
-                $.ajax({
-                url: "/api/servers/" + serverId,
-                method: "DELETE"
-                }).done(function (response){
-                    window.location.href = "/";
-
-                });
-            });
-
-            function showStartStopButton() {
-                let serverId = $("#server-id").val();
-                $.ajax({
-                    url: "/api/servers/status/" + serverId,
-                    method: "GET",
-                    dataType: "text"
-                }).done(function (response) {
-                    console.log("test");
-                    console.log("Server is " + response);
-                    if(response === "Running")
-                    {
-                        $("#server-li-item").append("<a id=\"toggle-button\" class=\"nav-link\" style=\"color: #007bff;text-decoration: none;background-color: transparent; cursor: pointer;\">Stop Server</a>");
-                    }
-                    else
-                    {
-                        $("#server-li-item").append("<a id=\"toggle-button\" class=\"nav-link\" style=\"color: #007bff;text-decoration: none;background-color: transparent; cursor: pointer;\">Start Server</a>");
-                    }
-                    $("#toggle-button").on("click", function (event) {
-                        let serverId = $("#server-id").val();
-
-                        let button = $(this);
-                        button.prop("disabled", true);
-                        button.text("");
-                        button.append("<span class='spinner-border spinner-border-sm' role='status' aria-hidden='true'></span>");
-
-                        $.ajax({
-                            url: "/api/servers/" + serverId + "/toggle",
-                            method: "POST"
-                        }).done(function (response) {
-                            location.reload();
-                        });
-                    });
-                });
-            }
-
-
-            function updateConsole() {
-                let serverId = $("#server-id").val();
-
-                $.ajax({
-                    url: "/api/servers/" + serverId + "/latest-log/" + 20,
-                    method: "GET"
-                }).done(function (response) {
-                    console.log(response);
-                    let serverConsole = document.getElementById("console");
-                    serverConsole.value = response.join("\n");
-                    serverConsole.scrollTop = serverConsole.scrollHeight;
-                });
-            }
-
-            showStartStopButton();
-            consoleUpdateIntervalId = setInterval(updateConsole, 5000);
-
-            $("#save-settings").on("click", function () {
-
-                let serverId = $("#server-id").val();
-                let button = $(this);
-                button.prop("disabled", true);
-                button.text("");
-                button.append("<span class='spinner-border spinner-border-sm' role='status' aria-hidden='true'></span>");
-
-                let json = {};
-                let properties = $("#server-settings").find("input[id^='property']");
-                for (const property of properties) {
-                    json[$(property).attr("name")] = $(property).val();
-                }
-
-                console.log("Saving settings = " + JSON.stringify(json));
-
-                $.ajax({
-                    url: "/api/servers/" + serverId + "/settings",
-                    method: "POST",
-                    contentType: "application/json",
-                    data: JSON.stringify(json)
-                }).done(function () {
-                    location.reload();
-                });
-            });
-
-            $("#console-input").on("keydown", function (event) {
-                if (event.code === "Enter") {
-                    let serverId = $("#server-id").val();
-                    let command = $("#console-input").val();
-                    $("#console-input").val("");
-
-                    $.ajax({
-                        url: "/api/servers/" + serverId + "/command",
-                        method: "POST",
-                        contentType: "text/plain",
-                        data: command
-                    }).done(function (response) {
-                        console.log("Command sent!");
-                        console.log(response);
-                    });
-                }
-            });
-        });
-
-
-    </script>
 
     <!-- Modal -->
     <div class="modal fade" id="delete-confirmation-modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
@@ -154,8 +34,7 @@
 
             <ul class="nav nav-tabs" id="tabs" role="tablist" style="display: inline-flex">
                 <li class="nav-item float-right" role="presentation" id="server-li-item">
-                    <!--                    <a th:if="${!server.isRunning()}" id="toggle-button" class="nav-link" style="color: #007bff;text-decoration: none;background-color: transparent; cursor: pointer;">Start Server</a>-->
-                    <!--                    <a th:if="${server.isRunning()}" id="toggle-button" class="nav-link" style="color: #007bff;text-decoration: none;background-color: transparent; cursor: pointer;">Stop Server</a>-->
+                    <a id="toggle-button" class="nav-link" style="color: #007bff;text-decoration: none;background-color: transparent; cursor: pointer;" disabled="true"><span class='spinner-border spinner-border-sm' role='status' aria-hidden='true'></span></a>
                 </li>
                 <li class="nav-item" role="presentation">
                     <a class="nav-link active" id="server-console-tab" data-toggle="tab" href="#server-console" role="tab" aria-controls="server-console" aria-selected="true">Console</a>

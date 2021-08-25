@@ -1,7 +1,3 @@
-$(document).ready(function () {
-    registerPlatformButtons();
-});
-
 function registerPlatformButtons() {
     $(".card-clickable").on('click', function () {
         clickPlatform(this);
@@ -13,3 +9,5 @@ function clickPlatform(clickedPlatformCard) {
     console.log("Chosen platform = " + platformTitle);
     window.location.href = "/servers/add-server?platform=" + platformTitle;
 }
+
+registerPlatformButtons();
