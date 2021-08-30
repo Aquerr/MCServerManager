@@ -30,6 +30,7 @@
     <main class="container">
 
         <div id="server-panel" class="mt-3">
+            <h4 th:text="${server.getName()}"></h4>
             <input id="server-id" type="text" th:value="${server.getId()}" hidden>
 
             <ul class="nav nav-tabs" id="tabs" role="tablist" style="display: inline-flex">
