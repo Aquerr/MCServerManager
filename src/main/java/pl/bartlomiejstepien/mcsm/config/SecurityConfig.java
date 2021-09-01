@@ -25,8 +25,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter
         http
             .authorizeRequests()
                 .antMatchers("/css/**", "icons/**", "/js/**", "/webjars/**", "/favicon.ico").permitAll()
+                .antMatchers("/h2-console/**").permitAll()
+                .and().headers().frameOptions().sameOrigin()
             .and()
-                .csrf().ignoringAntMatchers("/api/**")
+                .csrf().ignoringAntMatchers("/api/**", "/h2-console/**")
             .and()
             .formLogin()
                 .loginPage(Routes.LOGIN)
