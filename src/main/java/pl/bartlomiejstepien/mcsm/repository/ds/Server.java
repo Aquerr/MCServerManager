@@ -23,7 +23,7 @@ public class Server
     private String platform;
 
     @ManyToMany(mappedBy = "servers", cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH, CascadeType.REFRESH})
-    private final List<User> users = new ArrayList<>();
+    private final List<McsmPrincipal> mcsmPrincipals = new ArrayList<>();
 
     public Server()
     {
@@ -62,19 +62,14 @@ public class Server
         this.path = path;
     }
 
-    public List<User> getUsers()
+    public List<McsmPrincipal> getUsers()
     {
-        return this.users;
+        return this.mcsmPrincipals;
     }
 
-    public void addUser(User user)
+    public void addMcsmPrincipal(McsmPrincipal mcsmPrincipal)
     {
-        this.users.add(user);
-    }
-
-    public void addUsers(List<User> users)
-    {
-        this.users.addAll(users);
+        this.mcsmPrincipals.add(mcsmPrincipal);
     }
 
     public String getPlatform()

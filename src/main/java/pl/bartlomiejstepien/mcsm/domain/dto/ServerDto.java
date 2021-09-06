@@ -1,5 +1,6 @@
 package pl.bartlomiejstepien.mcsm.domain.dto;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import pl.bartlomiejstepien.mcsm.domain.model.ServerProperties;
 
 import java.nio.file.Path;
@@ -15,7 +16,8 @@ public class ServerDto
     private String name;
     private String serverDir;
 
-    private final List<UserDto> userDtos = new ArrayList<>();
+    @JsonManagedReference
+    private final List<ServerOwnerDto> serverOwnerDtos = new ArrayList<>();
     private final List<String> players = new LinkedList<>();
     private Path startFilePath;
     private String platform;
@@ -58,24 +60,24 @@ public class ServerDto
         return this.serverDir;
     }
 
-    public List<UserDto> getUsers()
+    public List<ServerOwnerDto> getUsers()
     {
-        return userDtos;
+        return serverOwnerDtos;
     }
 
-    public void addUser(final UserDto userDto)
+    public void addUser(final ServerOwnerDto userDto)
     {
-        this.userDtos.add(userDto);
+        this.serverOwnerDtos.add(userDto);
     }
 
-    public void addUsers(List<UserDto> userDtos)
+    public void addUsers(List<ServerOwnerDto> userDtos)
     {
-        this.userDtos.addAll(userDtos);
+        this.serverOwnerDtos.addAll(userDtos);
     }
 
-    public void removeUser(final UserDto userDto)
+    public void removeUser(final ServerOwnerDto userDto)
     {
-        this.userDtos.remove(userDto);
+        this.serverOwnerDtos.remove(userDto);
     }
 
     public Path getStartFilePath()

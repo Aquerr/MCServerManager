@@ -1,15 +1,14 @@
 package pl.bartlomiejstepien.mcsm.repository.ds;
 
 import org.springframework.security.core.GrantedAuthority;
-import pl.bartlomiejstepien.mcsm.domain.dto.ServerDto;
-import pl.bartlomiejstepien.mcsm.domain.dto.UserDto;
 
 import javax.persistence.*;
 import java.util.*;
 
+
 @Entity
 @Table(name = "mcsm_user")
-public class User
+public class McsmPrincipal
 {
     @Id
     @Column(name = "id", nullable = false, updatable = false, unique = true, insertable = false)
@@ -26,32 +25,32 @@ public class User
     @JoinTable(name = "user_server", joinColumns = {@JoinColumn(name = "user_id")}, inverseJoinColumns = {@JoinColumn(name = "server_id")})
     private final List<Server> servers = new ArrayList<>();
 
-    public User()
+    public McsmPrincipal()
     {
 
     }
 
-    public User(int id, String username, String password)
+    public McsmPrincipal(int id, String username, String password)
     {
         this.id = id;
         this.username = username;
         this.password = password;
     }
 
-    public static User fromUser(UserDto userDto)
-    {
-        if (userDto == null)
-            throw new IllegalArgumentException("User cannot be null");
-
-        final User user = new User(userDto.getId(), userDto.getUsername(), userDto.getPassword());
-        for (final ServerDto serverDto : userDto.getServers())
-        {
-            final Server server = new Server(serverDto.getId(), serverDto.getName(), serverDto.getServerDir());
-            server.addUser(user);
-            user.addServer(server);
-        }
-        return user;
-    }
+//    public static User fromUser(UserDto userDto)
+//    {
+//        if (userDto == null)
+//            throw new IllegalArgumentException("User cannot be null");
+//
+//        final User user = new User(userDto.getId(), userDto.getUsername(), userDto.getPassword());
+//        for (final ServerDto serverDto : userDto.getServers())
+//        {
+//            final Server server = new Server(serverDto.getId(), serverDto.getName(), serverDto.getServerDir());
+//            server.addUser(user);
+//            user.addServer(server);
+//        }
+//        return user;
+//    }
 
     public Collection<? extends GrantedAuthority> getAuthorities()
     {

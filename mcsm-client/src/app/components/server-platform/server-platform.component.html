@@ -3,25 +3,43 @@
   <hr>
 
   <div *ngFor="let platform of platforms | async">
-    <div *ngIf="platform.available" class="card mt-2 mr-2 card-clickable" style="flex-direction: row" [routerLink]="['/servers/add-server']" [queryParams]="{platform: platform.name.toLowerCase()}">
-      <div style="padding: 1rem; margin: auto;">
-        <img class="platform-img" [src]="'assets/' + platform.imagePath" alt="No platform image" style="display: inline-block;">
-      </div>
-      <div class="card-body" style="display:inline-block; padding: 0.5rem;">
-        <h3 class="card-title" [textContent]="platform.name"></h3>
-        <pre>{{platform.description}}</pre>
-      </div>
-    </div>
+    <mat-card class="mat-elevation-z4" matRipple *ngIf="platform.available" style="cursor: pointer; flex-direction: row; margin-bottom: 10px;" [routerLink]="['/servers/add-server']" [queryParams]="{platform: platform.name.toLowerCase()}">
+      <mat-card-content>
+        <img matCardImageSmall [src]="'assets/' + platform.imagePath" alt="No platform image" style="float: left; margin-right: 20px">
+        <h3 matCardTitle class="card-title" [textContent]="platform.name"></h3>
+        <p matCardSubtitle>{{platform.description}}</p>
+      </mat-card-content>
+    </mat-card>
 
-    <div *ngIf="!platform.available" class="card mt-2 mr-2" style="flex-direction: row; opacity: 35%">
-      <div style="padding: 1rem; margin: auto;">
-        <img class="platform-img" [src]="'assets/' + platform.imagePath" alt="No platform image" style="display: inline-block;">
-      </div>
-      <div class="card-body" style="display:inline-block; padding: 0.5rem;">
-        <h3 class="card-title" [textContent]="platform.name"></h3>
-        <pre [textContent]="platform.description"></pre>
-      </div>
-    </div>
+    <mat-card class="mat-elevation-z4" matRipple *ngIf="!platform.available" style="cursor: pointer; flex-direction: row; opacity: 35%; margin-bottom: 10px;">
+      <mat-card-content>
+        <img matCardImageSmall [src]="'assets/' + platform.imagePath" alt="No platform image" style="float: left; margin-right: 20px;">
+        <h3 mat-card-title [textContent]="platform.name"></h3>
+        <p mat-card-subtitle [textContent]="platform.description"></p>
+      </mat-card-content>
+    </mat-card>
   </div>
+
+<!--  <div matRipple *ngFor="let platform of platforms | async">-->
+<!--    <div *ngIf="platform.available" class="card mt-2 mr-2 card-clickable" style="flex-direction: row" [routerLink]="['/servers/add-server']" [queryParams]="{platform: platform.name.toLowerCase()}">-->
+<!--      <div style="padding: 1rem; margin: auto;">-->
+<!--        <img class="platform-img" [src]="'assets/' + platform.imagePath" alt="No platform image" style="display: inline-block;">-->
+<!--      </div>-->
+<!--      <div class="card-body" style="display:inline-block; padding: 0.5rem;">-->
+<!--        <h3 class="card-title" [textContent]="platform.name"></h3>-->
+<!--        <pre>{{platform.description}}</pre>-->
+<!--      </div>-->
+<!--    </div>-->
+
+<!--    <div *ngIf="!platform.available" class="card mt-2 mr-2" style="flex-direction: row; opacity: 35%">-->
+<!--      <div style="padding: 1rem; margin: auto;">-->
+<!--        <img class="platform-img" [src]="'assets/' + platform.imagePath" alt="No platform image" style="display: inline-block;">-->
+<!--      </div>-->
+<!--      <div class="card-body" style="display:inline-block; padding: 0.5rem;">-->
+<!--        <h3 class="card-title" [textContent]="platform.name"></h3>-->
+<!--        <pre [textContent]="platform.description"></pre>-->
+<!--      </div>-->
+<!--    </div>-->
+<!--  </div>-->
 
 </div>

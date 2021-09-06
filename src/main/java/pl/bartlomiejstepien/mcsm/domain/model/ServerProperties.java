@@ -23,45 +23,45 @@ public class ServerProperties
 
     }
 
-    public String getLevelName()
-    {
-        return this.getProperty(PROPERTY_NAME_LEVEL_NAME);
-    }
+//    public String getLevelName()
+//    {
+//        return this.getProperty(PROPERTY_NAME_LEVEL_NAME);
+//    }
 
-    public boolean isOnlineMode()
-    {
-        return Boolean.parseBoolean(this.properties.getProperty(PROPERTY_NAME_ONLINE_MODE));
-    }
+//    public boolean isOnlineMode()
+//    {
+//        return Boolean.parseBoolean(this.properties.getProperty(PROPERTY_NAME_ONLINE_MODE));
+//    }
 
-    public int getPort()
-    {
-        return Integer.parseInt(this.properties.getProperty(PROPERTY_NAME_SERVER_PORT));
-    }
+//    public int getPort()
+//    {
+//        return Integer.parseInt(this.properties.getProperty(PROPERTY_NAME_SERVER_PORT));
+//    }
 
-    public boolean isPvp()
-    {
-        return Boolean.parseBoolean(this.properties.getProperty(PROPERTY_NAME_PVP));
-    }
+//    public boolean isPvp()
+//    {
+//        return Boolean.parseBoolean(this.properties.getProperty(PROPERTY_NAME_PVP));
+//    }
 
-    public int getRconPort()
-    {
-        return Integer.parseInt(this.properties.getProperty(PROPERTY_NAME_RCON_PORT));
-    }
+//    public int getRconPort()
+//    {
+//        return Integer.parseInt(this.properties.getProperty(PROPERTY_NAME_RCON_PORT));
+//    }
 
-    public String getRconPassword()
-    {
-        return this.getProperty(PROPERTY_NAME_RCON_PASSWORD);
-    }
+//    public String getRconPassword()
+//    {
+//        return this.getProperty(PROPERTY_NAME_RCON_PASSWORD);
+//    }
 
-    public int getSpawnProtection()
-    {
-        return this.getProperty(PROPERTY_NAME_SPAWN_PROTECTION);
-    }
+//    public int getSpawnProtection()
+//    {
+//        return this.getProperty(PROPERTY_NAME_SPAWN_PROTECTION);
+//    }
 
-    public String getMotd()
-    {
-        return this.getProperty(PROPERTY_NAME_MOTD);
-    }
+//    public String getMotd()
+//    {
+//        return this.getProperty(PROPERTY_NAME_MOTD);
+//    }
 
     public Map<String, String> getAsMap()
     {
@@ -86,9 +86,9 @@ public class ServerProperties
     }
 
     @JsonAnyGetter
-    public <T> T getProperty(final String propertyName)
+    public String getProperty(final String propertyName)
     {
-        return (T) this.properties.getProperty(propertyName);
+        return this.properties.getProperty(propertyName);
     }
 
     public Properties getProperties()

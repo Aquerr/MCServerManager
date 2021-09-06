@@ -2,14 +2,11 @@ package pl.bartlomiejstepien.mcsm.repository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
-import pl.bartlomiejstepien.mcsm.domain.dto.UserDto;
-import pl.bartlomiejstepien.mcsm.repository.converter.UserConverter;
-import pl.bartlomiejstepien.mcsm.repository.ds.User;
+import pl.bartlomiejstepien.mcsm.repository.ds.McsmPrincipal;
 
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Repository
 public class UserRepository
@@ -22,33 +19,33 @@ public class UserRepository
         this.entityManager = entityManager;
     }
 
-    public User find(final int id)
+    public McsmPrincipal find(final int id)
     {
-        return this.entityManager.find(User.class, id);
+        return this.entityManager.find(McsmPrincipal.class, id);
     }
 
-    public List<User> findAll()
+    public List<McsmPrincipal> findAll()
     {
-        return ((List<User>)this.entityManager.createQuery("from user").getResultList());
+        return ((List<McsmPrincipal>)this.entityManager.createQuery("from user").getResultList());
     }
 
-    public void save(final User user)
+    public void save(final McsmPrincipal mcsmPrincipal)
     {
-        this.entityManager.persist(user);
+        this.entityManager.persist(mcsmPrincipal);
     }
 
     public void delete(final int id)
     {
-        final User user = this.entityManager.find(User.class, id);
-        if (user != null)
-            this.entityManager.remove(user);
+        final McsmPrincipal mcsmPrincipal = this.entityManager.find(McsmPrincipal.class, id);
+        if (mcsmPrincipal != null)
+            this.entityManager.remove(mcsmPrincipal);
     }
 
-    public User findByUsername(final String username)
+    public McsmPrincipal findByUsername(final String username)
     {
-        final TypedQuery<User> query = this.entityManager.createQuery("SELECT u FROM User u WHERE u.username = :username", User.class);
+        final TypedQuery<McsmPrincipal> query = this.entityManager.createQuery("SELECT u FROM McsmPrincipal u WHERE u.username = :username", McsmPrincipal.class);
         query.setParameter("username", username);
-        final List<User> users = query.getResultList();
-        return users.stream().findFirst().orElse(null);
+        final List<McsmPrincipal> mcsmPrincipals = query.getResultList();
+        return mcsmPrincipals.stream().findFirst().orElse(null);
     }
 }

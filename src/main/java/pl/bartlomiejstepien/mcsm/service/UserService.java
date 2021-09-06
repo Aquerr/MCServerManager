@@ -6,7 +6,6 @@ import org.springframework.transaction.annotation.Transactional;
 import pl.bartlomiejstepien.mcsm.domain.dto.UserDto;
 import pl.bartlomiejstepien.mcsm.repository.UserRepository;
 import pl.bartlomiejstepien.mcsm.repository.converter.UserConverter;
-import pl.bartlomiejstepien.mcsm.repository.ds.User;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -42,7 +41,7 @@ public class UserService
 
     public void save(final UserDto userDto)
     {
-        this.userRepository.save(User.fromUser(userDto));
+        this.userRepository.save(userConverter.convertToDs(userDto));
     }
 
     public UserDto findByUsername(String username)

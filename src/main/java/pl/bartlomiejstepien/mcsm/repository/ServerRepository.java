@@ -65,9 +65,19 @@ public class ServerRepository
 
     public List<Server> findByUserId(int userId)
     {
-        final TypedQuery<Server> query = this.entityManager.createQuery("SELECT server FROM Server AS server JOIN server.users AS user WHERE user.id = :userId", Server.class);
+        final TypedQuery<Server> query = this.entityManager.createQuery("SELECT server FROM Server AS server JOIN server.mcsmPrincipals AS mcsmPrincipal WHERE mcsmPrincipal.id = :userId", Server.class);
         query.setParameter("userId", userId);
         List<Server> servers = query.getResultList();
         return servers;
+    }
+
+    public Server findByServerIdAndUserId(int serverId, int userId)
+    {
+        final TypedQuery<Server> query = this.entityManager.createQuery("SELECT server FROM Server AS server JOIN server.mcsmPrincipals AS user ON user.id = :userId WHERE server.id = :serverId", Server.class);
+        query.setParameter("userId", userId);
+        query.setParameter("serverId", serverId);
+        return query.getResultList().stream()
+                .findFirst()
+                .orElse(null);
     }
 }

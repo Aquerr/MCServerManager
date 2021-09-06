@@ -3,8 +3,6 @@ package pl.bartlomiejstepien.mcsm.service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.context.event.ApplicationReadyEvent;
-import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pl.bartlomiejstepien.mcsm.config.Config;
@@ -18,11 +16,8 @@ import pl.bartlomiejstepien.mcsm.repository.ServerRepository;
 import pl.bartlomiejstepien.mcsm.repository.UserRepository;
 import pl.bartlomiejstepien.mcsm.repository.converter.ServerConverter;
 import pl.bartlomiejstepien.mcsm.repository.ds.Server;
-import pl.bartlomiejstepien.mcsm.repository.ds.User;
+import pl.bartlomiejstepien.mcsm.repository.ds.McsmPrincipal;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -56,8 +51,8 @@ public class ServerService
     @Transactional
     public void addServer(final int userId, final ServerDto serverDto)
     {
-        final User user = this.userRepository.find(userId);
-        user.addServer(this.serverConverter.convertToServer(serverDto));
+        final McsmPrincipal mcsmPrincipal = this.userRepository.find(userId);
+        mcsmPrincipal.addServer(this.serverConverter.convertToServer(serverDto));
     }
 
     @Transactional
@@ -96,13 +91,13 @@ public class ServerService
     @Transactional
     public void importServer(final int userId, final String serverName, final String path, Platform platform)
     {
-        final User user = this.userRepository.find(userId);
+        final McsmPrincipal mcsmPrincipal = this.userRepository.find(userId);
         final Server server = Optional.ofNullable(this.serverRepository.findByPath(path)).orElse(new Server(0, serverName, path));
-        if (server.getId() != 0 && user.getServers().stream().anyMatch(x -> path.equals(x.getPath())))
-            throw new ServerAlreadyOwnedException(new UserDto(user.getId(), user.getUsername(), user.getPassword()), new ServerDto(server.getId(), server.getName(), server.getPath()));
+        if (server.getId() != 0 && mcsmPrincipal.getServers().stream().anyMatch(x -> path.equals(x.getPath())))
+            throw new ServerAlreadyOwnedException(new UserDto(mcsmPrincipal.getId(), mcsmPrincipal.getUsername(), mcsmPrincipal.getPassword()), new ServerDto(server.getId(), server.getName(), server.getPath()));
         server.setPlatform(platform.getName());
-        user.addServer(server);
-        this.userRepository.save(user);
+        mcsmPrincipal.addServer(server);
+        this.userRepository.save(mcsmPrincipal);
     }
 
     @Transactional
@@ -115,5 +110,11 @@ public class ServerService
     public Optional<InstallationStatus> getInstallationStatus(int serverId)
     {
         return this.serverInstaller.getInstallationStatus(serverId);
+    }
+
+    public Optional<ServerDto> getServerForUser(int serverId, int userId)
+    {
+        return Optional.ofNullable(this.serverRepository.findByServerIdAndUserId(serverId, userId))
+                .map(this.serverConverter::convertToDto);
     }
 }

@@ -5,7 +5,7 @@ import pl.bartlomiejstepien.mcsm.domain.model.FancyTreeNode;
 
 import java.util.List;
 
-public interface FileService
+public interface ServerFilesService
 {
     List<FancyTreeNode> getServerFileStructure(ServerDto serverDto);
 

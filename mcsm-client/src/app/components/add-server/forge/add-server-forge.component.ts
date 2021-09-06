@@ -1,8 +1,10 @@
-import {Component, HostListener, OnInit} from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import { ModPack } from 'src/app/model/modpacks';
 import {ModPackService} from "../../../services/mod-pack.service";
+import {McsmModal} from "../../modal/mcsm-modal.component";
 import {MatDialog} from "@angular/material/dialog";
-import {ServerListComponent} from "../../server-list/server-list.component";
+import {MatSelect} from "@angular/material/select";
+// import {MatDialog} from "@angular/material/dialog";
 
 @Component({
   selector: 'app-add-server-forge',
@@ -19,7 +21,7 @@ export class AddServerForgeComponent implements OnInit {
   selectedCategoryId = 0;
   searchedModPackName = "";
 
-  constructor(private dialog:MatDialog, private modPackService:ModPackService) { }
+  constructor(private modPackService:ModPackService, private dialog: MatDialog) { }
 
   ngOnInit(): void {
 
@@ -31,9 +33,24 @@ export class AddServerForgeComponent implements OnInit {
       .subscribe(data => this.modpacks = data);
   }
 
-  @HostListener('window:scroll', ['$event'])
-  onScroll(): void {
-    if (document.body.scrollHeight == window.scrollY + window.innerHeight) {
+  // @HostListener('window:scroll', ['$event'])
+  // onScroll(): void {
+  //   if (document.body.scrollHeight == window.scrollY + window.innerHeight) {
+  //     console.log("Selected Version: " + this.selectedVersion);
+  //     console.log("Selected Category: " + this.selectedCategoryId);
+  //     console.log("Modpack count: " + this.modpacks.length);
+  //
+  //     this.modPackService.getModpacks(this.selectedCategoryId, 20, this.selectedVersion, this.modpacks.length, this.searchedModPackName)
+  //       .subscribe(data =>
+  //         data.forEach(modpack => {
+  //           this.modpacks.push(modpack);
+  //         }));
+  //   }
+  // }
+
+  onModpacksListScroll(scrollEvent: Event): void {
+    let target = scrollEvent.target as HTMLDivElement;
+    if (target.scrollHeight == target.scrollTop + target.clientHeight) {
       console.log("Selected Version: " + this.selectedVersion);
       console.log("Selected Category: " + this.selectedCategoryId);
       console.log("Modpack count: " + this.modpacks.length);
@@ -193,23 +210,40 @@ export class AddServerForgeComponent implements OnInit {
     this.modPackService.getModpackDescription(modPack.id).subscribe(data => {
       console.log("Card clicked!");
 
-      let dialogRef = this.dialog.open(ServerListComponent, {
-        height: '400px',
-        width: '600px',
+      let dialogRef = this.dialog.open(McsmModal, {
+        height: '800px',
+        width: '1400px',
+      });
+
+      dialogRef.componentInstance.setTitle(modPack.name);
+      dialogRef.componentInstance.setContent(data);
+      dialogRef.componentInstance.setSubmitButtonValue("Install");
+      dialogRef.componentInstance.setSubmitButtonCallback(() => {
+        console.log("Showing server pack version list for modpack_id=" + modPack.id)
+        this.showSelectModpackVersionModal(modPack.id);
       });
     });
+  }
 
-    //       let modpackTitle = $(this).find(".card-title").text();
-    //       let modpackId = $(this).find(".modpack-id").val();
-    //
-    //       $.ajax({
-    //         url: "/api/modpacks/" + modpackId + "/description",
-    //         method: "GET"
-    //       }).done(function (description) {
-    //         $("#modpack-modal .modal-title").text(modpackTitle);
-    //         $("#modpack-modal .modal-body").html(description);
-    //         $("#modpack-modal #select-server-version").attr("modpack-id", modpackId);
-    //         $("#modpack-modal").modal("show");
-    //       });
+  showSelectModpackVersionModal(modpackId: number) : void {
+    this.modPackService.getServerPacks(modpackId).subscribe(serverPacks => {
+      console.log(serverPacks);
+      let dialogRef = this.dialog.open(McsmModal, {
+        height: '250px',
+        width: '300px',
+      });
+
+      dialogRef.componentInstance.setTitle("Select version");
+      dialogRef.componentInstance.setSelectLabel("Versions");
+      dialogRef.componentInstance.setSelectVisible(true);
+      dialogRef.componentInstance.setSelectItems(serverPacks);
+      dialogRef.componentInstance.setSelectItemNameCallback(item => item.name);
+      dialogRef.componentInstance.setSelectItemValueCallback(item => item.id);
+      dialogRef.componentInstance.setSubmitButtonValue("Install");
+      dialogRef.componentInstance.setSubmitButtonCallback(() => {
+        // @ts-ignore
+        console.log(`Starting installation of serverpack=${dialogRef.componentInstance.getSelectedItemValue()} for modpack_id=${modpackId}`)
+      });
+    });
   }
 }

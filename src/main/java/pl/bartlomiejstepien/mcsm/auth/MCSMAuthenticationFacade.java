@@ -17,4 +17,10 @@ public class MCSMAuthenticationFacade implements AuthenticationFacade
                 .map(AuthenticatedUser.class::cast)
                 .orElse(null);
     }
+
+    @Override
+    public void setCurrentUser(Authentication authentication)
+    {
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+    }
 }

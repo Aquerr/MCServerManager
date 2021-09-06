@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import pl.bartlomiejstepien.mcsm.repository.UserRepository;
-import pl.bartlomiejstepien.mcsm.repository.ds.User;
+import pl.bartlomiejstepien.mcsm.repository.ds.McsmPrincipal;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -26,13 +26,13 @@ public class H2UserDetailsService implements UserDetailsService
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException
     {
         HttpServletRequest httpServletRequest = ((ServletRequestAttributes)RequestContextHolder.currentRequestAttributes()).getRequest();
-        LOGGER.info("Login attempt for username '" + username + "' from " + httpServletRequest.getRemoteAddr());
+//        LOGGER.info("Login attempt for username '" + username + "' from " + httpServletRequest.getRemoteAddr());
 
-        final User user = this.userRepository.findByUsername(username);
+        final McsmPrincipal mcsmPrincipal = this.userRepository.findByUsername(username);
 
-        if (user == null)
+        if (mcsmPrincipal == null)
             throw new UsernameNotFoundException("Could not find user with username = " + username);
 
-        return new AuthenticatedUser(user.getId(), user.getUsername(), user.getPassword(), httpServletRequest.getRemoteAddr());
+        return new AuthenticatedUser(mcsmPrincipal.getId(), mcsmPrincipal.getUsername(), mcsmPrincipal.getPassword(), httpServletRequest.getRemoteAddr());
     }
 }

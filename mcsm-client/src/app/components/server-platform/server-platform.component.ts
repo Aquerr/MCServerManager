@@ -10,9 +10,12 @@ export class ServerPlatformComponent implements OnInit {
 
   platforms = this.platformService.getPlatforms();
 
-  constructor(private platformService: PlatformService) { }
+  constructor(private platformService: PlatformService) {
+
+  }
 
   ngOnInit(): void {
+
   }
 
 }

@@ -1,0 +1,65 @@
+<h1 mat-dialog-title>{{modalTitle}}</h1>
+<!--<button style="float: right;" mat-dialog-close type="button" class="close" data-dismiss="modal" aria-label="Close">-->
+<!--  <span aria-hidden="true">&times;</span>-->
+<!--</button>-->
+<hr>
+<mat-dialog-content class="text-center">
+  <div [innerHTML]="content"></div>
+  <mat-form-field appearance="fill" *ngIf="selectVisible">
+    <mat-label>{{selectLabel}}</mat-label>
+    <mat-select [(ngModel)]="selectedItemValue">
+      <mat-option *ngFor="let item of selectItems" [value]="selectItemValue(item)">
+        {{selectItemName(item)}}
+      </mat-option>
+    </mat-select>
+  </mat-form-field>
+</mat-dialog-content>
+<hr>
+<mat-dialog-actions align="end">
+<!--  <div *ngFor="let modalActionElement of modalActionElements" [innerHTML]="modalActionElement">-->
+
+<!--  </div>-->
+<!--  <ng-template *ngFor="let modalActionElement of modalActionElements">-->
+<!--    {{modalActionElement}}-->
+<!--  </ng-template>-->
+  <button mat-button mat-dialog-close>Close</button>
+  <button mat-button matRipple type="button" [textContent]="submitButtonValue" (click)="submitButtonCallback()" mat-dialog-close></button>
+</mat-dialog-actions>
+
+<!--<div class="modal fade" tabindex="-1" role="dialog" id="server-import-modal">-->
+<!--  <div class="modal-dialog">-->
+<!--    <div class="modal-content">-->
+<!--      <div class="modal-header">-->
+<!--        <h5 class="modal-title">{{ modalTitle }}</h5>-->
+<!--        <button type="button" class="close" data-dismiss="modal" aria-label="Close">-->
+<!--          <span aria-hidden="true">&times;</span>-->
+<!--        </button>-->
+<!--      </div>-->
+<!--      <div class="modal-body">-->
+<!--        <div class="form-group" id="modal-body">-->
+<!--&lt;!&ndash;          <label for="server-name">{{ serverName }}</label>&ndash;&gt;-->
+<!--&lt;!&ndash;          <input id="server-name" type="text" name="server-name" placeholder="Server name" class="form-control" required>&ndash;&gt;-->
+<!--        </div>-->
+<!--        <div class="form-group" id="modal-fields">-->
+<!--&lt;!&ndash;          <label for="path">Path</label>&ndash;&gt;-->
+<!--&lt;!&ndash;          <input id="path" type="text" name="path" class="form-control" required>&ndash;&gt;-->
+<!--        </div>-->
+<!--        <div class="form-group">-->
+<!--&lt;!&ndash;          <label for="platform">Platform</label>&ndash;&gt;-->
+<!--&lt;!&ndash;          <select id="platform" class="form-control" required>&ndash;&gt;-->
+<!--&lt;!&ndash;            <th:block th:each="platform : ${T(pl.bartlomiejstepien.mcsm.domain.platform.Platform).values()}">&ndash;&gt;-->
+<!--&lt;!&ndash;              <option th:value="${platform.getName()}" th:text="${platform.getName()}"></option>&ndash;&gt;-->
+<!--&lt;!&ndash;            </th:block>&ndash;&gt;-->
+<!--&lt;!&ndash;          </select>&ndash;&gt;-->
+<!--        </div>-->
+<!--      </div>-->
+<!--      <mat-dialog-actions id="modal-actions">-->
+
+<!--      </mat-dialog-actions>-->
+<!--&lt;!&ndash;      <div class="modal-footer">&ndash;&gt;-->
+<!--&lt;!&ndash;        <button type="button" class="btn btn-secondary" data-dismiss="modal" matDialogClose>Close</button>&ndash;&gt;-->
+<!--&lt;!&ndash;        <button type="button" class="btn btn-primary" id="import-server">Import</button>&ndash;&gt;-->
+<!--&lt;!&ndash;      </div>&ndash;&gt;-->
+<!--    </div>-->
+<!--  </div>-->
+<!--</div>-->

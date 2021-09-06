@@ -14,9 +14,9 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
-public class FileServiceImpl implements FileService
+public class ServerFilesServiceImpl implements ServerFilesService
 {
-    public FileServiceImpl()
+    public ServerFilesServiceImpl()
     {
 
     }

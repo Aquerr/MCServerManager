@@ -2,9 +2,9 @@ package pl.bartlomiejstepien.mcsm.repository.converter;
 
 import org.springframework.stereotype.Component;
 import pl.bartlomiejstepien.mcsm.domain.dto.ServerDto;
-import pl.bartlomiejstepien.mcsm.domain.dto.UserDto;
+import pl.bartlomiejstepien.mcsm.domain.dto.ServerOwnerDto;
+import pl.bartlomiejstepien.mcsm.repository.ds.McsmPrincipal;
 import pl.bartlomiejstepien.mcsm.repository.ds.Server;
-import pl.bartlomiejstepien.mcsm.repository.ds.User;
 
 import java.io.File;
 
@@ -18,11 +18,10 @@ public class ServerConverter
 
         final ServerDto serverDto = new ServerDto(server.getId(), server.getPath().substring(server.getPath().lastIndexOf(File.separator) + 1), server.getPath());
         serverDto.setPlatform(server.getPlatform());
-        for (final User user : server.getUsers())
+        for (final McsmPrincipal mcsmPrincipal : server.getUsers())
         {
-            final UserDto userDto = new UserDto(user.getId(), user.getUsername(), user.getPassword());
-            serverDto.addUser(userDto);
-            userDto.addServer(serverDto);
+            final ServerOwnerDto serverOwnerDto = new ServerOwnerDto(mcsmPrincipal.getId(), mcsmPrincipal.getUsername(), server.getId());
+            serverDto.addUser(serverOwnerDto);
         }
         return serverDto;
     }
@@ -34,11 +33,11 @@ public class ServerConverter
 
         final Server server = new Server(serverDto.getId(), serverDto.getName(), serverDto.getServerDir());
         server.setPlatform(serverDto.getPlatform());
-        for (final UserDto userDto : serverDto.getUsers())
+        for (final ServerOwnerDto userDto : serverDto.getUsers())
         {
-            final User user = new User(userDto.getId(), userDto.getUsername(), userDto.getPassword());
-            user.addServer(server);
-            server.addUser(user);
+            final McsmPrincipal mcsmPrincipal = new McsmPrincipal(userDto.getId(), userDto.getUsername(), null);
+            mcsmPrincipal.addServer(server);
+            server.addMcsmPrincipal(mcsmPrincipal);
         }
         return server;
     }
