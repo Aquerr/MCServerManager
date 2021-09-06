@@ -9,7 +9,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import pl.bartlomiejstepien.mcsm.auth.AuthenticationFacade;
 import pl.bartlomiejstepien.mcsm.domain.dto.ServerDto;
-import pl.bartlomiejstepien.mcsm.service.ServerService;
+import pl.bartlomiejstepien.mcsm.service.ServerServiceImpl;
 
 import java.util.Arrays;
 import java.util.List;
@@ -20,7 +20,7 @@ import static org.mockito.Mockito.when;
 class HomeControllerTest extends BaseIntegrationTest
 {
     @MockBean
-    private ServerService serverService;
+    private ServerServiceImpl serverService;
 
     @MockBean
     private AuthenticationFacade authenticationFacade;

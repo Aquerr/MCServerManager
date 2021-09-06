@@ -18,10 +18,9 @@ import pl.bartlomiejstepien.mcsm.domain.model.ModPack;
 import pl.bartlomiejstepien.mcsm.domain.model.ServerProperties;
 import pl.bartlomiejstepien.mcsm.domain.platform.Platform;
 import pl.bartlomiejstepien.mcsm.domain.process.ServerProcessHandler;
-import pl.bartlomiejstepien.mcsm.service.CurseForgeAPIService;
-import pl.bartlomiejstepien.mcsm.service.ServerService;
+import pl.bartlomiejstepien.mcsm.integration.curseforge.CurseForgeService;
+import pl.bartlomiejstepien.mcsm.service.ServerServiceImpl;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -40,26 +39,26 @@ public class ServerManagerImpl implements ServerManager
     private static final String SERVER_PROPERTIES_FILE_NAME = "server.properties";
 
     private final Config config;
-    private final ServerService serverService;
+    private final ServerServiceImpl serverService;
     private final ServerProcessHandler serverProcessHandler;
     private final ServerInstaller serverInstaller;
     private final ServerStartFileFinder serverStartFileFinder;
-    private final CurseForgeAPIService curseForgeAPIService;
+    private final CurseForgeService curseForgeService;
 
     @Autowired
     public ServerManagerImpl(final Config config,
                              @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection") final ServerProcessHandler serverProcessHandler,
-                             final ServerService serverService,
+                             final ServerServiceImpl serverService,
                              final ServerInstaller serverInstaller,
                              final ServerStartFileFinder serverStartFileFinder,
-                             final CurseForgeAPIService curseForgeAPIService)
+                             final CurseForgeService curseForgeService)
     {
         this.config = config;
         this.serverProcessHandler = serverProcessHandler;
         this.serverService = serverService;
         this.serverInstaller = serverInstaller;
         this.serverStartFileFinder = serverStartFileFinder;
-        this.curseForgeAPIService = curseForgeAPIService;
+        this.curseForgeService = curseForgeService;
     }
 
     @EventListener(ApplicationReadyEvent.class)
@@ -327,7 +326,7 @@ public class ServerManagerImpl implements ServerManager
     @Override
     public int installServerForModpack(AuthenticatedUser authenticatedUser, int modpackId, int serverPackId)
     {
-        final ModPack modPack = this.curseForgeAPIService.getModpack(modpackId);
+        final ModPack modPack = this.curseForgeService.getModpack(modpackId);
         Path serverPath = prepareServerPathForNewModpack(authenticatedUser, modPack);
         if (isServerPathOccupied(serverPath))
             throw new RuntimeException("Server for this modpack already exists!");
@@ -424,9 +423,9 @@ public class ServerManagerImpl implements ServerManager
 
     private void downloadServerFilesForModpack(final ModPack modPack, int serverPackId) throws CouldNotDownloadServerFilesException
     {
-        String serverDownloadUrl = this.curseForgeAPIService.getServerDownloadUrl(modPack.getId(), serverPackId);
+        String serverDownloadUrl = this.curseForgeService.getServerDownloadUrl(modPack.getId(), serverPackId);
         //TODO: Fix url. Parenthesis "(" and ")" still not work
         serverDownloadUrl = serverDownloadUrl.replaceAll(" ", "%20");
-        this.curseForgeAPIService.downloadServerFile(modPack, serverDownloadUrl);
+        this.curseForgeService.downloadServerFile(modPack, serverDownloadUrl);
     }
 }

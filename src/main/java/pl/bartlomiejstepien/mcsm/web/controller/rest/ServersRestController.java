@@ -20,7 +20,7 @@ import pl.bartlomiejstepien.mcsm.domain.dto.UserDto;
 import pl.bartlomiejstepien.mcsm.domain.platform.Platform;
 import pl.bartlomiejstepien.mcsm.domain.server.ServerManager;
 import pl.bartlomiejstepien.mcsm.service.FileService;
-import pl.bartlomiejstepien.mcsm.service.ServerService;
+import pl.bartlomiejstepien.mcsm.service.ServerServiceImpl;
 import pl.bartlomiejstepien.mcsm.service.UserService;
 
 import javax.validation.Valid;
@@ -33,13 +33,13 @@ public class ServersRestController
     private static final Logger LOGGER = LoggerFactory.getLogger(ServersRestController.class);
 
     private final AuthenticationFacade authenticationFacade;
-    private final ServerService serverService;
+    private final ServerServiceImpl serverService;
     private final UserService userService;
     private final ServerManager serverManager;
     private final FileService fileService;
 
     public ServersRestController(final AuthenticationFacade authenticationFacade,
-                                 final ServerService serverService,
+                                 final ServerServiceImpl serverService,
                                  final UserService userService,
                                  final ServerManager serverManager,
                                  final FileService fileService)

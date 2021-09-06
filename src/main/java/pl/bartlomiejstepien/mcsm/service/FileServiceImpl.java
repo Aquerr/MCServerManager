@@ -16,11 +16,6 @@ import java.util.stream.Collectors;
 @Service
 public class FileServiceImpl implements FileService
 {
-    public FileServiceImpl()
-    {
-
-    }
-
     @Override
     public List<FancyTreeNode> getServerFileStructure(final ServerDto serverDto)
     {

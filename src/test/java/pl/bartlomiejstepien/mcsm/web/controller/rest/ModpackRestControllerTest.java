@@ -9,10 +9,10 @@ import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import pl.bartlomiejstepien.mcsm.auth.AuthenticatedUser;
 import pl.bartlomiejstepien.mcsm.domain.server.ServerManager;
+import pl.bartlomiejstepien.mcsm.integration.curseforge.CurseForgeService;
 import pl.bartlomiejstepien.mcsm.web.controller.BaseIntegrationTest;
-import pl.bartlomiejstepien.mcsm.service.CurseForgeAPIService;
-import pl.bartlomiejstepien.mcsm.service.ServerService;
-import pl.bartlomiejstepien.mcsm.service.UserService;
+import pl.bartlomiejstepien.mcsm.service.ServerServiceImpl;
+import pl.bartlomiejstepien.mcsm.service.UserServiceImpl;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -33,11 +33,11 @@ class ModpackRestControllerTest extends BaseIntegrationTest
     @MockBean
     private ServerManager serverManager;
     @MockBean
-    private CurseForgeAPIService curseForgeAPIService;
+    private CurseForgeService curseForgeService;
     @MockBean
-    private ServerService serverService;
+    private ServerServiceImpl serverService;
     @MockBean
-    private UserService userService;
+    private UserServiceImpl userService;
 
     @InjectMocks
     private ModpackRestController modpackRestController;
@@ -47,7 +47,7 @@ class ModpackRestControllerTest extends BaseIntegrationTest
     public void getModpackDescriptionShouldReturnCorrectModpackDescription() throws Exception
     {
         final String url = GET_MODPACK_DESCRIPTION_URL.replace("{id}", String.valueOf(MODPACK_ID));
-        when(curseForgeAPIService.getModpackDescription(MODPACK_ID)).thenReturn(MODPACK_DESCRIPTION);
+        when(curseForgeService.getModpackDescription(MODPACK_ID)).thenReturn(MODPACK_DESCRIPTION);
 
         //then
         this.mockMvc.perform(MockMvcRequestBuilders.get(url))

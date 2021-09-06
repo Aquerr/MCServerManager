@@ -11,6 +11,9 @@ public class UserConverter
 {
     public UserDto convertToDto(final User user)
     {
+        if (user == null)
+            return null;
+
         final UserDto userDto = new UserDto(user.getId(), user.getUsername(), user.getPassword());
         for (final Server server : user.getServers())
         {
@@ -23,6 +26,9 @@ public class UserConverter
 
     public User convertToUser(final UserDto userDto)
     {
+        if (userDto == null)
+            return null;
+
         final User user = new User(userDto.getId(), userDto.getUsername(), userDto.getPassword());
         for (final ServerDto serverDto : userDto.getServers())
         {

@@ -1,4 +1,4 @@
-package pl.bartlomiejstepien.mcsm.service;
+package pl.bartlomiejstepien.mcsm.integration.curseforge;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -16,7 +16,6 @@ import pl.bartlomiejstepien.mcsm.domain.model.InstallationStatus;
 import pl.bartlomiejstepien.mcsm.domain.model.ModPack;
 import pl.bartlomiejstepien.mcsm.domain.model.ServerPack;
 import pl.bartlomiejstepien.mcsm.domain.server.ServerInstaller;
-import pl.bartlomiejstepien.mcsm.integration.curseforge.CurseforgeModpackConverter;
 
 import java.io.*;
 import java.net.*;
@@ -25,9 +24,9 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
-public class CurseForgeAPIService
+public class CurseForgeAPIServiceImpl implements CurseForgeService
 {
-    private static final Logger LOGGER = LoggerFactory.getLogger(CurseForgeAPIService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(CurseForgeAPIServiceImpl.class);
     private static final RestTemplate REST_TEMPLATE = new RestTemplate();
 
     private final CurseforgeModpackConverter curseforgeModpackConverter;
@@ -35,13 +34,14 @@ public class CurseForgeAPIService
     private final ServerInstaller serverInstaller;
 
     @Autowired
-    public CurseForgeAPIService(final Config config, final ServerInstaller serverInstaller, final CurseforgeModpackConverter curseforgeModpackConverter)
+    public CurseForgeAPIServiceImpl(final Config config, final ServerInstaller serverInstaller, final CurseforgeModpackConverter curseforgeModpackConverter)
     {
         this.config = config;
         this.serverInstaller = serverInstaller;
         this.curseforgeModpackConverter = curseforgeModpackConverter;
     }
 
+    @Override
     public List<ModPack> getModpacks(final int categoryId, String modpackName, String version, final int count, int index)
     {
         final String url = CurseForgeAPIRoutes.MODPACKS_SEARCH.replace("{categoryId}", String.valueOf(categoryId))
@@ -67,6 +67,7 @@ public class CurseForgeAPIService
         return modPacks;
     }
 
+    @Override
     public int getLatestServerFileId(final int modpackId)
     {
         final String url = CurseForgeAPIRoutes.MODPACK_FILES.replace("{modpackId}", String.valueOf(modpackId));
@@ -105,6 +106,7 @@ public class CurseForgeAPIService
         return 0;
     }
 
+    @Override
     public ModPack getModpack(final int id)
     {
         final String url = CurseForgeAPIRoutes.MODPACK_INFO.replace("{modpackId}", String.valueOf(id));
@@ -118,6 +120,7 @@ public class CurseForgeAPIService
         return modPack;
     }
 
+    @Override
     public String getModpackDescription(final int id)
     {
         final String url = CurseForgeAPIRoutes.MODPACK_DESCRIPTION.replace("{modpackId}", String.valueOf(id));
@@ -127,6 +130,7 @@ public class CurseForgeAPIService
         return modpackDescription;
     }
 
+    @Override
     public String getServerDownloadUrl(final int modpackId, final int serverFileId)
     {
         final String url = CurseForgeAPIRoutes.MODPACK_LATEST_SERVER_DOWNLOAD_URL.replace("{modpackId}", String.valueOf(modpackId)).replace("{fileId}", String.valueOf(serverFileId));
@@ -143,6 +147,7 @@ public class CurseForgeAPIService
      * @param serverDownloadUrl the link to download from
      * @return the name of the zip file (with .zip extension)
      */
+    @Override
     public boolean downloadServerFile(final ModPack modPack, String serverDownloadUrl) throws CouldNotDownloadServerFilesException
     {
         LOGGER.info("Downloading server files for modpack {id=" + modPack.getId() + ", name=" + modPack.getName() + "}");
@@ -183,6 +188,7 @@ public class CurseForgeAPIService
         return true;
     }
 
+    @Override
     public List<ModPack.ModpackFile> getModPackFiles(int modpackId)
     {
         final String url = CurseForgeAPIRoutes.MODPACK_FILES.replace("{modpackId}", String.valueOf(modpackId));
@@ -192,11 +198,7 @@ public class CurseForgeAPIService
         return this.curseforgeModpackConverter.convertToModPackFiles(filesJsonArray);
     }
 
-    /**
-     * Gets server packs for the given modpack
-     * @param modpackId the modpack id
-     * @return list of serverpacks
-     */
+    @Override
     public List<ServerPack> getServerPacks(int modpackId)
     {
         final List<ModPack.ModpackFile> modpackFiles = getModPackFiles(modpackId);
@@ -207,6 +209,7 @@ public class CurseForgeAPIService
                 .collect(Collectors.toList());
     }
 
+    @Override
     public ModPack.ModpackFile getModPackFile(ModPack modPack, int fileId)
     {
         final String url = CurseForgeAPIRoutes.MODPACK_FILE

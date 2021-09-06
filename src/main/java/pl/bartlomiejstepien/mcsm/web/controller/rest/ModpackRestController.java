@@ -12,7 +12,7 @@ import pl.bartlomiejstepien.mcsm.auth.AuthenticationFacade;
 import pl.bartlomiejstepien.mcsm.domain.model.ServerPack;
 import pl.bartlomiejstepien.mcsm.domain.server.ServerManager;
 import pl.bartlomiejstepien.mcsm.domain.model.ModPack;
-import pl.bartlomiejstepien.mcsm.service.CurseForgeAPIService;
+import pl.bartlomiejstepien.mcsm.integration.curseforge.CurseForgeService;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
@@ -24,16 +24,16 @@ public class ModpackRestController
     private static final Logger LOGGER = LoggerFactory.getLogger(ModpackRestController.class);
 
     private final AuthenticationFacade authenticationFacade;
-    private final CurseForgeAPIService curseForgeAPIService;
+    private final CurseForgeService curseForgeService;
     private final ServerManager serverManager;
 
     @Autowired
     public ModpackRestController(final AuthenticationFacade authenticationFacade,
-                                 final CurseForgeAPIService curseForgeAPIService,
+                                 final CurseForgeService curseForgeService,
                                  final ServerManager serverManager)
     {
         this.authenticationFacade = authenticationFacade;
-        this.curseForgeAPIService = curseForgeAPIService;
+        this.curseForgeService = curseForgeService;
         this.serverManager = serverManager;
     }
 
@@ -41,7 +41,7 @@ public class ModpackRestController
     public String getModpackDescription(@PathVariable("id") final int id, final HttpServletRequest httpServletRequest)
     {
         LOGGER.info("Getting modpack description for id=" +id + " from " + httpServletRequest.getLocalAddr());
-        return this.curseForgeAPIService.getModpackDescription(id);
+        return this.curseForgeService.getModpackDescription(id);
     }
 
     @GetMapping(value = "/{modpackId}/serverpacks", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -49,7 +49,7 @@ public class ModpackRestController
     {
         final AuthenticatedUser authenticatedUser = authenticationFacade.getCurrentUser();
         LOGGER.info("Get server packs for modpack id=" + modpackId + " by " + authenticatedUser.getUsername() + " " + authenticatedUser.getRemoteIpAddress());
-        return this.curseForgeAPIService.getServerPacks(modpackId);
+        return this.curseForgeService.getServerPacks(modpackId);
     }
 
     @PostMapping(value = "/{modpackId}/serverpacks/{serverPackId}/install", produces = MediaType.TEXT_PLAIN_VALUE)
@@ -71,6 +71,6 @@ public class ModpackRestController
                                                    @RequestParam(name = "modpackName", defaultValue = "") String modpackName)
     {
         LOGGER.info("Get " + size + " modpacks named=" + modpackName + " for version=" + version + " and category=" + categoryId + " starting at index=" + index);
-        return this.curseForgeAPIService.getModpacks(categoryId, modpackName, version, size, index);
+        return this.curseForgeService.getModpacks(categoryId, modpackName, version, size, index);
     }
 }

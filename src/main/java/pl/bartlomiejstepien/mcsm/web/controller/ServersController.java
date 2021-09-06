@@ -14,24 +14,23 @@ import pl.bartlomiejstepien.mcsm.integration.curseforge.Versions;
 import pl.bartlomiejstepien.mcsm.domain.model.ModPack;
 import pl.bartlomiejstepien.mcsm.domain.dto.ServerDto;
 import pl.bartlomiejstepien.mcsm.domain.server.ServerManager;
-import pl.bartlomiejstepien.mcsm.service.CurseForgeAPIService;
-import pl.bartlomiejstepien.mcsm.service.ServerService;
+import pl.bartlomiejstepien.mcsm.integration.curseforge.CurseForgeService;
+import pl.bartlomiejstepien.mcsm.service.ServerServiceImpl;
 
 import java.util.List;
-import java.util.Map;
 
 @Controller
 @RequestMapping("/servers")
 public class ServersController
 {
-    private final CurseForgeAPIService curseForgeAPIService;
-    private final ServerService serverService;
+    private final CurseForgeService curseForgeService;
+    private final ServerServiceImpl serverService;
     private final ServerManager serverManager;
 
     @Autowired
-    public ServersController(final CurseForgeAPIService curseForgeAPIService, final ServerService serverService, final ServerManager serverManager)
+    public ServersController(final CurseForgeService curseForgeService, final ServerServiceImpl serverService, final ServerManager serverManager)
     {
-        this.curseForgeAPIService = curseForgeAPIService;
+        this.curseForgeService = curseForgeService;
         this.serverService = serverService;
         this.serverManager = serverManager;
     }
@@ -87,7 +86,7 @@ public class ServersController
     private ModelAndView prepareForgeModelAndView(ModelAndView modelAndView)
     {
         ModelMap model = modelAndView.getModelMap();
-        final List<ModPack> modPacks = this.curseForgeAPIService.getModpacks(0, "", "", 24, 0);
+        final List<ModPack> modPacks = this.curseForgeService.getModpacks(0, "", "", 24, 0);
         model.addAttribute("modpacks", modPacks);
         model.addAttribute("categories", Category.values());
         model.addAttribute("versions", Versions.VERSIONS);
