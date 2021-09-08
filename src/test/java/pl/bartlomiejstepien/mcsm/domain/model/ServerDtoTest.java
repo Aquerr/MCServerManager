@@ -30,10 +30,10 @@ class ServerDtoTest
         final UserDto userDto = new UserDto(0, "Test", "Password");
         final ServerDto serverDto = new ServerDto(0, "Test Server", "Test Path");
 
-        serverDto.addUser(userDto);
+        serverDto.getUsersIds().add(userDto.getId());
 
-        assertThat(serverDto.getUsers()).hasSize(1);
-        assertThat(serverDto.getUsers()).contains(userDto);
+        assertThat(serverDto.getUsersIds()).hasSize(1);
+        assertThat(serverDto.getUsersIds()).contains(userDto.getId());
     }
 
     @Test
@@ -41,10 +41,10 @@ class ServerDtoTest
     {
         final UserDto userDto = new UserDto(0, "Test", "Password");
         final ServerDto serverDto = new ServerDto(0, "Test Server", "Test Path");
-        serverDto.addUser(userDto);
+        serverDto.getUsersIds().add(userDto.getId());
 
-        serverDto.removeUser(userDto);
-        assertThat(serverDto.getUsers()).hasSize(0);
-        assertThat(serverDto.getUsers()).doesNotContain(userDto);
+        serverDto.getUsersIds().remove(userDto.getId());
+        assertThat(serverDto.getUsersIds()).hasSize(0);
+        assertThat(serverDto.getUsersIds()).doesNotContain(userDto.getId());
     }
 }

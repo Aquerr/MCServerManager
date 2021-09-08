@@ -20,18 +20,19 @@ public class ServerFileServiceImpl implements ServerFileService
     private static final Charset FILE_CHARSET = StandardCharsets.UTF_8;
 
     @Override
-    public List<FancyTreeNode> getServerFileStructure(final ServerDto serverDto)
+    public List<FancyTreeNode> getFolderContent(String path)
     {
         try
         {
-            return Files.list(Paths.get(serverDto.getServerDir()))
+            return Files.list(Paths.get(path))
                     .map(this::mapPathToFancyTreeNode)
                     .collect(Collectors.toList());
         }
-        catch (IOException e)
+        catch (IOException exception)
         {
-            e.printStackTrace();
+            exception.printStackTrace();
         }
+
         return Collections.emptyList();
     }
 
@@ -107,18 +108,7 @@ public class ServerFileServiceImpl implements ServerFileService
 
     private FancyTreeNode getDirectoryNode(Path path)
     {
-        final FancyTreeNode directoryNode = new FancyTreeNode(path.getFileName().toString(), true);
-        try
-        {
-            Files.list(path)
-                    .map(this::mapPathToFancyTreeNode)
-                    .forEach(directoryNode::addChild);
-        }
-        catch (IOException e)
-        {
-            e.printStackTrace();
-        }
-        return directoryNode;
+        return new FancyTreeNode(path.getFileName().toString(), true);
     }
 
     private static class ServerFileVisitor extends SimpleFileVisitor<Path>

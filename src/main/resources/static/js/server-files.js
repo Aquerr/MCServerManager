@@ -5,17 +5,42 @@ $('#file-editor').css("font-size", "16px");
 
 let serverId = $("#server-id").val();
 
+function buildTreeNodePath(node) {
+    if(node.title === 'root') {
+        return "";
+    } else {
+        return buildTreeNodePath(node.parent) + "/" + node.title;
+    }
+}
+
 var glyph_opts = {
     preset: "bootstrap3",
     map: {
     }
 };
 
+
 $('#tree').fancytree({
     // selectMode: 1,
     // glyph: glyph_opts,
+    clickFolderNode: 3,
+    // source: [
+    //     { "title" : "siema", key: "elo"},
+    //     { "title" : "boom", key: "nie", folder: true, lazy: true}
+    // ],
     source: {
-        url: "/api/servers/" + serverId + "/file-structure"
+        url: "/api/servers/" + serverId + "/folder-content"
+    },
+    lazyLoad: function (event, data) {
+        var node = data.node;
+        console.log("Lazy load!");
+        console.log(node);
+        // Load child nodes via Ajax GET /getTreeData?mode=children&parent=1234
+        data.result = {
+            url: "/api/servers/" + serverId + "/folder-content?path=" + buildTreeNodePath(node),
+            data: {mode: "children", parent: node.key},
+            cache: false
+        };
     },
     activate: function(event, data) {
         let node = data.node;

@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.MimeTypeUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import pl.bartlomiejstepien.mcsm.Routes;
 import pl.bartlomiejstepien.mcsm.auth.AuthenticatedUser;
@@ -24,6 +25,7 @@ import pl.bartlomiejstepien.mcsm.service.ServerServiceImpl;
 import pl.bartlomiejstepien.mcsm.service.UserService;
 
 import javax.validation.Valid;
+import java.io.File;
 import java.util.*;
 
 @RestController
@@ -163,17 +165,39 @@ public class ServersRestController
         }
     }
 
-    @GetMapping("/{id}/file-structure")
-    public ResponseEntity<?> fileStructure(final @PathVariable("id") int serverId)
+//    @GetMapping("/{id}/server-root-folder-content")
+//    public ResponseEntity<?> getServerRootFolderContent(final @PathVariable("id") int serverId)
+//    {
+//        LOGGER.info("/{}/server-root-folder-content", serverId);
+//        final AuthenticatedUser authenticatedUser = this.authenticationFacade.getCurrentUser();
+//        if (!hasAccessToServer(authenticatedUser, serverId))
+//        {
+//            throw new ServerNotOwnedException("You don't have access to do this");
+//        }
+//
+//        String serverDir = this.serverService.getServer(serverId).getServerDir();
+//        List<FancyTreeNode> nodes = this.serverFileService.getFolderContent(serverDir);
+//        LOGGER.info("Returning file tree = " + Arrays.deepToString(nodes.toArray()));
+//        return ResponseEntity.ok(nodes);
+//    }
+
+    @GetMapping("/{id}/folder-content")
+    public ResponseEntity<?> getFolderContent(final @PathVariable("id") int serverId, @RequestParam(value = "path", required = false) String path)
     {
-        LOGGER.info("/{}/file-structure", serverId);
+        LOGGER.info("/{}/file-content/{}", serverId, path);
         final AuthenticatedUser authenticatedUser = this.authenticationFacade.getCurrentUser();
         if (!hasAccessToServer(authenticatedUser, serverId))
         {
             throw new ServerNotOwnedException("You don't have access to do this");
         }
 
-        List<FancyTreeNode> nodes = this.serverFileService.getServerFileStructure(this.serverService.getServer(serverId));
+        String serverDir = this.serverService.getServer(serverId).getServerDir();
+        if (StringUtils.isEmpty(path))
+            path = serverDir;
+        else
+            path = serverDir + (path.startsWith("/") ? path : File.separator + path);
+
+        List<FancyTreeNode> nodes = this.serverFileService.getFolderContent(path);
         LOGGER.info("Returning file tree = " + Arrays.deepToString(nodes.toArray()));
         return ResponseEntity.ok(nodes);
     }

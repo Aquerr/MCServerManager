@@ -1,6 +1,5 @@
 package pl.bartlomiejstepien.mcsm.domain.model;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class FancyTreeNode
@@ -8,13 +7,20 @@ public class FancyTreeNode
     private String title;
     private String key;
     private boolean folder;
-    private List<FancyTreeNode> children = new ArrayList<>();
+    private boolean lazy;
+    private List<FancyTreeNode> children;
 
     public FancyTreeNode(String title, boolean folder)
     {
         this.title = title;
         this.key = title;
         this.folder = folder;
+        this.lazy = folder; // Folder should be always lazy loaded
+    }
+
+    public boolean isLazy()
+    {
+        return lazy;
     }
 
     public String getTitle()
@@ -43,11 +49,13 @@ public class FancyTreeNode
     }
 
     @Override
-    public String toString() {
+    public String toString()
+    {
         return "FancyTreeNode{" +
                 "title='" + title + '\'' +
                 ", key='" + key + '\'' +
                 ", folder=" + folder +
+                ", lazy=" + lazy +
                 ", children=" + children +
                 '}';
     }
