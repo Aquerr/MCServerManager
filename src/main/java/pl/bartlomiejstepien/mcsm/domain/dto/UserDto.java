@@ -10,7 +10,8 @@ public class UserDto
 
     private String password;
 
-    private final List<ServerDto> serverDtos = new ArrayList<>();
+//    private final List<ServerDto> serverDtos = new ArrayList<>();
+    private List<Integer> serverIds = new ArrayList<>();
 
     public UserDto()
     {
@@ -34,28 +35,53 @@ public class UserDto
         return password;
     }
 
-    public void addServer(final ServerDto serverDto)
-    {
-        this.serverDtos.add(serverDto);
-    }
+//    public void addServer(final ServerDto serverDto)
+//    {
+//        this.serverDtos.add(serverDto);
+//    }
 
-    public void removeServer(final ServerDto serverDto)
-    {
-        this.serverDtos.remove(serverDto);
-    }
+//    public void removeServer(final ServerDto serverDto)
+//    {
+//        this.serverDtos.remove(serverDto);
+//    }
 
     public int getId()
     {
         return id;
     }
 
-    public List<ServerDto> getServers()
+//    public List<ServerDto> getServers()
+//    {
+//        return serverDtos;
+//    }
+
+//    public Optional<ServerDto> getServerById(final int id)
+//    {
+//        return this.serverDtos.stream().filter(serverDto -> serverDto.getId() == id).findFirst();
+//    }
+
+    public List<Integer> getServerIds()
     {
-        return serverDtos;
+        return serverIds;
     }
 
-    public Optional<ServerDto> getServerById(final int id)
+    public void setId(int id)
     {
-        return this.serverDtos.stream().filter(serverDto -> serverDto.getId() == id).findFirst();
+        this.id = id;
+    }
+
+    public void setPassword(String password)
+    {
+        this.password = password;
+    }
+
+    public void setUsername(String username)
+    {
+        this.username = username;
+    }
+
+    public void setServerIds(List<Integer> serverIds)
+    {
+        this.serverIds = serverIds;
     }
 }

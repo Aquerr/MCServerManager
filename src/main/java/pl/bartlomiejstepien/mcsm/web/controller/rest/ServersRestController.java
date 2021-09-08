@@ -19,7 +19,7 @@ import pl.bartlomiejstepien.mcsm.domain.model.ServerProperties;
 import pl.bartlomiejstepien.mcsm.domain.dto.UserDto;
 import pl.bartlomiejstepien.mcsm.domain.platform.Platform;
 import pl.bartlomiejstepien.mcsm.domain.server.ServerManager;
-import pl.bartlomiejstepien.mcsm.service.FileService;
+import pl.bartlomiejstepien.mcsm.domain.server.ServerFileService;
 import pl.bartlomiejstepien.mcsm.service.ServerServiceImpl;
 import pl.bartlomiejstepien.mcsm.service.UserService;
 
@@ -36,19 +36,19 @@ public class ServersRestController
     private final ServerServiceImpl serverService;
     private final UserService userService;
     private final ServerManager serverManager;
-    private final FileService fileService;
+    private final ServerFileService serverFileService;
 
     public ServersRestController(final AuthenticationFacade authenticationFacade,
                                  final ServerServiceImpl serverService,
                                  final UserService userService,
                                  final ServerManager serverManager,
-                                 final FileService fileService)
+                                 final ServerFileService serverFileService)
     {
         this.authenticationFacade = authenticationFacade;
         this.serverService = serverService;
         this.userService = userService;
         this.serverManager = serverManager;
-        this.fileService = fileService;
+        this.serverFileService = serverFileService;
     }
 
     @GetMapping(value = "/installation-status/{modpackId}", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -94,11 +94,10 @@ public class ServersRestController
         AuthenticatedUser authenticatedUser = authenticationFacade.getCurrentUser();
         final UserDto userDto = this.userService.find(authenticatedUser.getId());
 
-        final Optional<ServerDto> optionalServer = userDto.getServerById(serverId);
-        if (!optionalServer.isPresent())
+        if(userDto.getServerIds().stream().noneMatch(id -> id == serverId))
             throw new RuntimeException("Access denied!");
 
-        final ServerDto serverDto = optionalServer.get();
+        final ServerDto serverDto = this.serverService.getServer(serverId);
         if (this.serverManager.isRunning(serverDto))
         {
             this.serverManager.stopServer(serverDto);
@@ -174,7 +173,7 @@ public class ServersRestController
             throw new ServerNotOwnedException("You don't have access to do this");
         }
 
-        List<FancyTreeNode> nodes = this.fileService.getServerFileStructure(this.serverService.getServer(serverId));
+        List<FancyTreeNode> nodes = this.serverFileService.getServerFileStructure(this.serverService.getServer(serverId));
         LOGGER.info("Returning file tree = " + Arrays.deepToString(nodes.toArray()));
         return ResponseEntity.ok(nodes);
     }
@@ -188,7 +187,7 @@ public class ServersRestController
             throw new ServerNotOwnedException("You don't have access to do this");
         }
 
-        return ResponseEntity.ok(this.fileService.getFileContent(fileName, this.serverService.getServer(serverId)));
+        return ResponseEntity.ok(this.serverFileService.getFileContent(fileName, this.serverService.getServer(serverId)));
     }
 
     @PostMapping(value = "/{id}/file-content/{fileName}", consumes = MediaType.TEXT_PLAIN_VALUE)
@@ -200,7 +199,7 @@ public class ServersRestController
             throw new ServerNotOwnedException("You don't have access to do this");
         }
 
-        return ResponseEntity.ok(this.fileService.saveFileContent(fileName, content, this.serverService.getServer(serverId)));
+        return ResponseEntity.ok(this.serverFileService.saveFileContent(fileName, content, this.serverService.getServer(serverId)));
     }
 
     private boolean hasAccessToServer(final AuthenticatedUser authenticatedUser, final int serverId)

@@ -11,7 +11,7 @@ public class Server
     @Id
     @Column(name = "id", nullable = false, updatable = false, unique = true)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Integer id;
 
     @Column(name = "path", nullable = false, unique = true)
     private String path;
@@ -22,8 +22,12 @@ public class Server
     @Column(name = "platform", nullable = false)
     private String platform;
 
-    @ManyToMany(mappedBy = "servers", cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH, CascadeType.REFRESH})
-    private final List<User> users = new ArrayList<>();
+//    @ManyToMany(mappedBy = "servers", cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH, CascadeType.REFRESH})
+//    private final List<User> users = new ArrayList<>();
+    @ElementCollection
+    @CollectionTable(name = "user_server", joinColumns = {@JoinColumn(name = "server_id")})
+    @Column(name = "user_id", nullable = false)
+    private List<Integer> usersIds = new ArrayList<>();
 
     public Server()
     {
@@ -52,9 +56,19 @@ public class Server
         return path;
     }
 
-    public void setId(int id)
+    public void setId(Integer id)
     {
         this.id = id;
+    }
+
+    public void setName(String name)
+    {
+        this.name = name;
+    }
+
+    public void setUsersIds(List<Integer> usersIds)
+    {
+        this.usersIds = usersIds;
     }
 
     public void setPath(String path)
@@ -62,19 +76,24 @@ public class Server
         this.path = path;
     }
 
-    public List<User> getUsers()
-    {
-        return this.users;
-    }
+//    public List<User> getUsers()
+//    {
+//        return this.users;
+//    }
 
-    public void addUser(User user)
-    {
-        this.users.add(user);
-    }
+//    public void addUser(User user)
+//    {
+//        this.users.add(user);
+//    }
 
-    public void addUsers(List<User> users)
+//    public void addUsers(List<User> users)
+//    {
+//        this.users.addAll(users);
+//    }
+
+    public List<Integer> getUsersIds()
     {
-        this.users.addAll(users);
+        return usersIds;
     }
 
     public String getPlatform()

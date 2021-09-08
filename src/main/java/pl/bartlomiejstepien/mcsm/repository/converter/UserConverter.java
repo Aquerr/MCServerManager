@@ -15,12 +15,7 @@ public class UserConverter
             return null;
 
         final UserDto userDto = new UserDto(user.getId(), user.getUsername(), user.getPassword());
-        for (final Server server : user.getServers())
-        {
-            final ServerDto serverDto = new ServerDto(server.getId(), server.getName(), server.getPath());
-            serverDto.addUser(userDto);
-            userDto.addServer(serverDto);
-        }
+        userDto.setServerIds(user.getServersIds());
         return userDto;
     }
 
@@ -30,12 +25,7 @@ public class UserConverter
             return null;
 
         final User user = new User(userDto.getId(), userDto.getUsername(), userDto.getPassword());
-        for (final ServerDto serverDto : userDto.getServers())
-        {
-            final Server server = new Server(serverDto.getId(), serverDto.getName(), serverDto.getServerDir());
-            server.addUser(user);
-            user.addServer(server);
-        }
+        user.setServersIds(userDto.getServerIds());
         return user;
     }
 }

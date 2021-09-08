@@ -1,21 +1,24 @@
-package pl.bartlomiejstepien.mcsm.service;
+package pl.bartlomiejstepien.mcsm.domain.server;
 
 import org.springframework.stereotype.Service;
 import pl.bartlomiejstepien.mcsm.domain.dto.ServerDto;
+import pl.bartlomiejstepien.mcsm.domain.exception.CouldNotReadFileException;
 import pl.bartlomiejstepien.mcsm.domain.model.FancyTreeNode;
 
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
-public class FileServiceImpl implements FileService
+public class ServerFileServiceImpl implements ServerFileService
 {
+    private static final Charset FILE_CHARSET = StandardCharsets.UTF_8;
+
     @Override
     public List<FancyTreeNode> getServerFileStructure(final ServerDto serverDto)
     {
@@ -39,25 +42,26 @@ public class FileServiceImpl implements FileService
         {
             final FilePathCollector filePathCollector = new FilePathCollector(fileName);
             Files.walkFileTree(Paths.get(serverDto.getServerDir()), new ServerFileVisitor(filePathCollector));
-            return Optional.ofNullable(filePathCollector.getFoundPath())
-                    .map(path -> {
-                        try
-                        {
-                            return Files.readString(path, StandardCharsets.UTF_8);
-                        }
-                        catch (IOException e)
-                        {
-                            e.printStackTrace();
-                        }
-                        return "";
-                    })
-            .orElse("");
+            Path path = filePathCollector.getFoundPath();
+            if(path == null)
+            {
+                throw new CouldNotReadFileException("File not found for path = " + fileName);
+            }
+            else
+            {
+                return readFileContent(path);
+            }
         }
         catch (IOException e)
         {
             e.printStackTrace();
+            throw new CouldNotReadFileException(e.getMessage());
         }
-        return "";
+    }
+
+    private String readFileContent(Path filePath) throws IOException
+    {
+        return Files.readString(filePath, FILE_CHARSET);
     }
 
     @Override

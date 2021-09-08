@@ -14,43 +14,33 @@ public class User
     @Id
     @Column(name = "id", nullable = false, updatable = false, unique = true, insertable = false)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Integer id;
 
     @Column(name = "username")
     private String username;
 
     @Column(name = "password")
     private String password;
+//
+//    @ManyToMany(cascade = {CascadeType.ALL}, fetch = FetchType.EAGER)
+//    @JoinTable(name = "user_server", joinColumns = {@JoinColumn(name = "user_id")}, inverseJoinColumns = {@JoinColumn(name = "server_id")})
+//    private final List<Server> servers = new ArrayList<>();
 
-    @ManyToMany(cascade = {CascadeType.ALL}, fetch = FetchType.EAGER)
-    @JoinTable(name = "user_server", joinColumns = {@JoinColumn(name = "user_id")}, inverseJoinColumns = {@JoinColumn(name = "server_id")})
-    private final List<Server> servers = new ArrayList<>();
+    @ElementCollection
+    @CollectionTable(name = "user_server", joinColumns = {@JoinColumn(name = "user_id")})
+    @Column(name = "server_id", nullable = false)
+    private List<Integer> serversIds = new ArrayList<>();
 
     public User()
     {
 
     }
 
-    public User(int id, String username, String password)
+    public User(Integer id, String username, String password)
     {
         this.id = id;
         this.username = username;
         this.password = password;
-    }
-
-    public static User fromUser(UserDto userDto)
-    {
-        if (userDto == null)
-            throw new IllegalArgumentException("User cannot be null");
-
-        final User user = new User(userDto.getId(), userDto.getUsername(), userDto.getPassword());
-        for (final ServerDto serverDto : userDto.getServers())
-        {
-            final Server server = new Server(serverDto.getId(), serverDto.getName(), serverDto.getServerDir());
-            server.addUser(user);
-            user.addServer(server);
-        }
-        return user;
     }
 
     public Collection<? extends GrantedAuthority> getAuthorities()
@@ -68,66 +58,49 @@ public class User
         return this.username;
     }
 
-    public boolean isAccountNonExpired()
-    {
-        return true;
-    }
+//    public void addServer(final Server server)
+//    {
+//        server.getUsers().add(this);
+//        this.servers.add(server);
+//    }
 
-    public boolean isAccountNonLocked()
-    {
-        return true;
-    }
-
-    public boolean isCredentialsNonExpired()
-    {
-        return true;
-    }
-
-    public boolean isEnabled()
-    {
-        return true;
-    }
-
-    public void addServer(final Server server)
-    {
-        server.getUsers().add(this);
-        this.servers.add(server);
-    }
-
-    private void addServers(final List<Server> servers)
-    {
-        this.servers.addAll(servers);
-    }
+//    private void addServers(final List<Server> servers)
+//    {
+//        this.servers.addAll(servers);
+//    }
 
     public int getId()
     {
         return id;
     }
 
-    public List<Server> getServers()
+    public List<Integer> getServersIds()
     {
-        return servers;
+        return serversIds;
     }
 
-    public Optional<Server> getServerById(final int id)
+    public void setId(Integer id)
     {
-        return this.servers.stream().filter(serverDto -> serverDto.getId() == id).findFirst();
+        this.id = id;
     }
 
-//    public UserDto toUser()
-//    {
-//        final UserDto userDto = new UserDto(this.id, this.username, this.password);
-//        for (final Server server : this.servers)
-//        {
-//            final ServerDto serverDto = ServerDto.fromServer(server);
-//            serverDto.addUser(userDto);
-//            userDto.addServer(serverDto);
-//        }
-//        return userDto;
-//    }
+    public void setUsername(String username)
+    {
+        this.username = username;
+    }
+
+    public void setPassword(String password)
+    {
+        this.password = password;
+    }
+
+    public void setServersIds(List<Integer> serversIds)
+    {
+        this.serversIds = serversIds;
+    }
 
     //    public List<Server> getServers()
 //    {
-//        return this.servers;
+//        return servers;
 //    }
 }

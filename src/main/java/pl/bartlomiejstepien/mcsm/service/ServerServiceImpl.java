@@ -52,8 +52,8 @@ public class ServerServiceImpl implements ServerService
     @Override
     public void addServer(final int userId, final ServerDto serverDto)
     {
-        final User user = this.userRepository.find(userId);
-        user.addServer(this.serverConverter.convertToServer(serverDto));
+        serverDto.getUsersIds().add(userId);
+        this.serverRepository.save(this.serverConverter.convertToServer(serverDto));
     }
 
     @Transactional
@@ -98,13 +98,29 @@ public class ServerServiceImpl implements ServerService
     @Override
     public void importServer(final int userId, final String serverName, final String path, Platform platform)
     {
+        LOGGER.info("Importing server {} for platform {}, at path {}, for user id {} ", serverName, platform.getName(), path, userId);
         final User user = this.userRepository.find(userId);
-        final Server server = Optional.ofNullable(this.serverRepository.findByPath(path)).orElse(new Server(0, serverName, path));
-        if (server.getId() != 0 && user.getServers().stream().anyMatch(x -> path.equals(x.getPath())))
-            throw new ServerAlreadyOwnedException(new UserDto(user.getId(), user.getUsername(), user.getPassword()), new ServerDto(server.getId(), server.getName(), server.getPath()));
-        server.setPlatform(platform.getName());
-        user.addServer(server);
-        this.userRepository.save(user);
+        final Server existingServerForPath = this.serverRepository.findByPath(path);
+
+        if (existingServerForPath != null)
+        {
+            if (user.getServersIds().contains(existingServerForPath.getId()))
+            {
+                throw new ServerAlreadyOwnedException(new UserDto(user.getId(), user.getUsername(), user.getPassword()), new ServerDto(existingServerForPath.getId(), existingServerForPath.getName(), existingServerForPath.getPath()));
+            }
+            else
+            {
+                user.getServersIds().add(existingServerForPath.getId());
+                this.userRepository.save(user);
+            }
+        }
+        else
+        {
+            final Server server = new Server(0, serverName, path);
+            server.setPlatform(platform.getName());
+            server.getUsersIds().add(userId);
+            this.serverRepository.save(server);
+        }
     }
 
     @Transactional

@@ -15,7 +15,8 @@ public class ServerDto
     private String name;
     private String serverDir;
 
-    private final List<UserDto> userDtos = new ArrayList<>();
+//    private final List<UserDto> userDtos = new ArrayList<>();
+    private List<Integer> usersIds = new ArrayList<>();
     private final List<String> players = new LinkedList<>();
     private Path startFilePath;
     private String platform;
@@ -58,24 +59,45 @@ public class ServerDto
         return this.serverDir;
     }
 
-    public List<UserDto> getUsers()
+//    public List<UserDto> getUsers()
+//    {
+//        return userDtos;
+//    }
+
+//    public void addUser(final UserDto userDto)
+//    {
+//        this.userDtos.add(userDto);
+//    }
+
+//    public void addUsers(List<UserDto> userDtos)
+//    {
+//        this.userDtos.addAll(userDtos);
+//    }
+
+//    public void removeUser(final UserDto userDto)
+//    {
+//        this.userDtos.remove(userDto);
+//    }
+
+
+    public void setName(String name)
     {
-        return userDtos;
+        this.name = name;
     }
 
-    public void addUser(final UserDto userDto)
+    public void setServerDir(String serverDir)
     {
-        this.userDtos.add(userDto);
+        this.serverDir = serverDir;
     }
 
-    public void addUsers(List<UserDto> userDtos)
+    public List<Integer> getUsersIds()
     {
-        this.userDtos.addAll(userDtos);
+        return usersIds;
     }
 
-    public void removeUser(final UserDto userDto)
+    public void setUsersIds(List<Integer> usersIds)
     {
-        this.userDtos.remove(userDto);
+        this.usersIds = usersIds;
     }
 
     public Path getStartFilePath()
