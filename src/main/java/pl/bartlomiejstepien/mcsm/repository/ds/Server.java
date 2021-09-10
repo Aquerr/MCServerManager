@@ -29,6 +29,9 @@ public class Server
     @Column(name = "user_id", nullable = false)
     private List<Integer> usersIds = new ArrayList<>();
 
+    @Column(name = "java_id")
+    private Integer javaId;
+
     public Server()
     {
 
@@ -104,5 +107,15 @@ public class Server
     public void setPlatform(String platform)
     {
         this.platform = platform;
+    }
+
+    public Integer getJavaId()
+    {
+        return javaId;
+    }
+
+    public void setJavaId(Integer javaId)
+    {
+        this.javaId = javaId;
     }
 }

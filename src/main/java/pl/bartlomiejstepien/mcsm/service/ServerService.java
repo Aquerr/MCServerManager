@@ -1,5 +1,6 @@
 package pl.bartlomiejstepien.mcsm.service;
 
+import pl.bartlomiejstepien.mcsm.domain.dto.JavaDto;
 import pl.bartlomiejstepien.mcsm.domain.dto.ServerDto;
 import pl.bartlomiejstepien.mcsm.domain.model.InstallationStatus;
 import pl.bartlomiejstepien.mcsm.domain.platform.Platform;
@@ -27,4 +28,8 @@ public interface ServerService
     Optional<ServerDto> getServerByPath(String path);
 
     Optional<InstallationStatus> getInstallationStatus(int serverId);
+
+    JavaDto getJavaForServer(int serverId);
+
+    boolean addJavaToServer(int serverId, int javaId);
 }

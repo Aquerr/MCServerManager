@@ -22,6 +22,8 @@ public class ServerDto
     private String platform;
     private final ServerProperties serverProperties = new ServerProperties();
 
+    private Integer javaId;
+
     public ServerDto()
     {
 
@@ -59,7 +61,17 @@ public class ServerDto
         return this.serverDir;
     }
 
-//    public List<UserDto> getUsers()
+    public void setJavaId(Integer javaId)
+    {
+        this.javaId = javaId;
+    }
+
+    public Integer getJavaId()
+    {
+        return javaId;
+    }
+
+    //    public List<UserDto> getUsers()
 //    {
 //        return userDtos;
 //    }

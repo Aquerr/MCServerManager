@@ -19,6 +19,7 @@ public class ServerConverter
         final ServerDto serverDto = new ServerDto(server.getId(), server.getPath().substring(server.getPath().lastIndexOf(File.separator) + 1), server.getPath());
         serverDto.setPlatform(server.getPlatform());
         serverDto.setUsersIds(server.getUsersIds());
+        serverDto.setJavaId(server.getJavaId());
         return serverDto;
     }
 
@@ -30,6 +31,7 @@ public class ServerConverter
         final Server server = new Server(serverDto.getId(), serverDto.getName(), serverDto.getServerDir());
         server.setPlatform(serverDto.getPlatform());
         server.setUsersIds(serverDto.getUsersIds());
+        server.setJavaId(serverDto.getJavaId());
         return server;
     }
 }

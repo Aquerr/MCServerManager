@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import pl.bartlomiejstepien.mcsm.Routes;
 import pl.bartlomiejstepien.mcsm.auth.AuthenticatedUser;
 import pl.bartlomiejstepien.mcsm.auth.AuthenticationFacade;
+import pl.bartlomiejstepien.mcsm.domain.dto.JavaDto;
 import pl.bartlomiejstepien.mcsm.domain.exception.ServerNotOwnedException;
 import pl.bartlomiejstepien.mcsm.domain.exception.ServerNotRunningException;
 import pl.bartlomiejstepien.mcsm.domain.model.FancyTreeNode;
@@ -21,6 +22,7 @@ import pl.bartlomiejstepien.mcsm.domain.dto.UserDto;
 import pl.bartlomiejstepien.mcsm.domain.platform.Platform;
 import pl.bartlomiejstepien.mcsm.domain.server.ServerManager;
 import pl.bartlomiejstepien.mcsm.domain.server.ServerFileService;
+import pl.bartlomiejstepien.mcsm.service.ServerService;
 import pl.bartlomiejstepien.mcsm.service.ServerServiceImpl;
 import pl.bartlomiejstepien.mcsm.service.UserService;
 
@@ -35,13 +37,13 @@ public class ServersRestController
     private static final Logger LOGGER = LoggerFactory.getLogger(ServersRestController.class);
 
     private final AuthenticationFacade authenticationFacade;
-    private final ServerServiceImpl serverService;
+    private final ServerService serverService;
     private final UserService userService;
     private final ServerManager serverManager;
     private final ServerFileService serverFileService;
 
     public ServersRestController(final AuthenticationFacade authenticationFacade,
-                                 final ServerServiceImpl serverService,
+                                 final ServerService serverService,
                                  final UserService userService,
                                  final ServerManager serverManager,
                                  final ServerFileService serverFileService)
@@ -165,26 +167,10 @@ public class ServersRestController
         }
     }
 
-//    @GetMapping("/{id}/server-root-folder-content")
-//    public ResponseEntity<?> getServerRootFolderContent(final @PathVariable("id") int serverId)
-//    {
-//        LOGGER.info("/{}/server-root-folder-content", serverId);
-//        final AuthenticatedUser authenticatedUser = this.authenticationFacade.getCurrentUser();
-//        if (!hasAccessToServer(authenticatedUser, serverId))
-//        {
-//            throw new ServerNotOwnedException("You don't have access to do this");
-//        }
-//
-//        String serverDir = this.serverService.getServer(serverId).getServerDir();
-//        List<FancyTreeNode> nodes = this.serverFileService.getFolderContent(serverDir);
-//        LOGGER.info("Returning file tree = " + Arrays.deepToString(nodes.toArray()));
-//        return ResponseEntity.ok(nodes);
-//    }
-
     @GetMapping("/{id}/folder-content")
     public ResponseEntity<?> getFolderContent(final @PathVariable("id") int serverId, @RequestParam(value = "path", required = false) String path)
     {
-        LOGGER.info("/{}/file-content/{}", serverId, path);
+        LOGGER.info("/{}/folder-content/path={}", serverId, path);
         final AuthenticatedUser authenticatedUser = this.authenticationFacade.getCurrentUser();
         if (!hasAccessToServer(authenticatedUser, serverId))
         {
@@ -224,6 +210,34 @@ public class ServersRestController
         }
 
         return ResponseEntity.ok(this.serverFileService.saveFileContent(fileName, content, this.serverService.getServer(serverId)));
+    }
+
+    @GetMapping(value = "/{id}/java")
+    public JavaDto getJavaForServer(final @PathVariable("id") int serverId)
+    {
+        final AuthenticatedUser authenticatedUser = this.authenticationFacade.getCurrentUser();
+        if (!hasAccessToServer(authenticatedUser, serverId))
+        {
+            throw new ServerNotOwnedException("You don't have access to do this");
+        }
+
+        return this.serverService.getJavaForServer(serverId);
+    }
+
+    @PostMapping(value = "{id}/java/{javaId}")
+    public String saveJavaForServer(final @PathVariable("id") Integer serverId, final @PathVariable("javaId") Integer javaId)
+    {
+        final AuthenticatedUser authenticatedUser = this.authenticationFacade.getCurrentUser();
+        if (!hasAccessToServer(authenticatedUser, serverId))
+        {
+            throw new ServerNotOwnedException("You don't have access to do this");
+        }
+
+        boolean success = this.serverService.addJavaToServer(serverId, javaId);
+        if (success)
+            return "Success";
+        else
+            return "Failure";
     }
 
     private boolean hasAccessToServer(final AuthenticatedUser authenticatedUser, final int serverId)

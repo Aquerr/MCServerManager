@@ -43,6 +43,9 @@
     <div class="collapse navbar-collapse" id="navbarContent">
         <ul sec:authorize="isAuthenticated()" class="navbar-nav ml-auto">
             <li class="nav-item">
+                <a class="nav-link" th:href="@{/config}"><i class="fas fa-cog"></i></a>
+            </li>
+            <li class="nav-item">
                 <a class="nav-link" href="#" th:text="${#authentication.name}"><i class="fas fa-user-circle"></i></a>
             </li>
             <li class="nav-item">

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/fragments :: head (pageTitle='Java Configuration')">
+</head>
+<script type="text/javascript" th:src="@{/js/config-java.js}" defer></script>
+<body>
+<div th:replace="fragments/fragments :: header"></div>
+  <div class="container mt-4">
+<!--    <th:block th:each="javaDto : ${javaList}">-->
+<!--      <div class="card">-->
+<!--        <div class="card-body">-->
+<!--          <input class="java-id form-control" type="number" hidden th:value="${javaDto.id}">-->
+<!--          <div class="form-group">-->
+<!--            <label>Name</label>-->
+<!--            <input class="form-control" placeholder="Name..." th:value="${javaDto.name}">-->
+<!--          </div>-->
+<!--          <div class="form-group">-->
+<!--            <label>Path (to java executable file)</label>-->
+<!--            <input class="java-path form-control" placeholder="C:\Program Files\Java\jre-1.8\bin\java" th:value="${javaDto.path}">-->
+<!--          </div>-->
+<!--        </div>-->
+<!--      </div>-->
+<!--    </th:block>-->
+      <div id="java-list" class="accordion">
+          <th:block th:each="javaDto : ${javaList}">
+              <div class="card">
+                  <div class="card-header">
+                      <h3>
+                          <button class="btn btn-link" th:text="${'#' + javaDto.id + ' - ' + javaDto.name}" data-toggle="collapse" th:data-target="${'#collapse' + javaDto.id}"></button>
+                          <span class="float-right java-delete" style="cursor: pointer;" th:java-id="${javaDto.id}">&times</span>
+                      </h3>
+                  </div>
+                  <div th:id="${'collapse' + javaDto.id}" class="collapse">
+                      <div class="card-body">
+                          <input class="java-id form-control" type="number" hidden th:value="${javaDto.id}">
+                          <div class="form-group">
+                              <label>Name</label>
+                              <input class="java-name form-control" placeholder="Name..." th:value="${javaDto.name}">
+                          </div>
+                          <div class="form-group">
+                              <label>Path (to Java executable file)</label>
+                              <input class="java-path form-control" placeholder="C:\Program Files\Java\jre-1.8\bin\java" th:value="${javaDto.path}">
+                          </div>
+                          <button class="btn btn-primary java-save">Save</button>
+                      </div>
+                  </div>
+              </div>
+          </th:block>
+      </div>
+    <div class="mt-3">
+      <button id="add-java" class="btn btn-primary">Add Java</button>
+    </div>
+  </div>
+</body>
+</html>

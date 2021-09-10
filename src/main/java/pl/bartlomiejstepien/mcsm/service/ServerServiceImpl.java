@@ -6,15 +6,20 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pl.bartlomiejstepien.mcsm.config.Config;
+import pl.bartlomiejstepien.mcsm.domain.dto.JavaDto;
 import pl.bartlomiejstepien.mcsm.domain.dto.ServerDto;
 import pl.bartlomiejstepien.mcsm.domain.dto.UserDto;
 import pl.bartlomiejstepien.mcsm.domain.exception.ServerAlreadyOwnedException;
+import pl.bartlomiejstepien.mcsm.domain.exception.ServerNotExistsException;
 import pl.bartlomiejstepien.mcsm.domain.model.InstallationStatus;
 import pl.bartlomiejstepien.mcsm.domain.platform.Platform;
 import pl.bartlomiejstepien.mcsm.domain.server.ServerInstaller;
+import pl.bartlomiejstepien.mcsm.repository.JavaRepository;
 import pl.bartlomiejstepien.mcsm.repository.ServerRepository;
 import pl.bartlomiejstepien.mcsm.repository.UserRepository;
+import pl.bartlomiejstepien.mcsm.repository.converter.JavaConverter;
 import pl.bartlomiejstepien.mcsm.repository.converter.ServerConverter;
+import pl.bartlomiejstepien.mcsm.repository.ds.Java;
 import pl.bartlomiejstepien.mcsm.repository.ds.Server;
 import pl.bartlomiejstepien.mcsm.repository.ds.User;
 
@@ -33,19 +38,25 @@ public class ServerServiceImpl implements ServerService
     private final ServerInstaller serverInstaller;
     private final ServerConverter serverConverter;
     private final UserRepository userRepository;
+    private final JavaRepository javaRepository;
+    private final JavaConverter javaConverter;
 
     @Autowired
     public ServerServiceImpl(final Config config,
                              final UserRepository userRepository,
                              final ServerRepository serverRepository,
                              final ServerInstaller serverInstaller,
-                             final ServerConverter serverConverter)
+                             final ServerConverter serverConverter,
+                             final JavaRepository javaRepository,
+                             final JavaConverter javaConverter)
     {
         this.config = config;
         this.userRepository = userRepository;
         this.serverRepository = serverRepository;
         this.serverInstaller = serverInstaller;
         this.serverConverter = serverConverter;
+        this.javaRepository = javaRepository;
+        this.javaConverter = javaConverter;
     }
 
     @Transactional
@@ -135,5 +146,27 @@ public class ServerServiceImpl implements ServerService
     public Optional<InstallationStatus> getInstallationStatus(int serverId)
     {
         return this.serverInstaller.getInstallationStatus(serverId);
+    }
+
+    @Transactional
+    @Override
+    public JavaDto getJavaForServer(int serverId)
+    {
+        final Server server = this.serverRepository.find(serverId);
+        if (server == null)
+            throw new ServerNotExistsException("Server for id = " + serverId + " does not exist!");
+
+        final Java java = this.javaRepository.find(server.getJavaId());
+        return this.javaConverter.convertToDto(java);
+    }
+
+    @Transactional
+    @Override
+    public boolean addJavaToServer(int serverId, int javaId)
+    {
+        final Server server = this.serverRepository.find(serverId);
+        server.setJavaId(serverId);
+        this.serverRepository.update(server);
+        return true;
     }
 }
