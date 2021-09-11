@@ -15,6 +15,7 @@ import pl.bartlomiejstepien.mcsm.domain.model.ModPack;
 import pl.bartlomiejstepien.mcsm.domain.dto.ServerDto;
 import pl.bartlomiejstepien.mcsm.domain.server.ServerManager;
 import pl.bartlomiejstepien.mcsm.integration.curseforge.CurseForgeService;
+import pl.bartlomiejstepien.mcsm.service.ConfigService;
 import pl.bartlomiejstepien.mcsm.service.ServerServiceImpl;
 
 import java.util.List;
@@ -26,13 +27,16 @@ public class ServersController
     private final CurseForgeService curseForgeService;
     private final ServerServiceImpl serverService;
     private final ServerManager serverManager;
+    private final ConfigService configService;
 
     @Autowired
-    public ServersController(final CurseForgeService curseForgeService, final ServerServiceImpl serverService, final ServerManager serverManager)
+    public ServersController(final CurseForgeService curseForgeService, final ServerServiceImpl serverService, final ServerManager serverManager
+        , final ConfigService configService)
     {
         this.curseForgeService = curseForgeService;
         this.serverService = serverService;
         this.serverManager = serverManager;
+        this.configService = configService;
     }
 
     @GetMapping("/add-server")
@@ -73,6 +77,7 @@ public class ServersController
         this.serverManager.loadProperties(serverDto);
 
         model.addAttribute("server", serverDto);
+        model.addAttribute("allJavaVersions", this.configService.getAllJavaVersions());
         return "servers/server-panel";
     }
 

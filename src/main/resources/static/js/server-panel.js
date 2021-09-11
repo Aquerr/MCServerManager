@@ -124,5 +124,31 @@ $("#console-input").on("keydown", function (event) {
     }
 });
 
+$("#save-java").on("click", function () {
+    const serverId = $("#server-id").val();
+    const selectedJavaId = $("#java-select").val();
+    const javaSaveButton = $("#save-java");
+    javaSaveButton.text("");
+    javaSaveButton.html("<span class='spinner-border spinner-border-sm' role='status' aria-hidden='true'></span>");
+
+    $.ajax({
+        method: "PUT",
+        url: "/api/servers/" + serverId + "/java/" + selectedJavaId,
+        success: function (response) {
+            javaSaveButton.innerHTML = "";
+            javaSaveButton.removeClass("btn-primary");
+            javaSaveButton.addClass("btn-success");
+            javaSaveButton.html("Saved <i id='save-java-success' style='display: none;' class='far fa-check-circle'></i>");
+            $("#save-java-success").fadeIn();
+
+            setTimeout(function (){
+                javaSaveButton.removeClass("btn-success");
+                javaSaveButton.addClass("btn-primary");
+                javaSaveButton.html("Save");
+            }, 4000);
+        }
+    });
+});
+
 showStartStopButton();
 consoleUpdateIntervalId = setInterval(updateConsole, 5000);

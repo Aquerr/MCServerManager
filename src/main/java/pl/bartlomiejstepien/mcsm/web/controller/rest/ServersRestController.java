@@ -224,7 +224,7 @@ public class ServersRestController
         return this.serverService.getJavaForServer(serverId);
     }
 
-    @PostMapping(value = "{id}/java/{javaId}")
+    @PutMapping(value = "{id}/java/{javaId}")
     public String saveJavaForServer(final @PathVariable("id") Integer serverId, final @PathVariable("javaId") Integer javaId)
     {
         final AuthenticatedUser authenticatedUser = this.authenticationFacade.getCurrentUser();

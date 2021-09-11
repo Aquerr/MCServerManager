@@ -165,7 +165,7 @@ public class ServerServiceImpl implements ServerService
     public boolean addJavaToServer(int serverId, int javaId)
     {
         final Server server = this.serverRepository.find(serverId);
-        server.setJavaId(serverId);
+        server.setJavaId(javaId);
         this.serverRepository.update(server);
         return true;
     }
