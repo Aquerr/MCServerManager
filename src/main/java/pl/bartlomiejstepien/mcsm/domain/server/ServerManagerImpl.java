@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.FileSystemUtils;
 import pl.bartlomiejstepien.mcsm.auth.AuthenticatedUser;
 import pl.bartlomiejstepien.mcsm.config.Config;
+import pl.bartlomiejstepien.mcsm.domain.dto.JavaDto;
 import pl.bartlomiejstepien.mcsm.domain.dto.ServerDto;
 import pl.bartlomiejstepien.mcsm.domain.exception.CouldNotDownloadServerFilesException;
 import pl.bartlomiejstepien.mcsm.domain.exception.ServerNotRunningException;
@@ -368,10 +369,11 @@ public class ServerManagerImpl implements ServerManager
         Path serverPath = Paths.get(serverDto.getServerDir());
         Path serverRootDirectory = findServerRootDirectory(serverPath);
         Path serverStartFilePath = serverStartFileFinder.findServerStartFile(serverRootDirectory);
+        JavaDto javaDto = this.serverService.getJavaForServer(serverDto.getId());
         if (serverStartFilePath == null)
             throw new RuntimeException("Could not find server start file!");
 
-        return new InstalledServer(0, serverDto.getName(), serverPath, serverStartFilePath);
+        return new InstalledServer(0, serverDto.getName(), serverPath, serverStartFilePath, javaDto.getPath());
     }
 
     private Path findServerRootDirectory(Path serverPath)

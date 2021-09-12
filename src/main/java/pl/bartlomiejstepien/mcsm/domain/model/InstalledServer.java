@@ -12,8 +12,6 @@ import java.util.List;
 
 public class InstalledServer
 {
-    private static final Logger LOGGER = LoggerFactory.getLogger(ServerDto.class);
-
     private int id;
     private String name;
     private Path serverDir;
@@ -23,12 +21,15 @@ public class InstalledServer
 
     private final List<String> players = new LinkedList<>();
 
-    public InstalledServer(int id, String name, Path serverDir, Path startFilePath)
+    private final String javaPath;
+
+    public InstalledServer(int id, String name, Path serverDir, Path startFilePath, String javaPath)
     {
         this.id = id;
         this.name = name;
         this.serverDir = serverDir;
         this.startFilePath = startFilePath;
+        this.javaPath = javaPath;
     }
 
     public void addUser(UserDto userDto)
@@ -79,5 +80,10 @@ public class InstalledServer
     public List<String> getPlayers()
     {
         return players;
+    }
+
+    public String getJavaPath()
+    {
+        return javaPath;
     }
 }

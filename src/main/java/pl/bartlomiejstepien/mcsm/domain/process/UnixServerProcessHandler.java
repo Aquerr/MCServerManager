@@ -8,12 +8,14 @@ import pl.bartlomiejstepien.mcsm.domain.dto.ServerDto;
 import pl.bartlomiejstepien.mcsm.domain.model.InstalledServer;
 import pl.bartlomiejstepien.mcsm.util.IsUnixCondition;
 
-import java.io.IOException;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.util.Arrays;
+import java.util.Map;
 
 @Component
 @Conditional(IsUnixCondition.class)
@@ -34,10 +36,19 @@ public class UnixServerProcessHandler implements ServerProcessHandler
 
         try
         {
-            final Process process = new ProcessBuilder("sh", "-f", serverStartFile.toAbsolutePath().toString())
-                    .start();
+            final String[] commandArray = new String[] {"sh", "-f", serverStartFile.getFileName().toString()};
+            final ProcessBuilder processBuilder = new ProcessBuilder(commandArray);
+            processBuilder.directory(installedServer.getServerDir().toFile());
+            Map<String, String> environment = processBuilder.environment();
+            environment.put("PATH", installedServer.getJavaPath() + ":" + System.getenv("PATH"));
+            LOGGER.info("Starting server process with java {} in {} with commands: {}", installedServer.getJavaPath(), installedServer.getServerDir().toAbsolutePath(), Arrays.toString(commandArray));
+            final Process process = processBuilder.start();
+            //            environment.put("JAVA_HOME", "/usr/lib/jvm/java-1.8.0-openjdk-amd64");
+            //            processBuilder.redirectErrorStream(true);
+//            new Thread(() -> readInputStream(process.getInputStream())).start();
 
             final long pid = process.pid();
+
             LOGGER.info("Server process id = " + pid);
             Files.write(installedServer.getServerDir().resolve(PID_FILE_NAME),
                     String.valueOf(pid).getBytes(StandardCharsets.UTF_8),
@@ -52,6 +63,26 @@ public class UnixServerProcessHandler implements ServerProcessHandler
 
         return null;
     }
+
+//    private void readInputStream(InputStream inputStream)
+//    {
+//        BufferedReader subProcessInputReader =
+//                new BufferedReader(new InputStreamReader(inputStream));
+//
+//        String line = null;
+//        while (true)
+//        {
+//            try
+//            {
+//                if ((line = subProcessInputReader.readLine()) == null) break;
+//            }
+//            catch (IOException exception)
+//            {
+//                exception.printStackTrace();
+//            }
+//            System.out.println(line);
+//        }
+//    }
 
     @Override
     public void stopServerProcess(ServerDto serverDto)

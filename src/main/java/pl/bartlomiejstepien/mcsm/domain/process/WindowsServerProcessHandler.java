@@ -9,11 +9,11 @@ import pl.bartlomiejstepien.mcsm.domain.model.InstalledServer;
 import pl.bartlomiejstepien.mcsm.util.IsWindowsCondition;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -29,8 +29,16 @@ public class WindowsServerProcessHandler implements ServerProcessHandler
     {
         try
         {
-            final String serverDir = installedServer.getServerDir().toAbsolutePath().toString();
-            return Runtime.getRuntime().exec("cmd /c start " + installedServer.getStartFilePath().getFileName().toString() + " title " + installedServer.getName(), null, new File(serverDir));
+            final String[] commandArray = new String[] {"cmd", "/c", "start", installedServer.getStartFilePath().getFileName().toString(), "title", installedServer.getName()};
+            LOGGER.info("Starting server process with java {} in {} with commands: {}", installedServer.getJavaPath(), installedServer.getServerDir().toAbsolutePath(), Arrays.toString(commandArray));
+            final ProcessBuilder processBuilder = new ProcessBuilder(commandArray);
+            processBuilder.directory(installedServer.getServerDir().toFile());
+            Map<String, String> environment = processBuilder.environment();
+            environment.put("PATH", installedServer.getJavaPath() + ":" + System.getenv("Path"));
+            final Process process = processBuilder.start();
+
+            return process;
+//            return Runtime.getRuntime().exec("cmd /c start " + installedServer.getStartFilePath().getFileName().toString() + " title " + installedServer.getName(), null, new File(serverDir));
         }
         catch (IOException e)
         {
