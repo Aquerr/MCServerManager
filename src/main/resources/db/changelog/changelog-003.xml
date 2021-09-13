@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.2.xsd">
+
+    <changeSet id="create_role_table" author="Nerdi">
+        <createTable tableName="role">
+            <column name="id" autoIncrement="true" type="int">
+                <constraints primaryKey="true" nullable="false" unique="true"/>
+            </column>
+            <column name="name" type="varchar(20)">
+                <constraints unique="true" nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet id="insert_roles" author="Nerdi">
+        <insert tableName="role">
+            <column name="id" value="1"/>
+            <column name="name" value="USER"/>
+        </insert>
+        <insert tableName="role">
+            <column name="id" value="2"/>
+            <column name="name" value="ADMIN"/>
+        </insert>
+    </changeSet>
+    <changeSet id="add_role_column_to_user" author="Nerdi">
+        <addColumn tableName="mcsm_user">
+            <column name="role_id" type="int" defaultValue="1">
+                <constraints nullable="false" unique="false" foreignKeyName="fk_user_role" references="role(id)"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+</databaseChangeLog>

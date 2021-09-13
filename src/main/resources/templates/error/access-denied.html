@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity5">
+<head th:replace="fragments/fragments :: head (pageTitle='Access Denied')">
+</head>
+<body>
+    <div th:replace="fragments/fragments :: header"></div>
+    <div class="container mt-2">
+        <h4>Access Denied</h4>
+        <p>Sorry, You don't have access to open this page. :(</p>
+    </div>
+</body>
+</html>

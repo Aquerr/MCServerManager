@@ -13,6 +13,8 @@ public class UserDto
 //    private final List<ServerDto> serverDtos = new ArrayList<>();
     private List<Integer> serverIds = new ArrayList<>();
 
+    private RoleEnum role;
+
     public UserDto()
     {
 
@@ -83,5 +85,15 @@ public class UserDto
     public void setServerIds(List<Integer> serverIds)
     {
         this.serverIds = serverIds;
+    }
+
+    public RoleEnum getRole()
+    {
+        return role;
+    }
+
+    public void setRole(RoleEnum role)
+    {
+        this.role = role;
     }
 }

@@ -10,7 +10,9 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.access.AccessDeniedHandler;
 import pl.bartlomiejstepien.mcsm.Routes;
+import pl.bartlomiejstepien.mcsm.auth.McsmAccessDeniedHandler;
 
 @Configuration
 @EnableWebSecurity
@@ -25,6 +27,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter
         http
             .authorizeRequests()
                 .antMatchers("/css/**", "icons/**", "/js/**", "/webjars/**", "/favicon.ico").permitAll()
+                .antMatchers("/config/**", "/api/config/**").hasAuthority("ADMIN")
                 .antMatchers("/h2-console/**").permitAll()
                 .and().headers().frameOptions().sameOrigin()
             .and()
@@ -44,7 +47,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter
             .and()
             .authorizeRequests()
             .anyRequest().authenticated()
-            .and();
+            .and()
+            .exceptionHandling().accessDeniedHandler(accessDeniedHandler());
     }
 
     @Override
@@ -65,5 +69,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter
     public PasswordEncoder passwordEncoder()
     {
         return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public AccessDeniedHandler accessDeniedHandler()
+    {
+        return new McsmAccessDeniedHandler();
     }
 }

@@ -31,16 +31,20 @@ public class User
     @Column(name = "server_id", nullable = false)
     private List<Integer> serversIds = new ArrayList<>();
 
+    @Column(name = "role_id")
+    private int roleId;
+
     public User()
     {
 
     }
 
-    public User(Integer id, String username, String password)
+    public User(Integer id, String username, String password, Integer roleId)
     {
         this.id = id;
         this.username = username;
         this.password = password;
+        this.roleId = roleId;
     }
 
     public Collection<? extends GrantedAuthority> getAuthorities()
@@ -97,6 +101,16 @@ public class User
     public void setServersIds(List<Integer> serversIds)
     {
         this.serversIds = serversIds;
+    }
+
+    public int getRoleId()
+    {
+        return roleId;
+    }
+
+    public void setRoleId(int roleId)
+    {
+        this.roleId = roleId;
     }
 
     //    public List<Server> getServers()

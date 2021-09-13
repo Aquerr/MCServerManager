@@ -1,7 +1,9 @@
 package pl.bartlomiejstepien.mcsm.auth;
 
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import pl.bartlomiejstepien.mcsm.domain.dto.RoleEnum;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -14,12 +16,15 @@ public class AuthenticatedUser implements UserDetails
 
     private final String remoteIpAddress;
 
-    public AuthenticatedUser(int id, String username, String password, String remoteIpAddress)
+    private RoleEnum role;
+
+    public AuthenticatedUser(int id, String username, String password, String remoteIpAddress, RoleEnum role)
     {
         this.id = id;
         this.username = username;
         this.password = password;
         this.remoteIpAddress = remoteIpAddress;
+        this.role = role;
     }
 
     public int getId()
@@ -30,7 +35,7 @@ public class AuthenticatedUser implements UserDetails
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities()
     {
-        return Collections.emptyList();
+        return Collections.singletonList(new SimpleGrantedAuthority(role.getName()));
     }
 
     @Override

@@ -5,6 +5,7 @@ import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import pl.bartlomiejstepien.mcsm.domain.dto.RoleEnum;
 import pl.bartlomiejstepien.mcsm.repository.UserRepository;
 import pl.bartlomiejstepien.mcsm.repository.ds.User;
 
@@ -27,7 +28,7 @@ public class DataLoader
         final User user = this.userRepository.find(1);
         if (user == null || !user.getUsername().equals("Nerdi"))
         {
-            this.userRepository.save(new User(0, "Nerdi", "$2a$10$RsBi7zEwsAHxTgQO8cBX5Oe7iCPvIkGN3ichuibM9uGzmvx6TzFC6"));
+            this.userRepository.save(new User(null, "Nerdi", "$2a$10$RsBi7zEwsAHxTgQO8cBX5Oe7iCPvIkGN3ichuibM9uGzmvx6TzFC6", RoleEnum.ADMIN.getId()));
         }
     }
 }

@@ -26,6 +26,7 @@ class UserServiceImplTest
     private static final Integer USER_ID = 1;
     private static final String USERNAME = "Username";
     private static final String PASSWORD = "Password";
+    private static final Integer ROLE_ID = 2;
 
     @Mock
     private UserRepository userRepository;
@@ -151,6 +152,6 @@ class UserServiceImplTest
 
     private User prepareUser()
     {
-        return new User(USER_ID, USERNAME, PASSWORD);
+        return new User(USER_ID, USERNAME, PASSWORD, ROLE_ID);
     }
 }
