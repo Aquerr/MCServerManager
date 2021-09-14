@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/fragments :: head (pageTitle='Users Config')">
+</head>
+<script type="text/javascript" th:src="@{/js/config-users.js}" defer></script>
+<body>
+<div th:replace="fragments/fragments :: header"></div>
+<div class="container mt-4">
+    <div th:text="${authentication}"></div>
+    <table class="table table-striped">
+    <!--    <table class="table" th:if="${authentication.authorities.contains('ADMIN')}">-->
+        <thead class="table-dark">
+            <tr>
+                <th scope="col">Id</th>
+                <th scope="col">Name</th>
+                <th scope="col">Password</th>
+                <th scope="col">Role</th>
+                <th scope="col" class="text-center">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="user : ${users}">
+                <td th:text="${user.id}"></td>
+                <td><span th:text="${user.username}"></span></td>
+                <td><span th:text="${user.password}"></span></td>
+                <td><span th:text="${user.role}"></span></td>
+                <td class="text-center">
+                    <div>
+                        <button class="btn btn-primary mr-1" onclick="editUser(this)" th:user-id="${user.id}">Edit</button>
+                        <button th:if="${user.id != #authentication.principal.id}" class="btn btn-danger" onclick="deleteUser(this)" th:user-id="${user.id}">Delete</button>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <button id="add-new-user" class="btn btn-primary">Add new user</button>
+</div>
+
+<div class="modal fade" tabindex="-1" role="dialog" id="add-user-modal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">New user</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <input id="user-id" hidden>
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input id="username" type="text" name="username" placeholder="Username" class="form-control" required>
+                    <div class="invalid-feedback"></div>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input id="password" type="password" name="password" class="form-control" placeholder="Password" required>
+                    <div class="invalid-feedback"></div>
+                </div>
+                <div class="form-group">
+                    <label for="confirm-password">Repeat password</label>
+                    <input id="confirm-password" type="password" name="confirm-password" class="form-control" placeholder="Repeat password" required>
+                    <div class="invalid-feedback"></div>
+                </div>
+                <div class="form-group">
+                    <label for="role">Role</label>
+                    <select id="role" class="form-control" required>
+                        <th:block th:each="role : ${T(pl.bartlomiejstepien.mcsm.domain.dto.RoleEnum).values()}">
+                            <option th:value="${role.getName()}" th:text="${role.getName()}"></option>
+                        </th:block>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="user-submit">Submit</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

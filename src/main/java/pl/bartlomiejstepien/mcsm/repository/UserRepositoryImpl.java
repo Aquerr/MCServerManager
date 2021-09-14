@@ -31,13 +31,13 @@ public class UserRepositoryImpl implements UserRepository
     @Override
     public List<User> findAll()
     {
-        return ((List<User>)this.entityManager.createQuery("from user").getResultList());
+        return ((List<User>)this.entityManager.createQuery("from User").getResultList());
     }
 
     @Override
     public void save(final User user)
     {
-        this.entityManager.persist(user);
+        this.entityManager.merge(user);
     }
 
     @Override

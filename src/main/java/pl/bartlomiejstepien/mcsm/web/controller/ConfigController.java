@@ -6,17 +6,20 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import pl.bartlomiejstepien.mcsm.service.ConfigService;
+import pl.bartlomiejstepien.mcsm.service.UserService;
 
 @Controller
 @RequestMapping("/config")
 public class ConfigController
 {
     private final ConfigService configService;
+    private final UserService userService;
 
     @Autowired
-    public ConfigController(final ConfigService configService)
+    public ConfigController(final ConfigService configService, final UserService userService)
     {
         this.configService = configService;
+        this.userService = userService;
     }
 
     @GetMapping
@@ -30,5 +33,12 @@ public class ConfigController
     {
         model.addAttribute("javaList", this.configService.getAllJavaVersions());
         return "config/java/java-config";
+    }
+
+    @GetMapping("/users")
+    public String showUsersConfig(Model model)
+    {
+        model.addAttribute("users", this.userService.findAll());
+        return "config/users/users-config";
     }
 }

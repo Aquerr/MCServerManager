@@ -4,7 +4,7 @@ import java.util.*;
 
 public class UserDto
 {
-    private int id;
+    private Integer id;
 
     private String username;
 
@@ -20,7 +20,7 @@ public class UserDto
 
     }
 
-    public UserDto(int id, String username, String password)
+    public UserDto(Integer id, String username, String password)
     {
         this.id = id;
         this.username = username;
@@ -47,7 +47,7 @@ public class UserDto
 //        this.serverDtos.remove(serverDto);
 //    }
 
-    public int getId()
+    public Integer getId()
     {
         return id;
     }
@@ -67,7 +67,7 @@ public class UserDto
         return serverIds;
     }
 
-    public void setId(int id)
+    public void setId(Integer id)
     {
         this.id = id;
     }

@@ -12,7 +12,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.access.AccessDeniedHandler;
 import pl.bartlomiejstepien.mcsm.Routes;
-import pl.bartlomiejstepien.mcsm.auth.McsmAccessDeniedHandler;
 
 @Configuration
 @EnableWebSecurity

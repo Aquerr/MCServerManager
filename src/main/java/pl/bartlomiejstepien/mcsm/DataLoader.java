@@ -25,8 +25,8 @@ public class DataLoader
     @Transactional
     public void loadData()
     {
-        final User user = this.userRepository.find(1);
-        if (user == null || !user.getUsername().equals("Nerdi"))
+        final User user = this.userRepository.findByUsername("Nerdi");
+        if (user == null)
         {
             this.userRepository.save(new User(null, "Nerdi", "$2a$10$RsBi7zEwsAHxTgQO8cBX5Oe7iCPvIkGN3ichuibM9uGzmvx6TzFC6", RoleEnum.ADMIN.getId()));
         }

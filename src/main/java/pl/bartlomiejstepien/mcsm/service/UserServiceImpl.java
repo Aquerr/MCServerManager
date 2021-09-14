@@ -1,6 +1,7 @@
 package pl.bartlomiejstepien.mcsm.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pl.bartlomiejstepien.mcsm.domain.dto.UserDto;
@@ -14,14 +15,18 @@ import java.util.stream.Collectors;
 @Transactional
 public class UserServiceImpl implements UserService
 {
+    private final PasswordEncoder passwordEncoder;
     private final UserRepository userRepository;
     private final UserConverter userConverter;
 
     @Autowired
-    public UserServiceImpl(final UserRepository userRepository, final UserConverter userConverter)
+    public UserServiceImpl(final UserRepository userRepository,
+                           final UserConverter userConverter,
+                           final PasswordEncoder passwordEncoder)
     {
         this.userRepository = userRepository;
         this.userConverter = userConverter;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
@@ -45,6 +50,7 @@ public class UserServiceImpl implements UserService
     @Override
     public void save(final UserDto userDto)
     {
+        userDto.setPassword(this.passwordEncoder.encode(userDto.getPassword()));
         this.userRepository.save(this.userConverter.convertToUser(userDto));
     }
 

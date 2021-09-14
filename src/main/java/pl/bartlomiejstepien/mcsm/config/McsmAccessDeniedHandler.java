@@ -1,4 +1,4 @@
-package pl.bartlomiejstepien.mcsm.auth;
+package pl.bartlomiejstepien.mcsm.config;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
