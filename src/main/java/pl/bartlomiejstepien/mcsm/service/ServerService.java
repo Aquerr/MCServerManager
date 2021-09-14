@@ -23,7 +23,7 @@ public interface ServerService
 
     List<ServerDto> getServersForUser(int userId);
 
-    void importServer(int userId, String serverName, String path, Platform platform);
+    void importServer(Integer userId, String serverName, String path, Platform platform, Integer javaId);
 
     Optional<ServerDto> getServerByPath(String path);
 

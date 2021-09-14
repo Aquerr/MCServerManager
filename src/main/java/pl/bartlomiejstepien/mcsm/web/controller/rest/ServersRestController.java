@@ -135,10 +135,14 @@ public class ServersRestController
         String serverName = json.get("server-name").textValue();
         String path = json.get("path").textValue();
         String platform = json.get("platform").textValue();
+        int javaId = Integer.parseInt(json.get("java_id").textValue());
+
+        if (StringUtils.isEmpty(serverName) || StringUtils.isEmpty(path) || StringUtils.isEmpty(platform) || javaId <= 0)
+            throw new IllegalArgumentException("Wrong parameters");
 
         AuthenticatedUser authenticatedUser = authenticationFacade.getCurrentUser();
 
-        serverService.importServer(authenticatedUser.getId(), serverName, path, Platform.valueOf(platform.toUpperCase()));
+        serverService.importServer(authenticatedUser.getId(), serverName, path, Platform.valueOf(platform.toUpperCase()), javaId);
         LOGGER.debug("Server has been imported.");
     }
 

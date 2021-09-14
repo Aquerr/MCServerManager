@@ -107,9 +107,9 @@ public class ServerServiceImpl implements ServerService
 
     @Transactional
     @Override
-    public void importServer(final int userId, final String serverName, final String path, Platform platform)
+    public void importServer(final Integer userId, final String serverName, final String path, Platform platform, Integer javaId)
     {
-        LOGGER.info("Importing server {} for platform {}, at path {}, for user id {} ", serverName, platform.getName(), path, userId);
+        LOGGER.info("Importing server {} for platform {}, at path {}, for user id {} with java {}", serverName, platform.getName(), path, userId, javaId);
         final User user = this.userRepository.find(userId);
         final Server existingServerForPath = this.serverRepository.findByPath(path);
 
@@ -129,6 +129,7 @@ public class ServerServiceImpl implements ServerService
         {
             final Server server = new Server(0, serverName, path);
             server.setPlatform(platform.getName());
+            server.setJavaId(javaId);
             server.getUsersIds().add(userId);
             this.serverRepository.save(server);
         }
