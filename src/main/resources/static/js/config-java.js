@@ -7,8 +7,8 @@ const newJavaTemplate = "<div class=\"card\">\n" +
     "                              <input class=\"java-name form-control\" placeholder=\"Name...\">\n" +
     "                          </div>\n" +
     "                          <div class=\"form-group\">\n" +
-    "                              <label>Path (to Java executable file)</label>\n" +
-    "                              <input class=\"java-path form-control\" placeholder=\"C:\\Program Files\\Java\\jre-1.8\\bin\\java\">\n" +
+    "                              <label>Path to folder containing Java executable file</label>\n" +
+    "                              <input class=\"java-path form-control\" placeholder=\"C:\\Program Files\\Java\\jre-1.8\\bin\\java\\bin\">\n" +
     "                          </div>\n" +
     "                          <button class=\"btn btn-primary java-save\">Save</button>\n" +
     "                      </div>\n" +
