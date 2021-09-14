@@ -5,6 +5,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import pl.bartlomiejstepien.mcsm.domain.dto.UserDto;
 import pl.bartlomiejstepien.mcsm.repository.UserRepository;
 import pl.bartlomiejstepien.mcsm.repository.converter.UserConverter;
@@ -33,6 +34,9 @@ class UserServiceImplTest
 
     @Mock
     private UserConverter userConverter;
+
+    @Mock
+    private PasswordEncoder passwordEncoder;
 
     @InjectMocks
     private UserServiceImpl userService;
@@ -108,6 +112,7 @@ class UserServiceImplTest
         userService.save(userDto);
 
         // then
+        verify(passwordEncoder).encode(user.getPassword());
         verify(userRepository).save(user);
     }
 
