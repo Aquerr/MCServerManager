@@ -4,6 +4,10 @@ public class Versions
 {
     public static String[] VERSIONS = {
             "",
+            "1.18",
+            "1.17.2",
+            "1.17.1",
+            "1.17",
             "1.16.5",
             "1.16.4",
             "1.16.3",

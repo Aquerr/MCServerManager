@@ -13,4 +13,6 @@ public interface JavaRepository
     void save(Java java);
 
     void delete(Integer id);
+
+    Java findFirst();
 }

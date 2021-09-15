@@ -34,7 +34,7 @@ public class WindowsServerProcessHandler implements ServerProcessHandler
             final ProcessBuilder processBuilder = new ProcessBuilder(commandArray);
             processBuilder.directory(installedServer.getServerDir().toFile());
             Map<String, String> environment = processBuilder.environment();
-            environment.put("PATH", installedServer.getJavaPath() + ":" + System.getenv("Path"));
+            environment.put("Path", installedServer.getJavaPath() + ";" + System.getenv("Path"));
             final Process process = processBuilder.start();
 
             return process;

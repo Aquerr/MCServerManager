@@ -45,4 +45,14 @@ public class JavaRepositoryImpl implements JavaRepository
         if (java != null)
             this.entityManager.remove(java);
     }
+
+    @Override
+    public Java findFirst()
+    {
+        TypedQuery<Java> query = this.entityManager.createQuery("SELECT java FROM Java java", Java.class);
+        query.setMaxResults(1);
+        return query.getResultList().stream()
+                .findFirst()
+                .orElse(null);
+    }
 }

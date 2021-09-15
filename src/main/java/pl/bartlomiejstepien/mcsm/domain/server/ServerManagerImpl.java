@@ -20,6 +20,7 @@ import pl.bartlomiejstepien.mcsm.domain.model.ServerProperties;
 import pl.bartlomiejstepien.mcsm.domain.platform.Platform;
 import pl.bartlomiejstepien.mcsm.domain.process.ServerProcessHandler;
 import pl.bartlomiejstepien.mcsm.integration.curseforge.CurseForgeService;
+import pl.bartlomiejstepien.mcsm.service.JavaService;
 import pl.bartlomiejstepien.mcsm.service.ServerServiceImpl;
 
 import java.io.IOException;
@@ -45,6 +46,7 @@ public class ServerManagerImpl implements ServerManager
     private final ServerInstaller serverInstaller;
     private final ServerStartFileFinder serverStartFileFinder;
     private final CurseForgeService curseForgeService;
+    private final JavaService javaService;
 
     @Autowired
     public ServerManagerImpl(final Config config,
@@ -52,7 +54,8 @@ public class ServerManagerImpl implements ServerManager
                              final ServerServiceImpl serverService,
                              final ServerInstaller serverInstaller,
                              final ServerStartFileFinder serverStartFileFinder,
-                             final CurseForgeService curseForgeService)
+                             final CurseForgeService curseForgeService,
+                             final JavaService javaService)
     {
         this.config = config;
         this.serverProcessHandler = serverProcessHandler;
@@ -60,6 +63,7 @@ public class ServerManagerImpl implements ServerManager
         this.serverInstaller = serverInstaller;
         this.serverStartFileFinder = serverStartFileFinder;
         this.curseForgeService = curseForgeService;
+        this.javaService = javaService;
     }
 
     @EventListener(ApplicationReadyEvent.class)
@@ -101,7 +105,7 @@ public class ServerManagerImpl implements ServerManager
         if (RUNNING_SERVERS.containsKey(serverDto.getId()))
             throw new RuntimeException("Server is already running!");
 
-        final InstalledServer installedServer = prepareServer(serverDto);
+        final InstalledServer installedServer = convertToInstalledServer(serverDto);
         final Process process = serverProcessHandler.startServerProcess(installedServer);
         if (process == null)
             throw new RuntimeException("Could not start server with id= " + serverDto.getId());
@@ -318,10 +322,16 @@ public class ServerManagerImpl implements ServerManager
     {
         this.serverInstaller.installServerForModpack(authenticatedUser, modPack, serverPath);
 
+        LOGGER.info("Looking for server start file...");
+        Path serverRootDirectory = findServerRootDirectory(serverPath);
+        Path serverStartFilePath = serverStartFileFinder.findServerStartFile(serverRootDirectory);
+        if (serverStartFilePath == null)
+            throw new RuntimeException("Could not find server start file!");
+
         LOGGER.info("Accepting EULA...");
         acceptEula(serverPath);
 
-        return prepareServer(new ServerDto(0, modPack.getName(), serverPath.toString()));
+        return new InstalledServer(0, modPack.getName(), serverPath, serverStartFilePath);
     }
 
     @Override
@@ -346,8 +356,14 @@ public class ServerManagerImpl implements ServerManager
             }
         }
 
+
+        //TODO: Remove determineJavaVersionForModpack and set java to first found java. User should properly configure the server after the installation.
+        JavaDto javaDto = determineJavaVersionForModpack(modPack)
+                .orElseThrow(() -> new RuntimeException("No available java found!"));
+
         final InstalledServer installedServer = installServerForModPack(authenticatedUser, modPack, serverPath);
         ServerDto serverDto = new ServerDto(installedServer.getId(), installedServer.getName(), installedServer.getServerDir().toString());
+        serverDto.setJavaId(javaDto.getId());
         serverDto.setPlatform(Platform.FORGE.getName());
         this.serverService.addServer(authenticatedUser.getId(), serverDto);
         final int serverId = this.serverService.getServerByPath(installedServer.getServerDir().toString())
@@ -363,17 +379,28 @@ public class ServerManagerImpl implements ServerManager
         return serverId;
     }
 
-    private InstalledServer prepareServer(final ServerDto serverDto)
+    private Optional<JavaDto> determineJavaVersionForModpack(ModPack modPack)
+    {
+        if (modPack.getVersion().equals("1.17") || modPack.getVersion().equals("1.17.1") || modPack.getVersion().equals("1.17.2"))
+        {
+            return Optional.ofNullable(this.javaService.findFirst());
+        }
+        return Optional.ofNullable(this.javaService.findFirst());
+    }
+
+    private InstalledServer convertToInstalledServer(final ServerDto serverDto)
     {
         LOGGER.info("Looking for server start file...");
         Path serverPath = Paths.get(serverDto.getServerDir());
         Path serverRootDirectory = findServerRootDirectory(serverPath);
         Path serverStartFilePath = serverStartFileFinder.findServerStartFile(serverRootDirectory);
-        JavaDto javaDto = this.serverService.getJavaForServer(serverDto.getId());
+        String javaPath = this.serverService.getJavaForServer(serverDto.getId()).getPath();
         if (serverStartFilePath == null)
             throw new RuntimeException("Could not find server start file!");
 
-        return new InstalledServer(0, serverDto.getName(), serverPath, serverStartFilePath, javaDto.getPath());
+        InstalledServer installedServer = new InstalledServer(serverDto.getId(), serverDto.getName(), serverPath, serverStartFilePath);
+        installedServer.setJavaPath(javaPath);
+        return installedServer;
     }
 
     private Path findServerRootDirectory(Path serverPath)

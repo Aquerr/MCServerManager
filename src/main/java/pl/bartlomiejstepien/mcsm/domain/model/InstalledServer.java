@@ -21,14 +21,18 @@ public class InstalledServer
 
     private final List<String> players = new LinkedList<>();
 
-    private final String javaPath;
+    private String javaPath;
 
-    public InstalledServer(int id, String name, Path serverDir, Path startFilePath, String javaPath)
+    public InstalledServer(int id, String name, Path serverDir, Path startFilePath)
     {
         this.id = id;
         this.name = name;
         this.serverDir = serverDir;
         this.startFilePath = startFilePath;
+    }
+
+    public void setJavaPath(String javaPath)
+    {
         this.javaPath = javaPath;
     }
 
