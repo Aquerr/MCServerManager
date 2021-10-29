@@ -42,7 +42,7 @@
 
     <div class="collapse navbar-collapse" id="navbarContent">
         <ul sec:authorize="isAuthenticated()" class="navbar-nav ml-auto">
-            <li class="nav-item">
+            <li th:unless="${#authentication.principal.role.name == 'USER'}" class="nav-item">
                 <a class="nav-link" th:href="@{/config}">Settings <i class="fas fa-cog"></i></a>
             </li>
             <li class="nav-item">
