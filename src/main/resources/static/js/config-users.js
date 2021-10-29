@@ -14,6 +14,14 @@ function editUser(editButton) {
          $("#username").val(response.username);
          $("#role").val(response.role);
          $("#add-user-modal").modal("show");
+
+         const currentUserRole = $("#current-user-role").val();
+
+         if(response.role === currentUserRole) {
+            $("#role").parent().hide();
+         } else {
+            $("#role").parent().show();
+         }
       }
    });
 }

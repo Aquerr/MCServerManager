@@ -1,9 +1,10 @@
 package pl.bartlomiejstepien.mcsm.web.controller.rest;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import pl.bartlomiejstepien.mcsm.Routes;
+import pl.bartlomiejstepien.mcsm.auth.AuthenticatedUser;
 import pl.bartlomiejstepien.mcsm.auth.AuthenticationFacade;
 import pl.bartlomiejstepien.mcsm.domain.dto.JavaDto;
 import pl.bartlomiejstepien.mcsm.domain.dto.UserDto;
@@ -60,17 +61,28 @@ public class ConfigRestController
             throw new RuntimeException("User not found!");
         }
 
-        this.userService.save(userDto);
+        AuthenticatedUser authenticatedUser = this.authenticationFacade.getCurrentUser();
+        if (authenticatedUser.getId() == existingUser.getId())
+        {
+            userDto.setRole(existingUser.getRole());
+            this.userService.save(userDto);
+        }
+        else if(authenticatedUser.getRole().hasMorePrivilegesThan(existingUser.getRole()))
+        {
+            this.userService.save(userDto);
+        }
+
         return ResponseEntity.ok().build();
     }
 
     @PostMapping("/users")
-    public ResponseEntity<?> saveUser(final @RequestBody UserDto userDto)
+    public ResponseEntity<?> registerUser(final @RequestBody UserDto userDto)
     {
         if(this.userService.findByUsername(userDto.getUsername()) != null)
         {
             throw new UsernameAreadyExistsException(userDto.getUsername() + " is already is use!");
         }
+
         this.userService.save(userDto);
         return ResponseEntity.ok().build();
     }
@@ -83,8 +95,16 @@ public class ConfigRestController
             throw new RuntimeException("Cannot delete itself.");
         }
 
-        this.userService.delete(userId);
-        return ResponseEntity.ok("Deleted");
+        UserDto existingUser = this.userService.find(userId);
+
+        AuthenticatedUser authenticatedUser = this.authenticationFacade.getCurrentUser();
+        if (authenticatedUser.getId() != existingUser.getId() || authenticatedUser.getRole().hasMorePrivilegesThan(existingUser.getRole()))
+        {
+            this.userService.delete(userId);
+            return ResponseEntity.ok("Deleted");
+        }
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+
     }
 
     @GetMapping("/users/{id}")

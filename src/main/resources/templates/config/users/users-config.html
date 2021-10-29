@@ -6,9 +6,9 @@
 <body>
 <div th:replace="fragments/fragments :: header"></div>
 <div class="container mt-4">
-    <div th:text="${authentication}"></div>
     <table class="table table-striped">
-    <!--    <table class="table" th:if="${authentication.authorities.contains('ADMIN')}">-->
+        <input id="current-user-id" th:value="${#authentication.principal.id}" disabled hidden>
+        <input id="current-user-role" th:value="${#authentication.principal.role}" disabled hidden>
         <thead class="table-dark">
             <tr>
                 <th scope="col">Id</th>
@@ -26,8 +26,8 @@
                 <td><span th:text="${user.role}"></span></td>
                 <td class="text-center">
                     <div>
-                        <button class="btn btn-primary mr-1" onclick="editUser(this)" th:user-id="${user.id}">Edit</button>
-                        <button th:if="${user.id != #authentication.principal.id}" class="btn btn-danger" onclick="deleteUser(this)" th:user-id="${user.id}">Delete</button>
+                        <button th:if="${T(pl.bartlomiejstepien.mcsm.web.thymeleaf.UsersConfigHelper).canEditUser(#authentication.principal, user)}" class="btn btn-primary mr-1" onclick="editUser(this)" th:user-id="${user.id}">Edit</button>
+                        <button th:if="${T(pl.bartlomiejstepien.mcsm.web.thymeleaf.UsersConfigHelper).canDeleteUser(#authentication.principal, user)}" class="btn btn-danger" onclick="deleteUser(this)" th:user-id="${user.id}">Delete</button>
                     </div>
                 </td>
             </tr>
@@ -66,7 +66,7 @@
                     <label for="role">Role</label>
                     <select id="role" class="form-control" required>
                         <th:block th:each="role : ${T(pl.bartlomiejstepien.mcsm.domain.dto.RoleEnum).values()}">
-                            <option th:value="${role.getName()}" th:text="${role.getName()}"></option>
+                            <option th:if="${role.ordinal() < #authentication.principal.getRole().ordinal()}" th:value="${role.getName()}" th:text="${role.getName()}"></option>
                         </th:block>
                     </select>
                 </div>

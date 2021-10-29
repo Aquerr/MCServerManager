@@ -3,6 +3,7 @@ package pl.bartlomiejstepien.mcsm.config;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -26,7 +27,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter
         http
             .authorizeRequests()
                 .antMatchers("/css/**", "icons/**", "/js/**", "/webjars/**", "/favicon.ico").permitAll()
-                .antMatchers("/config/**", "/api/config/**").hasAuthority("ADMIN")
+                .antMatchers("/config/**", "/api/config/users/**").hasAnyAuthority("ADMIN", "OWNER")
+                .antMatchers(HttpMethod.POST, "/api/config/java").hasAnyAuthority("ADMIN", "OWNER")
+                .antMatchers(HttpMethod.PUT, "/api/config/java").hasAnyAuthority("ADMIN", "OWNER")
+                .antMatchers(HttpMethod.DELETE, "/api/config/java").hasAnyAuthority("ADMIN", "OWNER")
+                .antMatchers(HttpMethod.GET, "/api/config/java").permitAll()
                 .antMatchers("/h2-console/**").permitAll()
                 .and().headers().frameOptions().sameOrigin()
             .and()

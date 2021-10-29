@@ -3,7 +3,8 @@ package pl.bartlomiejstepien.mcsm.domain.dto;
 public enum RoleEnum
 {
     USER(1, "USER"),
-    ADMIN(2, "ADMIN");
+    ADMIN(2, "ADMIN"),
+    OWNER(3, "OWNER");
 
     final int id;
     final String name;
@@ -32,5 +33,10 @@ public enum RoleEnum
                 return roleEnum;
         }
         return null;
+    }
+
+    public boolean hasMorePrivilegesThan(RoleEnum role)
+    {
+        return ordinal() > role.ordinal();
     }
 }

@@ -78,4 +78,9 @@ public class AuthenticatedUser implements UserDetails
     {
         return remoteIpAddress;
     }
+
+    public RoleEnum getRole()
+    {
+        return role;
+    }
 }

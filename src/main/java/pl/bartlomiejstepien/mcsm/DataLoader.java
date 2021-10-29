@@ -28,7 +28,7 @@ public class DataLoader
         final User user = this.userRepository.findByUsername("Nerdi");
         if (user == null)
         {
-            this.userRepository.save(new User(null, "Nerdi", "$2a$10$RsBi7zEwsAHxTgQO8cBX5Oe7iCPvIkGN3ichuibM9uGzmvx6TzFC6", RoleEnum.ADMIN.getId()));
+            this.userRepository.save(new User(null, "Nerdi", "$2a$10$RsBi7zEwsAHxTgQO8cBX5Oe7iCPvIkGN3ichuibM9uGzmvx6TzFC6", RoleEnum.OWNER.getId()));
         }
     }
 }
