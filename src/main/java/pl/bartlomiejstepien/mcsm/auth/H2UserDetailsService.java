@@ -27,13 +27,28 @@ public class H2UserDetailsService implements UserDetailsService
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException
     {
         HttpServletRequest httpServletRequest = ((ServletRequestAttributes)RequestContextHolder.currentRequestAttributes()).getRequest();
-        LOGGER.info("Login attempt for username '" + username + "' from " + httpServletRequest.getRemoteAddr());
+        LOGGER.info("Login attempt for username {} from {}", username, getClientIp(httpServletRequest));
 
         final User user = this.userRepository.findByUsername(username);
 
         if (user == null)
             throw new UsernameNotFoundException("Could not find user with username = " + username);
 
-        return new AuthenticatedUser(user.getId(), user.getUsername(), user.getPassword(), httpServletRequest.getRemoteAddr(), RoleEnum.findRoleById(user.getRoleId()));
+        return new AuthenticatedUser(user.getId(), user.getUsername(), user.getPassword(), getClientIp(httpServletRequest), RoleEnum.findRoleById(user.getRoleId()));
+    }
+
+    private static String getClientIp(HttpServletRequest request)
+    {
+        String remoteAddr = "";
+
+        if (request != null)
+        {
+            remoteAddr = request.getHeader("X-FORWARDED-FOR");
+            if (remoteAddr == null || "".equals(remoteAddr))
+            {
+                remoteAddr = request.getRemoteAddr();
+            }
+        }
+        return remoteAddr;
     }
 }
