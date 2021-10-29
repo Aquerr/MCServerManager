@@ -29,7 +29,5 @@ public interface ServerManager
 
     void deleteServer(final ServerDto serverDto);
 
-    InstalledServer installServerForModPack(final AuthenticatedUser authenticatedUser, ModPack modPack, Path serverPath);
-
     int installServerForModpack(AuthenticatedUser authenticatedUser, int modpackId, int serverPackId);
 }

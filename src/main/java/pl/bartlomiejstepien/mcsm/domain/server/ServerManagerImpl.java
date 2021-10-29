@@ -47,6 +47,7 @@ public class ServerManagerImpl implements ServerManager
     private final ServerStartFileFinder serverStartFileFinder;
     private final CurseForgeService curseForgeService;
     private final JavaService javaService;
+    private final ModPackNameCorrector serverFilePathConverter;
 
     @Autowired
     public ServerManagerImpl(final Config config,
@@ -55,7 +56,8 @@ public class ServerManagerImpl implements ServerManager
                              final ServerInstaller serverInstaller,
                              final ServerStartFileFinder serverStartFileFinder,
                              final CurseForgeService curseForgeService,
-                             final JavaService javaService)
+                             final JavaService javaService,
+                             final ModPackNameCorrector serverFilePathConverter)
     {
         this.config = config;
         this.serverProcessHandler = serverProcessHandler;
@@ -64,6 +66,7 @@ public class ServerManagerImpl implements ServerManager
         this.serverStartFileFinder = serverStartFileFinder;
         this.curseForgeService = curseForgeService;
         this.javaService = javaService;
+        this.serverFilePathConverter = serverFilePathConverter;
     }
 
     @EventListener(ApplicationReadyEvent.class)
@@ -317,8 +320,7 @@ public class ServerManagerImpl implements ServerManager
         this.serverService.deleteServer(serverDto.getId());
     }
 
-    @Override
-    public InstalledServer installServerForModPack(AuthenticatedUser authenticatedUser, ModPack modPack, Path serverPath)
+    private InstalledServer installServerForModPack(AuthenticatedUser authenticatedUser, ModPack modPack, Path serverPath)
     {
         this.serverInstaller.installServerForModpack(authenticatedUser, modPack, serverPath);
 
@@ -437,7 +439,8 @@ public class ServerManagerImpl implements ServerManager
     }
 
     private Path prepareServerPathForNewModpack(AuthenticatedUser authenticatedUser, ModPack modPack) {
-        return Paths.get(config.getServersDir()).resolve(authenticatedUser.getUsername()).resolve(modPack.getName());
+        String modpackName = serverFilePathConverter.convert(modPack.getName());
+        return Paths.get(config.getServersDir()).resolve(authenticatedUser.getUsername()).resolve(modpackName);
     }
 
     private boolean isServerPathOccupied(Path serverPath)
