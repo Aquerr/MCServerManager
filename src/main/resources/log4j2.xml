@@ -1,15 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Configuration status="DEBUG">
+    <Properties>
+        <Property name="LOG_PATTERN">
+            %d{HH::mm:ss.SSS} %-5level [%t] %logger{36} : %msg%n
+        </Property>
+    </Properties>
     <Appenders>
-        <Console name="Console" target="SYSTEM_OUT">
-            <PatternLayout pattern="%d{HH::mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
+        <Console name="Console" target="SYSTEM_OUT" follow="true">
+            <PatternLayout pattern="${LOG_PATTERN}"/>
         </Console>
         <RollingFile
-                name="rollingFile"
-                filePattern="logs/application.%d{dd-MMM}.log.gz"
+                name="McsmRollingFile"
+                fileName="logs/mcsm-logs.log"
+                filePattern="logs/mcsm-logs.%d{dd-MMM}.log.%{yyy-MM-dd}"
                 ignoreExceptions="false">
             <PatternLayout>
-                <Pattern>%d{yyyy-MM-dd HH:mm:ss} %-5p %m%n</Pattern>
+                <Pattern>${LOG_PATTERN}</Pattern>
             </PatternLayout>
             <Policies>
                 <TimeBasedTriggeringPolicy interval="1"/>
@@ -18,10 +24,10 @@
         </RollingFile>
     </Appenders>
     <Loggers>
-        <Logger name="pl.bartlomiejstepien.mcsm" level="DEBUG" additivity="false">
-            <AppenderRef ref="rollingFile"/>
+        <Root level="INFO">
+            <AppenderRef ref="McsmRollingFile"/>
             <AppenderRef ref="Console"/>
-        </Logger>
+        </Root>
         <Logger name="org.springframework" level="INFO" additivity="false">
             <AppenderRef ref="Console"/>
         </Logger>
