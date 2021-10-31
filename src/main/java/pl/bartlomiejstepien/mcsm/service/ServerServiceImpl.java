@@ -117,7 +117,7 @@ public class ServerServiceImpl implements ServerService
         {
             if (user.getServersIds().contains(existingServerForPath.getId()))
             {
-                throw new ServerAlreadyOwnedException(new UserDto(user.getId(), user.getUsername(), user.getPassword()), new ServerDto(existingServerForPath.getId(), existingServerForPath.getName(), existingServerForPath.getPath()));
+                throw new ServerAlreadyOwnedException(new UserDto(user.getId(), user.getUsername()), new ServerDto(existingServerForPath.getId(), existingServerForPath.getName(), existingServerForPath.getPath()));
             }
             else
             {

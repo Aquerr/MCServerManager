@@ -12,7 +12,7 @@
         <RollingFile
                 name="McsmRollingFile"
                 fileName="logs/mcsm-logs.log"
-                filePattern="logs/mcsm-logs.%d{dd-MMM}.log.%{yyy-MM-dd}"
+                filePattern="logs/mcsm-logs.%d{dd-MM-yyyy}.log.gz"
                 ignoreExceptions="false">
             <PatternLayout>
                 <Pattern>${LOG_PATTERN}</Pattern>

@@ -27,7 +27,7 @@ class ServerDtoTest
     @Test
     public void userIsAddedToTheServer()
     {
-        final UserDto userDto = new UserDto(0, "Test", "Password");
+        final UserDto userDto = new UserDto(0, "Test");
         final ServerDto serverDto = new ServerDto(0, "Test Server", "Test Path");
 
         serverDto.getUsersIds().add(userDto.getId());
@@ -39,7 +39,7 @@ class ServerDtoTest
     @Test
     public void userIsRemovedFromTheServer()
     {
-        final UserDto userDto = new UserDto(0, "Test", "Password");
+        final UserDto userDto = new UserDto(0, "Test");
         final ServerDto serverDto = new ServerDto(0, "Test Server", "Test Path");
         serverDto.getUsersIds().add(userDto.getId());
 

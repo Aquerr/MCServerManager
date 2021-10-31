@@ -6,7 +6,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import pl.bartlomiejstepien.mcsm.auth.AuthenticatedUser;
-import pl.bartlomiejstepien.mcsm.domain.dto.RoleEnum;
+import pl.bartlomiejstepien.mcsm.domain.dto.Role;
 
 import static org.mockito.Mockito.when;
 
@@ -17,7 +17,7 @@ public class SpringSecurityTestConfiguration
     public static final String USER_USERNAME = "mcsm";
     public static final String USER_PASSWORD = "test123";
 
-    public static final AuthenticatedUser TEST_USER = new AuthenticatedUser(USER_ID, USER_USERNAME, USER_PASSWORD, "", RoleEnum.ADMIN);
+    public static final AuthenticatedUser TEST_USER = new AuthenticatedUser(USER_ID, USER_USERNAME, USER_PASSWORD, "", Role.ADMIN);
 
     @Bean("userDetailsServiceTest")
     @Primary

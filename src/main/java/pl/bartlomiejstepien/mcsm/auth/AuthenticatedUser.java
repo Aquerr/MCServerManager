@@ -3,22 +3,22 @@ package pl.bartlomiejstepien.mcsm.auth;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-import pl.bartlomiejstepien.mcsm.domain.dto.RoleEnum;
+import pl.bartlomiejstepien.mcsm.domain.dto.Role;
 
 import java.util.Collection;
 import java.util.Collections;
 
 public class AuthenticatedUser implements UserDetails
 {
-    private final int id;
+    private final Integer id;
     private final String username;
     private final String password;
 
     private final String remoteIpAddress;
 
-    private RoleEnum role;
+    private Role role;
 
-    public AuthenticatedUser(int id, String username, String password, String remoteIpAddress, RoleEnum role)
+    public AuthenticatedUser(Integer id, String username, String password, String remoteIpAddress, Role role)
     {
         this.id = id;
         this.username = username;
@@ -27,7 +27,7 @@ public class AuthenticatedUser implements UserDetails
         this.role = role;
     }
 
-    public int getId()
+    public Integer getId()
     {
         return id;
     }
@@ -79,7 +79,7 @@ public class AuthenticatedUser implements UserDetails
         return remoteIpAddress;
     }
 
-    public RoleEnum getRole()
+    public Role getRole()
     {
         return role;
     }

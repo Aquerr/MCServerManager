@@ -1,6 +1,6 @@
 package pl.bartlomiejstepien.mcsm.domain.dto;
 
-public enum RoleEnum
+public enum Role
 {
     USER(1, "USER"),
     ADMIN(2, "ADMIN"),
@@ -9,7 +9,7 @@ public enum RoleEnum
     final int id;
     final String name;
 
-    RoleEnum(int id, String name)
+    Role(int id, String name)
     {
         this.id = id;
         this.name = name;
@@ -25,17 +25,17 @@ public enum RoleEnum
         return name;
     }
 
-    public static RoleEnum findRoleById(int id)
+    public static Role findRoleById(int id)
     {
-        for (RoleEnum roleEnum : values())
+        for (Role role : values())
         {
-            if (roleEnum.getId() == id)
-                return roleEnum;
+            if (role.getId() == id)
+                return role;
         }
         return null;
     }
 
-    public boolean hasMorePrivilegesThan(RoleEnum role)
+    public boolean hasMorePrivilegesThan(Role role)
     {
         return ordinal() > role.ordinal();
     }

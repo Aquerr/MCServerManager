@@ -9,7 +9,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
-import pl.bartlomiejstepien.mcsm.domain.dto.RoleEnum;
+import pl.bartlomiejstepien.mcsm.domain.dto.Role;
 import pl.bartlomiejstepien.mcsm.repository.UserRepository;
 import pl.bartlomiejstepien.mcsm.repository.ds.User;
 
@@ -34,7 +34,7 @@ public class H2UserDetailsService implements UserDetailsService
         if (user == null)
             throw new UsernameNotFoundException("Could not find user with username = " + username);
 
-        return new AuthenticatedUser(user.getId(), user.getUsername(), user.getPassword(), getClientIp(httpServletRequest), RoleEnum.findRoleById(user.getRoleId()));
+        return new AuthenticatedUser(user.getId(), user.getUsername(), user.getPassword(), getClientIp(httpServletRequest), Role.findRoleById(user.getRoleId()));
     }
 
     private static String getClientIp(HttpServletRequest request)

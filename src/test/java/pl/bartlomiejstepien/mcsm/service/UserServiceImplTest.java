@@ -101,22 +101,6 @@ class UserServiceImplTest
     }
 
     @Test
-    void saveShouldInvokeRepositoryAndSaveUser()
-    {
-        // given
-        UserDto userDto = prepareUserDto();
-        User user = prepareUser();
-        given(userConverter.convertToUser(userDto)).willReturn(user);
-
-        // when
-        userService.save(userDto);
-
-        // then
-        verify(passwordEncoder).encode(user.getPassword());
-        verify(userRepository).save(user);
-    }
-
-    @Test
     void findByUsernameShouldInvokeRepositoryAndConverterAndReturnUserDto()
     {
         // given
@@ -132,7 +116,6 @@ class UserServiceImplTest
         verify(userConverter).convertToDto(user);
         assertThat(result.getId()).isEqualTo(USER_ID);
         assertThat(result.getUsername()).isEqualTo(USERNAME);
-        assertThat(result.getPassword()).isEqualTo(PASSWORD);
     }
 
     @Test
@@ -152,7 +135,7 @@ class UserServiceImplTest
 
     private UserDto prepareUserDto()
     {
-        return new UserDto(USER_ID, USERNAME, PASSWORD);
+        return new UserDto(USER_ID, USERNAME);
     }
 
     private User prepareUser()

@@ -1,6 +1,7 @@
 package pl.bartlomiejstepien.mcsm.service;
 
 import pl.bartlomiejstepien.mcsm.domain.dto.UserDto;
+import pl.bartlomiejstepien.mcsm.domain.model.UserRegUpdatePayload;
 
 import java.util.List;
 
@@ -12,7 +13,9 @@ public interface UserService
 
     void delete(int id);
 
-    void save(UserDto userDto);
-
     UserDto findByUsername(String username);
+
+    void register(UserRegUpdatePayload userRegUpdatePayload);
+
+    void update(Integer userId, UserRegUpdatePayload userRegUpdatePayload);
 }

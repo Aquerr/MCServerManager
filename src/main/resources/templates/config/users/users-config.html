@@ -13,7 +13,6 @@
             <tr>
                 <th scope="col">Id</th>
                 <th scope="col">Name</th>
-                <th scope="col">Password</th>
                 <th scope="col">Role</th>
                 <th scope="col" class="text-center">Actions</th>
             </tr>
@@ -22,7 +21,6 @@
             <tr th:each="user : ${users}">
                 <td th:text="${user.id}"></td>
                 <td><span th:text="${user.username}"></span></td>
-                <td><span th:text="${user.password}"></span></td>
                 <td><span th:text="${user.role}"></span></td>
                 <td class="text-center">
                     <div>
@@ -65,7 +63,7 @@
                 <div class="form-group">
                     <label for="role">Role</label>
                     <select id="role" class="form-control" required>
-                        <th:block th:each="role : ${T(pl.bartlomiejstepien.mcsm.domain.dto.RoleEnum).values()}">
+                        <th:block th:each="role : ${T(pl.bartlomiejstepien.mcsm.domain.dto.Role).values()}">
                             <option th:if="${role.ordinal() < #authentication.principal.getRole().ordinal()}" th:value="${role.getName()}" th:text="${role.getName()}"></option>
                         </th:block>
                     </select>

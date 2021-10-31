@@ -2,6 +2,7 @@ package pl.bartlomiejstepien.mcsm.web.controller.rest;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 import pl.bartlomiejstepien.mcsm.Routes;
 import pl.bartlomiejstepien.mcsm.auth.AuthenticatedUser;
@@ -9,6 +10,7 @@ import pl.bartlomiejstepien.mcsm.auth.AuthenticationFacade;
 import pl.bartlomiejstepien.mcsm.domain.dto.JavaDto;
 import pl.bartlomiejstepien.mcsm.domain.dto.UserDto;
 import pl.bartlomiejstepien.mcsm.domain.exception.UsernameAreadyExistsException;
+import pl.bartlomiejstepien.mcsm.domain.model.UserRegUpdatePayload;
 import pl.bartlomiejstepien.mcsm.service.ConfigService;
 import pl.bartlomiejstepien.mcsm.service.UserService;
 
@@ -53,37 +55,16 @@ public class ConfigRestController
     }
 
     @PutMapping("/users/{id}")
-    public ResponseEntity<?> updateUser(final @PathVariable("id") Integer userId, final @RequestBody UserDto userDto)
+    public ResponseEntity<?> updateUser(final @PathVariable("id") Integer userId, final @RequestBody UserRegUpdatePayload userRegUpdatePayload)
     {
-        final UserDto existingUser = this.userService.find(userId);
-        if (existingUser == null)
-        {
-            throw new RuntimeException("User not found!");
-        }
-
-        AuthenticatedUser authenticatedUser = this.authenticationFacade.getCurrentUser();
-        if (authenticatedUser.getId() == existingUser.getId())
-        {
-            userDto.setRole(existingUser.getRole());
-            this.userService.save(userDto);
-        }
-        else if(authenticatedUser.getRole().hasMorePrivilegesThan(existingUser.getRole()))
-        {
-            this.userService.save(userDto);
-        }
-
+        this.userService.update(userId, userRegUpdatePayload);
         return ResponseEntity.ok().build();
     }
 
     @PostMapping("/users")
-    public ResponseEntity<?> registerUser(final @RequestBody UserDto userDto)
+    public ResponseEntity<?> registerUser(final @RequestBody UserRegUpdatePayload userRegUpdatePayload)
     {
-        if(this.userService.findByUsername(userDto.getUsername()) != null)
-        {
-            throw new UsernameAreadyExistsException(userDto.getUsername() + " is already is use!");
-        }
-
-        this.userService.save(userDto);
+        this.userService.register(userRegUpdatePayload);
         return ResponseEntity.ok().build();
     }
 
@@ -111,7 +92,6 @@ public class ConfigRestController
     public UserDto getUser(final @PathVariable("id") Integer userId)
     {
         UserDto userDto = this.userService.find(userId);
-        userDto.setPassword("");
         return userDto;
     }
 }

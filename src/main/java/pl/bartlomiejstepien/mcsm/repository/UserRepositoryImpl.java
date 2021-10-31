@@ -2,14 +2,11 @@ package pl.bartlomiejstepien.mcsm.repository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
-import pl.bartlomiejstepien.mcsm.domain.dto.UserDto;
-import pl.bartlomiejstepien.mcsm.repository.converter.UserConverter;
 import pl.bartlomiejstepien.mcsm.repository.ds.User;
 
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Repository
 public class UserRepositoryImpl implements UserRepository
@@ -55,5 +52,17 @@ public class UserRepositoryImpl implements UserRepository
         query.setParameter("username", username);
         final List<User> users = query.getResultList();
         return users.stream().findFirst().orElse(null);
+    }
+
+    @Override
+    public void register(User user)
+    {
+        this.entityManager.persist(user);
+    }
+
+    @Override
+    public void update(User user)
+    {
+        this.entityManager.merge(user);
     }
 }
