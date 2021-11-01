@@ -4,6 +4,26 @@
 </head>
 <script type="text/javascript" th:src="@{/js/index.js}" defer></script>
 <body>
+    <div class="modal fade" tabindex="-1" role="dialog" id="mcsm-not-configured-modal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Error</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p>MCSM does not have any Java configuration.</p>
+                    <p>If you are an admin, go to <strong> settings </strong> and add at least <strong>one java version</strong>.</p>
+                    <p>If you are a user, contact your <strong> administrator </strong> to fix it.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
     <div class="modal fade" tabindex="-1" role="dialog" id="server-import-modal">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -69,7 +89,7 @@
             <div th:if="${servers.isEmpty()}">
                 <p class="text-muted">Your server list is empty :(</p>
             </div>
-            <a href="#" th:href="@{/servers/select-platform}" class="btn btn-light">Add a new server</a>
+            <a href="#" onclick="showSelectPlatformPage()" class="btn btn-light">Add a new server</a>
             <a href="#" id="import-server-button" class="btn btn-light">Import server</a>
         </div>
     </div>

@@ -1,3 +1,21 @@
+function showSelectPlatformPage() {
+    validateAtLeastOneJavaVersionInstalled(() => window.location.href = "/servers/select-platform")
+}
+
+function validateAtLeastOneJavaVersionInstalled(callback) {
+    $.ajax({
+        method: "GET",
+        url: "/api/config/java",
+        success: function (response) {
+            if(response.length === 0) {
+                $("#mcsm-not-configured-modal").modal("show");
+            } else {
+                callback();
+            }
+        }
+    });
+}
+
 function loadJavaVersionsForImport() {
     $.ajax({
         method: "GET",
@@ -17,7 +35,7 @@ $(".card").on("click", function (event) {
 });
 
 $("#import-server-button").on("click", function() {
-    $("#server-import-modal").modal("show");
+    validateAtLeastOneJavaVersionInstalled(() => $("#server-import-modal").modal("show"));
 });
 
 $("#import-server").on("click", function() {
