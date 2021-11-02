@@ -155,7 +155,7 @@ $("#install-server").on("click", function () {
         }).done(function (response) {
             let message = response["message"];
             let percent = response["percent"];
-            $("#server-install-modal #installation-status").text(percent + " " + message);
+            $("#server-install-modal #installation-status").text(percent + "% " + message);
         });
     }
 

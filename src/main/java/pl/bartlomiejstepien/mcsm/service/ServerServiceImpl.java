@@ -11,9 +11,7 @@ import pl.bartlomiejstepien.mcsm.domain.dto.ServerDto;
 import pl.bartlomiejstepien.mcsm.domain.dto.UserDto;
 import pl.bartlomiejstepien.mcsm.domain.exception.ServerAlreadyOwnedException;
 import pl.bartlomiejstepien.mcsm.domain.exception.ServerNotExistsException;
-import pl.bartlomiejstepien.mcsm.domain.model.InstallationStatus;
 import pl.bartlomiejstepien.mcsm.domain.platform.Platform;
-import pl.bartlomiejstepien.mcsm.domain.server.ServerInstaller;
 import pl.bartlomiejstepien.mcsm.repository.JavaRepository;
 import pl.bartlomiejstepien.mcsm.repository.ServerRepository;
 import pl.bartlomiejstepien.mcsm.repository.UserRepository;
@@ -35,7 +33,6 @@ public class ServerServiceImpl implements ServerService
     private final Config config;
 
     private final ServerRepository serverRepository;
-    private final ServerInstaller serverInstaller;
     private final ServerConverter serverConverter;
     private final UserRepository userRepository;
     private final JavaRepository javaRepository;
@@ -45,7 +42,6 @@ public class ServerServiceImpl implements ServerService
     public ServerServiceImpl(final Config config,
                              final UserRepository userRepository,
                              final ServerRepository serverRepository,
-                             final ServerInstaller serverInstaller,
                              final ServerConverter serverConverter,
                              final JavaRepository javaRepository,
                              final JavaConverter javaConverter)
@@ -53,7 +49,6 @@ public class ServerServiceImpl implements ServerService
         this.config = config;
         this.userRepository = userRepository;
         this.serverRepository = serverRepository;
-        this.serverInstaller = serverInstaller;
         this.serverConverter = serverConverter;
         this.javaRepository = javaRepository;
         this.javaConverter = javaConverter;
@@ -65,13 +60,6 @@ public class ServerServiceImpl implements ServerService
     {
         serverDto.getUsersIds().add(userId);
         this.serverRepository.save(this.serverConverter.convertToServer(serverDto));
-    }
-
-    @Transactional
-    @Override
-    public void addServer(final Server server)
-    {
-        this.serverRepository.save(server);
     }
 
     @Transactional
@@ -141,12 +129,6 @@ public class ServerServiceImpl implements ServerService
     {
         final Server server = this.serverRepository.findByPath(path);
         return Optional.ofNullable(server).map(this.serverConverter::convertToDto);
-    }
-
-    @Override
-    public Optional<InstallationStatus> getInstallationStatus(int serverId)
-    {
-        return this.serverInstaller.getInstallationStatus(serverId);
     }
 
     @Transactional

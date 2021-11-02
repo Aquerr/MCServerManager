@@ -21,6 +21,7 @@ import pl.bartlomiejstepien.mcsm.domain.platform.Platform;
 import pl.bartlomiejstepien.mcsm.domain.process.ServerProcessHandler;
 import pl.bartlomiejstepien.mcsm.integration.curseforge.CurseForgeService;
 import pl.bartlomiejstepien.mcsm.service.JavaService;
+import pl.bartlomiejstepien.mcsm.service.ServerService;
 import pl.bartlomiejstepien.mcsm.service.ServerServiceImpl;
 
 import java.io.IOException;
@@ -41,7 +42,7 @@ public class ServerManagerImpl implements ServerManager
     private static final String SERVER_PROPERTIES_FILE_NAME = "server.properties";
 
     private final Config config;
-    private final ServerServiceImpl serverService;
+    private final ServerService serverService;
     private final ServerProcessHandler serverProcessHandler;
     private final ServerInstaller serverInstaller;
     private final ServerStartFileFinder serverStartFileFinder;
@@ -52,7 +53,7 @@ public class ServerManagerImpl implements ServerManager
     @Autowired
     public ServerManagerImpl(final Config config,
                              @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection") final ServerProcessHandler serverProcessHandler,
-                             final ServerServiceImpl serverService,
+                             final ServerService serverService,
                              final ServerInstaller serverInstaller,
                              final ServerStartFileFinder serverStartFileFinder,
                              final CurseForgeService curseForgeService,
@@ -358,7 +359,6 @@ public class ServerManagerImpl implements ServerManager
             }
         }
 
-
         //TODO: Remove determineJavaVersionForModpack and set java to first found java. User should properly configure the server after the installation.
         JavaDto javaDto = determineJavaVersionForModpack(modPack)
                 .orElseThrow(() -> new RuntimeException("No available java found!"));
@@ -371,11 +371,6 @@ public class ServerManagerImpl implements ServerManager
         final int serverId = this.serverService.getServerByPath(installedServer.getServerDir().toString())
                 .map(ServerDto::getId)
                 .orElse(-1);
-
-//        final User user = this.userRepository.find(authenticatedUser.getId());
-//        final Server server = new Server(0, installedServer.getName(), installedServer.getServerDir().toString());
-//        user.addServer(server);
-//        this.serverRepository.save(server);
 
         LOGGER.info("Server id=" + serverId + " is ready!");
         return serverId;

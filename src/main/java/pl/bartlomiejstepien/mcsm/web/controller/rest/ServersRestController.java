@@ -3,6 +3,7 @@ package pl.bartlomiejstepien.mcsm.web.controller.rest;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.MimeTypeUtils;
@@ -20,6 +21,7 @@ import pl.bartlomiejstepien.mcsm.domain.dto.ServerDto;
 import pl.bartlomiejstepien.mcsm.domain.model.ServerProperties;
 import pl.bartlomiejstepien.mcsm.domain.dto.UserDto;
 import pl.bartlomiejstepien.mcsm.domain.platform.Platform;
+import pl.bartlomiejstepien.mcsm.domain.server.ServerInstallationStatusMonitor;
 import pl.bartlomiejstepien.mcsm.domain.server.ServerManager;
 import pl.bartlomiejstepien.mcsm.domain.server.ServerFileService;
 import pl.bartlomiejstepien.mcsm.service.ServerService;
@@ -38,28 +40,32 @@ public class ServersRestController
 
     private final AuthenticationFacade authenticationFacade;
     private final ServerService serverService;
+    private final ServerInstallationStatusMonitor serverInstallationStatusMonitor;
     private final UserService userService;
     private final ServerManager serverManager;
     private final ServerFileService serverFileService;
 
+    @Autowired
     public ServersRestController(final AuthenticationFacade authenticationFacade,
                                  final ServerService serverService,
                                  final UserService userService,
                                  final ServerManager serverManager,
-                                 final ServerFileService serverFileService)
+                                 final ServerFileService serverFileService,
+                                 final ServerInstallationStatusMonitor serverInstallationStatusMonitor)
     {
         this.authenticationFacade = authenticationFacade;
         this.serverService = serverService;
         this.userService = userService;
         this.serverManager = serverManager;
         this.serverFileService = serverFileService;
+        this.serverInstallationStatusMonitor = serverInstallationStatusMonitor;
     }
 
     @GetMapping(value = "/installation-status/{modpackId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public InstallationStatus getInstallationStatus(@PathVariable final int modpackId)
     {
         LOGGER.info("Getting installation status for id = " + modpackId);
-        return this.serverService.getInstallationStatus(modpackId).orElse(new InstallationStatus(0, ""));
+        return this.serverInstallationStatusMonitor.getInstallationStatus(modpackId).orElse(new InstallationStatus(0, ""));
     }
 
     @GetMapping(value = "/{id}/latest-log/{lines}", produces = MediaType.APPLICATION_JSON_VALUE)

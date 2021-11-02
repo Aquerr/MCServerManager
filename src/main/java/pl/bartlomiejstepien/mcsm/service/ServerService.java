@@ -13,8 +13,6 @@ public interface ServerService
 {
     void addServer(int userId, ServerDto serverDto);
 
-    void addServer(Server server);
-
     List<ServerDto> getServers();
 
     void deleteServer(int id);
@@ -26,8 +24,6 @@ public interface ServerService
     void importServer(Integer userId, String serverName, String path, Platform platform, Integer javaId);
 
     Optional<ServerDto> getServerByPath(String path);
-
-    Optional<InstallationStatus> getInstallationStatus(int serverId);
 
     JavaDto getJavaForServer(int serverId);
 

@@ -15,12 +15,18 @@ import pl.bartlomiejstepien.mcsm.domain.exception.CouldNotDownloadServerFilesExc
 import pl.bartlomiejstepien.mcsm.domain.model.InstallationStatus;
 import pl.bartlomiejstepien.mcsm.domain.model.ModPack;
 import pl.bartlomiejstepien.mcsm.domain.model.ServerPack;
-import pl.bartlomiejstepien.mcsm.domain.server.ServerInstaller;
+import pl.bartlomiejstepien.mcsm.domain.server.ServerInstallationStatusMonitor;
 
-import java.io.*;
-import java.net.*;
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.time.Instant;
-import java.util.*;
+import java.util.Comparator;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
@@ -31,13 +37,13 @@ public class CurseForgeAPIServiceImpl implements CurseForgeService
 
     private final CurseforgeModpackConverter curseforgeModpackConverter;
     private final Config config;
-    private final ServerInstaller serverInstaller;
+    private final ServerInstallationStatusMonitor serverInstallationStatusMonitor;
 
     @Autowired
-    public CurseForgeAPIServiceImpl(final Config config, final ServerInstaller serverInstaller, final CurseforgeModpackConverter curseforgeModpackConverter)
+    public CurseForgeAPIServiceImpl(final Config config, final ServerInstallationStatusMonitor serverInstallationStatusMonitor, final CurseforgeModpackConverter curseforgeModpackConverter)
     {
         this.config = config;
-        this.serverInstaller = serverInstaller;
+        this.serverInstallationStatusMonitor = serverInstallationStatusMonitor;
         this.curseforgeModpackConverter = curseforgeModpackConverter;
     }
 
@@ -154,16 +160,23 @@ public class CurseForgeAPIServiceImpl implements CurseForgeService
         try
         {
             final URL url = new URL(serverDownloadUrl);
-            try(BufferedInputStream bufferedInputStream = new BufferedInputStream(url.openStream());
+            HttpURLConnection httpURLConnection = (HttpURLConnection) url.openConnection();
+            long totalToDownload = httpURLConnection.getContentLengthLong();
+            long alreadyDownloaded = 0;
+            this.serverInstallationStatusMonitor.setInstallationStatus(modPack.getId(), new InstallationStatus(0, "Downloading server files..."));
+
+            try(BufferedInputStream bufferedInputStream = new BufferedInputStream(httpURLConnection.getInputStream());
                 FileOutputStream fileOutputStream = new FileOutputStream(this.config.getDownloadsDir() + File.separator + modPack.getName() + "_" + modPack.getVersion()))
             {
                 byte[] dataBuffer = new byte[1024];
                 int bytesRead;
                 while ((bytesRead = bufferedInputStream.read(dataBuffer, 0, 1024)) != -1)
                 {
-                    final InstallationStatus installationStatus = this.serverInstaller.getInstallationStatus(modPack.getId()).orElse(new InstallationStatus(0, "Downloading server files..."));
-                    installationStatus.setPercent(bufferedInputStream.available() / 100);
-                    this.serverInstaller.setInstallationStatus(modPack.getId(), installationStatus);
+                    final InstallationStatus installationStatus = this.serverInstallationStatusMonitor.getInstallationStatus(modPack.getId()).orElse(new InstallationStatus(0, "Downloading server files..."));
+                    alreadyDownloaded += 1024;
+                    int percentage = (int)(alreadyDownloaded * 100 / totalToDownload);
+                    installationStatus.setPercent(percentage);
+                    this.serverInstallationStatusMonitor.setInstallationStatus(modPack.getId(), installationStatus);
                     fileOutputStream.write(dataBuffer, 0, bytesRead);
                 }
             }
