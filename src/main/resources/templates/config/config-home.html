@@ -2,24 +2,53 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="fragments/fragments :: head (pageTitle='Configuration')">
 </head>
+<link rel="stylesheet" th:href="@{/css/config-home.css}">
 <script type="text/javascript" th:src="@{/js/config-home.js}" defer></script>
 <body>
 <div th:replace="fragments/fragments :: header"></div>
   <div class="container mt-4">
-    <div class="card-deck">
-        <div id="java-config" class="card">
-          <div class="card-body">
-            <h5 class="card-title">Java Configuration</h5>
-            <p class="card-text">Configure available Java versions in MCSM</p>
-            <a class="stretched-link" th:href="@{/config/java}"></a>
-          </div>
+    <div class="row row-cols-1 row-cols-md-2">
+        <div class="col mb-4">
+            <div id="java-config" class="card">
+                <div class="card-body">
+                    <div class="card-icon">
+                        <i class="fas fa-cog fa-3x"></i>
+                    </div>
+                    <div class="card-info">
+                        <h5 class="card-title">Java Configuration</h5>
+                        <p class="card-text">Configure available Java versions in MCSM</p>
+                        <a class="stretched-link" th:href="@{/config/java}"></a>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div id="users-config" class="card">
-          <div class="card-body">
-            <h5 class="card-title">Users Configuration</h5>
-            <p class="card-text">Configure users accounts</p>
-            <a class="stretched-link" th:href="@{/config/users}"></a>
-          </div>
+        <div class="col mb-4">
+            <div id="users-config" class="card">
+                <div class="card-body">
+                    <div class="card-icon">
+                        <i class="fas fa-cog fa-3x"></i>
+                    </div>
+                    <div class="card-info">
+                        <h5 class="card-title">Users Configuration</h5>
+                        <p class="card-text">Configure users accounts</p>
+                        <a class="stretched-link" th:href="@{/config/users}"></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col mb-4">
+            <div id="mcsm-logs" class="card">
+                <div class="card-body">
+                    <div class="card-icon">
+                        <i class="fas fa-file-alt fa-3x"></i>
+                    </div>
+                    <div class="card-info">
+                        <h5 class="card-title">MCSM Logs</h5>
+                        <p class="card-text">View MCSM logs</p>
+                        <a class="stretched-link" th:href="@{/logs}"></a>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
   </div>

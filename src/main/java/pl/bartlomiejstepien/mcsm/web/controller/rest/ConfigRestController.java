@@ -2,14 +2,12 @@ package pl.bartlomiejstepien.mcsm.web.controller.rest;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 import pl.bartlomiejstepien.mcsm.Routes;
 import pl.bartlomiejstepien.mcsm.auth.AuthenticatedUser;
 import pl.bartlomiejstepien.mcsm.auth.AuthenticationFacade;
 import pl.bartlomiejstepien.mcsm.domain.dto.JavaDto;
 import pl.bartlomiejstepien.mcsm.domain.dto.UserDto;
-import pl.bartlomiejstepien.mcsm.domain.exception.UsernameAreadyExistsException;
 import pl.bartlomiejstepien.mcsm.domain.model.UserRegUpdatePayload;
 import pl.bartlomiejstepien.mcsm.service.ConfigService;
 import pl.bartlomiejstepien.mcsm.service.UserService;

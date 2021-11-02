@@ -27,7 +27,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter
         http
             .authorizeRequests()
                 .antMatchers("/css/**", "icons/**", "/js/**", "/webjars/**", "/favicon.ico").permitAll()
-                .antMatchers("/config/**", "/api/config/users/**").hasAnyAuthority("ADMIN", "OWNER")
+                .antMatchers("/config/**", "/api/config/users/**", "/logs/**").hasAnyAuthority("ADMIN", "OWNER")
                 .antMatchers(HttpMethod.POST, "/api/config/java").hasAnyAuthority("ADMIN", "OWNER")
                 .antMatchers(HttpMethod.PUT, "/api/config/java").hasAnyAuthority("ADMIN", "OWNER")
                 .antMatchers(HttpMethod.DELETE, "/api/config/java").hasAnyAuthority("ADMIN", "OWNER")
