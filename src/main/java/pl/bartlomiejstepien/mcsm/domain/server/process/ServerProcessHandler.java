@@ -1,4 +1,4 @@
-package pl.bartlomiejstepien.mcsm.domain.process;
+package pl.bartlomiejstepien.mcsm.domain.server.process;
 
 import pl.bartlomiejstepien.mcsm.domain.dto.ServerDto;
 import pl.bartlomiejstepien.mcsm.domain.model.InstalledServer;

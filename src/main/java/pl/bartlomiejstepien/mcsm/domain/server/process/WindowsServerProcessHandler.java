@@ -1,4 +1,4 @@
-package pl.bartlomiejstepien.mcsm.domain.process;
+package pl.bartlomiejstepien.mcsm.domain.server.process;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -37,6 +37,7 @@ import java.util.*;
 public class ServersRestController
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(ServersRestController.class);
+    private static final String ACCESS_DENIED = "Access Denied!";
 
     private final AuthenticationFacade authenticationFacade;
     private final ServerService serverService;
@@ -84,7 +85,7 @@ public class ServersRestController
         final ServerDto serverDto = this.serverService.getServersForUser(authenticatedUser.getId()).stream()
                 .filter(s -> s.getId() == serverId)
                 .findFirst()
-                .orElseThrow(() -> new ServerNotOwnedException("Access denied!"));
+                .orElseThrow(() -> new ServerNotOwnedException(ACCESS_DENIED));
 
         try
         {
@@ -105,7 +106,7 @@ public class ServersRestController
         final UserDto userDto = this.userService.find(authenticatedUser.getId());
 
         if(userDto.getServerIds().stream().noneMatch(id -> id == serverId))
-            throw new RuntimeException("Access denied!");
+            throw new RuntimeException(ACCESS_DENIED);
 
         final ServerDto serverDto = this.serverService.getServer(serverId);
         if (this.serverManager.isRunning(serverDto))
@@ -173,7 +174,7 @@ public class ServersRestController
         }
         else
         {
-            throw new ServerNotOwnedException("You don't have access to do this");
+            throw new ServerNotOwnedException(ACCESS_DENIED);
         }
     }
 
@@ -184,7 +185,7 @@ public class ServersRestController
         final AuthenticatedUser authenticatedUser = this.authenticationFacade.getCurrentUser();
         if (!hasAccessToServer(authenticatedUser, serverId))
         {
-            throw new ServerNotOwnedException("You don't have access to do this");
+            throw new ServerNotOwnedException(ACCESS_DENIED);
         }
 
         String serverDir = this.serverService.getServer(serverId).getServerDir();
@@ -204,7 +205,7 @@ public class ServersRestController
         final AuthenticatedUser authenticatedUser = this.authenticationFacade.getCurrentUser();
         if (!hasAccessToServer(authenticatedUser, serverId))
         {
-            throw new ServerNotOwnedException("You don't have access to do this");
+            throw new ServerNotOwnedException(ACCESS_DENIED);
         }
 
         return ResponseEntity.ok(this.serverFileService.getFileContent(fileName, this.serverService.getServer(serverId)));
@@ -216,7 +217,7 @@ public class ServersRestController
         final AuthenticatedUser authenticatedUser = this.authenticationFacade.getCurrentUser();
         if (!hasAccessToServer(authenticatedUser, serverId))
         {
-            throw new ServerNotOwnedException("You don't have access to do this");
+            throw new ServerNotOwnedException(ACCESS_DENIED);
         }
 
         return ResponseEntity.ok(this.serverFileService.saveFileContent(fileName, content, this.serverService.getServer(serverId)));
@@ -228,7 +229,7 @@ public class ServersRestController
         final AuthenticatedUser authenticatedUser = this.authenticationFacade.getCurrentUser();
         if (!hasAccessToServer(authenticatedUser, serverId))
         {
-            throw new ServerNotOwnedException("You don't have access to do this");
+            throw new ServerNotOwnedException(ACCESS_DENIED);
         }
 
         return this.serverService.getJavaForServer(serverId);
@@ -240,7 +241,7 @@ public class ServersRestController
         final AuthenticatedUser authenticatedUser = this.authenticationFacade.getCurrentUser();
         if (!hasAccessToServer(authenticatedUser, serverId))
         {
-            throw new ServerNotOwnedException("You don't have access to do this");
+            throw new ServerNotOwnedException(ACCESS_DENIED);
         }
 
         boolean success = this.serverService.addJavaToServer(serverId, javaId);

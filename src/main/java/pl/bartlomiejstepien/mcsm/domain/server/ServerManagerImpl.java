@@ -9,16 +9,13 @@ import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 import org.springframework.util.FileSystemUtils;
 import pl.bartlomiejstepien.mcsm.config.Config;
-import pl.bartlomiejstepien.mcsm.domain.dto.JavaDto;
 import pl.bartlomiejstepien.mcsm.domain.dto.ServerDto;
 import pl.bartlomiejstepien.mcsm.domain.exception.CouldNotInstallServerException;
 import pl.bartlomiejstepien.mcsm.domain.exception.ServerNotRunningException;
 import pl.bartlomiejstepien.mcsm.domain.model.InstalledServer;
-import pl.bartlomiejstepien.mcsm.domain.model.ModPack;
 import pl.bartlomiejstepien.mcsm.domain.model.ServerProperties;
 import pl.bartlomiejstepien.mcsm.domain.platform.Platform;
-import pl.bartlomiejstepien.mcsm.domain.process.ServerProcessHandler;
-import pl.bartlomiejstepien.mcsm.service.JavaService;
+import pl.bartlomiejstepien.mcsm.domain.server.process.ServerProcessHandler;
 import pl.bartlomiejstepien.mcsm.service.ServerService;
 
 import java.io.IOException;

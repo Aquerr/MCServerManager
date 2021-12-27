@@ -11,7 +11,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import pl.bartlomiejstepien.mcsm.domain.model.InstalledServer;
 import pl.bartlomiejstepien.mcsm.domain.platform.Platform;
-import pl.bartlomiejstepien.mcsm.domain.server.ForgeModpackInstallationRequest;
+import pl.bartlomiejstepien.mcsm.domain.server.forge.ForgeModpackInstallationRequest;
 import pl.bartlomiejstepien.mcsm.domain.server.ServerInstallationRequest;
 import pl.bartlomiejstepien.mcsm.domain.server.ServerManager;
 import pl.bartlomiejstepien.mcsm.integration.curseforge.CurseForgeClient;

@@ -1,6 +1,7 @@
-package pl.bartlomiejstepien.mcsm.domain.server;
+package pl.bartlomiejstepien.mcsm.domain.server.forge;
 
 import pl.bartlomiejstepien.mcsm.domain.platform.Platform;
+import pl.bartlomiejstepien.mcsm.domain.server.ServerInstallationRequest;
 
 import java.util.Objects;
 

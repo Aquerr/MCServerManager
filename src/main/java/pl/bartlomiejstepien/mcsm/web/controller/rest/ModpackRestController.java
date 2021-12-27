@@ -10,7 +10,7 @@ import pl.bartlomiejstepien.mcsm.Routes;
 import pl.bartlomiejstepien.mcsm.auth.AuthenticatedUser;
 import pl.bartlomiejstepien.mcsm.auth.AuthenticationFacade;
 import pl.bartlomiejstepien.mcsm.domain.model.ServerPack;
-import pl.bartlomiejstepien.mcsm.domain.server.ForgeModpackInstallationRequest;
+import pl.bartlomiejstepien.mcsm.domain.server.forge.ForgeModpackInstallationRequest;
 import pl.bartlomiejstepien.mcsm.domain.server.ServerManager;
 import pl.bartlomiejstepien.mcsm.domain.model.ModPack;
 import pl.bartlomiejstepien.mcsm.integration.curseforge.CurseForgeClient;
