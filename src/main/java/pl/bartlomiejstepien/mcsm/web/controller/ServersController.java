@@ -10,11 +10,11 @@ import org.springframework.web.servlet.ModelAndView;
 import pl.bartlomiejstepien.mcsm.auth.AuthenticatedUser;
 import pl.bartlomiejstepien.mcsm.domain.platform.Platform;
 import pl.bartlomiejstepien.mcsm.integration.curseforge.Category;
+import pl.bartlomiejstepien.mcsm.integration.curseforge.CurseForgeClient;
 import pl.bartlomiejstepien.mcsm.integration.curseforge.Versions;
 import pl.bartlomiejstepien.mcsm.domain.model.ModPack;
 import pl.bartlomiejstepien.mcsm.domain.dto.ServerDto;
 import pl.bartlomiejstepien.mcsm.domain.server.ServerManager;
-import pl.bartlomiejstepien.mcsm.integration.curseforge.CurseForgeService;
 import pl.bartlomiejstepien.mcsm.service.ConfigService;
 import pl.bartlomiejstepien.mcsm.service.ServerServiceImpl;
 
@@ -24,16 +24,16 @@ import java.util.List;
 @RequestMapping("/servers")
 public class ServersController
 {
-    private final CurseForgeService curseForgeService;
+    private final CurseForgeClient curseForgeClient;
     private final ServerServiceImpl serverService;
     private final ServerManager serverManager;
     private final ConfigService configService;
 
     @Autowired
-    public ServersController(final CurseForgeService curseForgeService, final ServerServiceImpl serverService, final ServerManager serverManager
+    public ServersController(final CurseForgeClient curseForgeClient, final ServerServiceImpl serverService, final ServerManager serverManager
         , final ConfigService configService)
     {
-        this.curseForgeService = curseForgeService;
+        this.curseForgeClient = curseForgeClient;
         this.serverService = serverService;
         this.serverManager = serverManager;
         this.configService = configService;
@@ -91,7 +91,7 @@ public class ServersController
     private ModelAndView prepareForgeModelAndView(ModelAndView modelAndView)
     {
         ModelMap model = modelAndView.getModelMap();
-        final List<ModPack> modPacks = this.curseForgeService.getModpacks(0, "", "", 24, 0);
+        final List<ModPack> modPacks = this.curseForgeClient.getModpacks(0, "", "", 24, 0);
         model.addAttribute("modpacks", modPacks);
         model.addAttribute("categories", Category.values());
         model.addAttribute("versions", Versions.VERSIONS);

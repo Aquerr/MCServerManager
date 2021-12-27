@@ -8,21 +8,18 @@ import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 import org.springframework.util.FileSystemUtils;
-import pl.bartlomiejstepien.mcsm.auth.AuthenticatedUser;
 import pl.bartlomiejstepien.mcsm.config.Config;
 import pl.bartlomiejstepien.mcsm.domain.dto.JavaDto;
 import pl.bartlomiejstepien.mcsm.domain.dto.ServerDto;
-import pl.bartlomiejstepien.mcsm.domain.exception.CouldNotDownloadServerFilesException;
+import pl.bartlomiejstepien.mcsm.domain.exception.CouldNotInstallServerException;
 import pl.bartlomiejstepien.mcsm.domain.exception.ServerNotRunningException;
 import pl.bartlomiejstepien.mcsm.domain.model.InstalledServer;
 import pl.bartlomiejstepien.mcsm.domain.model.ModPack;
 import pl.bartlomiejstepien.mcsm.domain.model.ServerProperties;
 import pl.bartlomiejstepien.mcsm.domain.platform.Platform;
 import pl.bartlomiejstepien.mcsm.domain.process.ServerProcessHandler;
-import pl.bartlomiejstepien.mcsm.integration.curseforge.CurseForgeService;
 import pl.bartlomiejstepien.mcsm.service.JavaService;
 import pl.bartlomiejstepien.mcsm.service.ServerService;
-import pl.bartlomiejstepien.mcsm.service.ServerServiceImpl;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -44,30 +41,22 @@ public class ServerManagerImpl implements ServerManager
     private final Config config;
     private final ServerService serverService;
     private final ServerProcessHandler serverProcessHandler;
-    private final ServerInstaller serverInstaller;
     private final ServerStartFileFinder serverStartFileFinder;
-    private final CurseForgeService curseForgeService;
-    private final JavaService javaService;
-    private final ModPackNameCorrector serverFilePathConverter;
+
+    private final Map<Platform, AbstractServerInstallationStrategy<? extends ServerInstallationRequest>> installationStrategyMap;
 
     @Autowired
     public ServerManagerImpl(final Config config,
                              @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection") final ServerProcessHandler serverProcessHandler,
                              final ServerService serverService,
-                             final ServerInstaller serverInstaller,
                              final ServerStartFileFinder serverStartFileFinder,
-                             final CurseForgeService curseForgeService,
-                             final JavaService javaService,
-                             final ModPackNameCorrector serverFilePathConverter)
+                             final Map<Platform, AbstractServerInstallationStrategy<? extends ServerInstallationRequest>> installationStrategyMap)
     {
         this.config = config;
         this.serverProcessHandler = serverProcessHandler;
         this.serverService = serverService;
-        this.serverInstaller = serverInstaller;
         this.serverStartFileFinder = serverStartFileFinder;
-        this.curseForgeService = curseForgeService;
-        this.javaService = javaService;
-        this.serverFilePathConverter = serverFilePathConverter;
+        this.installationStrategyMap = installationStrategyMap;
     }
 
     @EventListener(ApplicationReadyEvent.class)
@@ -321,68 +310,19 @@ public class ServerManagerImpl implements ServerManager
         this.serverService.deleteServer(serverDto.getId());
     }
 
-    private InstalledServer installServerForModPack(AuthenticatedUser authenticatedUser, ModPack modPack, Path serverPath)
-    {
-        this.serverInstaller.installServerForModpack(authenticatedUser, modPack, serverPath);
-
-        LOGGER.info("Looking for server start file...");
-        Path serverRootDirectory = findServerRootDirectory(serverPath);
-        Path serverStartFilePath = serverStartFileFinder.findServerStartFile(serverRootDirectory);
-        if (serverStartFilePath == null)
-            throw new RuntimeException("Could not find server start file!");
-
-        LOGGER.info("Accepting EULA...");
-        acceptEula(serverPath);
-
-        return new InstalledServer(0, modPack.getName(), serverPath, serverStartFilePath);
-    }
-
     @Override
-    public int installServerForModpack(AuthenticatedUser authenticatedUser, int modpackId, int serverPackId)
+    public InstalledServer installServer(ServerInstallationRequest serverInstallationRequest)
     {
-        final ModPack modPack = this.curseForgeService.getModpack(modpackId);
-        Path serverPath = prepareServerPathForNewModpack(authenticatedUser, modPack);
-        if (isServerPathOccupied(serverPath))
-            throw new RuntimeException("Server for this modpack already exists!");
-
-        if (!isModPackAlreadyDownloaded(modPack))
+        try
         {
-            try
-            {
-                //TODO: Add download status...
-                downloadServerFilesForModpack(modPack, serverPackId);
-            }
-            catch (CouldNotDownloadServerFilesException e)
-            {
-                e.printStackTrace();
-                return -1;
-            }
+            Platform platform = serverInstallationRequest.getPlatform();
+            AbstractServerInstallationStrategy<? extends ServerInstallationRequest> serverInstallationStrategy = this.installationStrategyMap.get(platform);
+            return serverInstallationStrategy.installInternal(serverInstallationRequest);
         }
-
-        //TODO: Remove determineJavaVersionForModpack and set java to first found java. User should properly configure the server after the installation.
-        JavaDto javaDto = determineJavaVersionForModpack(modPack)
-                .orElseThrow(() -> new RuntimeException("No available java found!"));
-
-        final InstalledServer installedServer = installServerForModPack(authenticatedUser, modPack, serverPath);
-        ServerDto serverDto = new ServerDto(installedServer.getId(), installedServer.getName(), installedServer.getServerDir().toString());
-        serverDto.setJavaId(javaDto.getId());
-        serverDto.setPlatform(Platform.FORGE.getName());
-        this.serverService.addServer(authenticatedUser.getId(), serverDto);
-        final int serverId = this.serverService.getServerByPath(installedServer.getServerDir().toString())
-                .map(ServerDto::getId)
-                .orElse(-1);
-
-        LOGGER.info("Server id=" + serverId + " is ready!");
-        return serverId;
-    }
-
-    private Optional<JavaDto> determineJavaVersionForModpack(ModPack modPack)
-    {
-        if (modPack.getVersion().equals("1.17") || modPack.getVersion().equals("1.17.1") || modPack.getVersion().equals("1.17.2"))
+        catch (Exception exception)
         {
-            return Optional.ofNullable(this.javaService.findFirst());
+            throw new CouldNotInstallServerException(exception.getMessage());
         }
-        return Optional.ofNullable(this.javaService.findFirst());
     }
 
     private InstalledServer convertToInstalledServer(final ServerDto serverDto)
@@ -418,41 +358,5 @@ public class ServerManagerImpl implements ServerManager
             e.printStackTrace();
         }
         return serverPath;
-    }
-
-    private void acceptEula(Path serverPath) {
-        final Path eulaFilePath = serverPath.resolve("eula.txt");
-        try {
-            if (Files.notExists(eulaFilePath)) {
-                Files.createFile(eulaFilePath);
-            }
-            Files.write(eulaFilePath, "eula=true".getBytes(StandardCharsets.UTF_8), StandardOpenOption.WRITE);
-        }
-        catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private Path prepareServerPathForNewModpack(AuthenticatedUser authenticatedUser, ModPack modPack) {
-        String modpackName = serverFilePathConverter.convert(modPack.getName());
-        return Paths.get(config.getServersDir()).resolve(authenticatedUser.getUsername()).resolve(modpackName);
-    }
-
-    private boolean isServerPathOccupied(Path serverPath)
-    {
-        return Files.exists(serverPath);
-    }
-
-    private boolean isModPackAlreadyDownloaded(final ModPack modPack)
-    {
-        return Files.exists(this.config.getDownloadsDirPath().resolve(Paths.get(modPack.getName() + "_" + modPack.getVersion())));
-    }
-
-    private void downloadServerFilesForModpack(final ModPack modPack, int serverPackId) throws CouldNotDownloadServerFilesException
-    {
-        String serverDownloadUrl = this.curseForgeService.getServerDownloadUrl(modPack.getId(), serverPackId);
-        //TODO: Fix url. Parenthesis "(" and ")" still not work
-        serverDownloadUrl = serverDownloadUrl.replaceAll(" ", "%20");
-        this.curseForgeService.downloadServerFile(modPack, serverDownloadUrl);
     }
 }

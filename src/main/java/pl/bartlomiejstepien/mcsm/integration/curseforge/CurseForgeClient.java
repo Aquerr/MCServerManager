@@ -6,7 +6,7 @@ import pl.bartlomiejstepien.mcsm.domain.model.ServerPack;
 
 import java.util.List;
 
-public interface CurseForgeService
+public interface CurseForgeClient
 {
     List<ModPack> getModpacks(int categoryId, String modpackName, String version, int count, int index);
 

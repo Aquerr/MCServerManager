@@ -30,9 +30,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-public class CurseForgeAPIServiceImpl implements CurseForgeService
+public class CurseForgeClientImpl implements CurseForgeClient
 {
-    private static final Logger LOGGER = LoggerFactory.getLogger(CurseForgeAPIServiceImpl.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(CurseForgeClientImpl.class);
     private static final RestTemplate REST_TEMPLATE = new RestTemplate();
 
     private final CurseforgeModpackConverter curseforgeModpackConverter;
@@ -40,7 +40,7 @@ public class CurseForgeAPIServiceImpl implements CurseForgeService
     private final ServerInstallationStatusMonitor serverInstallationStatusMonitor;
 
     @Autowired
-    public CurseForgeAPIServiceImpl(final Config config, final ServerInstallationStatusMonitor serverInstallationStatusMonitor, final CurseforgeModpackConverter curseforgeModpackConverter)
+    public CurseForgeClientImpl(final Config config, final ServerInstallationStatusMonitor serverInstallationStatusMonitor, final CurseforgeModpackConverter curseforgeModpackConverter)
     {
         this.config = config;
         this.serverInstallationStatusMonitor = serverInstallationStatusMonitor;

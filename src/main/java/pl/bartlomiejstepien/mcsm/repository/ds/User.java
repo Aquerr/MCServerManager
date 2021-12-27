@@ -32,7 +32,7 @@ public class User
     private List<Integer> serversIds = new ArrayList<>();
 
     @Column(name = "role_id")
-    private int roleId;
+    private Integer roleId;
 
     public User()
     {
@@ -73,7 +73,7 @@ public class User
 //        this.servers.addAll(servers);
 //    }
 
-    public int getId()
+    public Integer getId()
     {
         return id;
     }
@@ -103,12 +103,12 @@ public class User
         this.serversIds = serversIds;
     }
 
-    public int getRoleId()
+    public Integer getRoleId()
     {
         return roleId;
     }
 
-    public void setRoleId(int roleId)
+    public void setRoleId(Integer roleId)
     {
         this.roleId = roleId;
     }

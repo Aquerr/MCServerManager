@@ -11,16 +11,16 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(MockitoExtension.class)
-class ModPackNameCorrectorTest
+class ServerDirNameCorrectorTest
 {
     @InjectMocks
-    private ModPackNameCorrector modPackNameCorrector;
+    private ServerDirNameCorrector serverDirNameCorrector;
 
     @ParameterizedTest
     @MethodSource(value = "prepareStringsWillIllegalCharacters")
     void convertRemovesAllIllegalCharactersFromGivenString(String text)
     {
-        final String convertedText = modPackNameCorrector.convert(text);
+        final String convertedText = serverDirNameCorrector.convert(text);
 
         assertThat(convertedText).doesNotContain(illegalCharactersList());
     }

@@ -1,8 +1,5 @@
 package pl.bartlomiejstepien.mcsm.domain.model;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import pl.bartlomiejstepien.mcsm.domain.dto.ServerDto;
 import pl.bartlomiejstepien.mcsm.domain.dto.UserDto;
 
 import java.nio.file.Path;
@@ -12,10 +9,10 @@ import java.util.List;
 
 public class InstalledServer
 {
-    private int id;
-    private String name;
-    private Path serverDir;
-    private Path startFilePath;
+    private final int id;
+    private final String name;
+    private final Path serverDir;
+    private final Path startFilePath;
 
     private final List<UserDto> userDtos = new ArrayList<>();
 
