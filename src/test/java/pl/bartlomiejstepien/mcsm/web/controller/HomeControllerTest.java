@@ -27,7 +27,7 @@ class HomeControllerTest extends BaseIntegrationTest
 
     @Test
     @WithUserDetails(value = USER_USERNAME, userDetailsServiceBeanName = "userDetailsServiceTest")
-    public void homePageShouldRequireAuthentication() throws Exception
+    void homePageShouldRequireAuthentication() throws Exception
     {
         when(authenticationFacade.getCurrentUser()).thenReturn(getTestUser());
 
@@ -37,7 +37,7 @@ class HomeControllerTest extends BaseIntegrationTest
 
     @Test
     @WithUserDetails(value = USER_USERNAME, userDetailsServiceBeanName = "userDetailsServiceTest")
-    public void homePageShouldShowUserServers() throws Exception
+    void homePageShouldShowUserServers() throws Exception
     {
         when(authenticationFacade.getCurrentUser()).thenReturn(getTestUser());
         when(serverService.getServersForUser(getTestUser().getId())).thenReturn(prepareServerDtos());

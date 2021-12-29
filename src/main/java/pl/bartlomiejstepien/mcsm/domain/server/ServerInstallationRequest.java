@@ -5,4 +5,6 @@ import pl.bartlomiejstepien.mcsm.domain.platform.Platform;
 public interface ServerInstallationRequest
 {
     Platform getPlatform();
+
+    String getUsername();
 }

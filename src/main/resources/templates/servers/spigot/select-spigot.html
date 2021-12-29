@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity5">
+<head th:replace="fragments/fragments :: head (pageTitle='Select Spigot')">
+</head>
+<script type="text/javascript" th:src="@{/js/select-spigot.js}" defer></script>
+<body>
+<div class="modal" tabindex="-1" role="dialog" id="server-install-modal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Server installation</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body text-center">
+                <div class="text-center">
+                    <p>Your Spigot server is being installed. Please wait!</p>
+                    <div class="loader" role="status">
+                        <span class="sr-only">Loading...</span>
+                    </div>
+                    <p id="installation-status"></p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <a type="button" class="btn btn-primary" style="display: none;" id="open-server">Go to server</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" tabindex="-1" role="dialog" id="spigot-modal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirmation</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Modal body text goes here.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="install-server">Install</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div th:replace="fragments/fragments :: header"></div>
+
+<div class="container mt-4" style="max-width: 1240px;">
+
+    <h3>Select Spigot version</h3>
+    <hr>
+
+    <div>
+        <div id="spigot-list">
+            <th:block th:each="version : ${versions}">
+                <div th:if="${version != ''}">
+                    <div class="card mt-2 mr-2 card-clickable" style="flex-direction: row;">
+                        <div style="padding: 1rem; margin: auto;">
+                            <img class="card-img-top" style="display: inline-block;" th:src="${spigotIconPath}" alt="Card image cap">
+                        </div>
+                        <div class="card-body" style="display:inline-block; padding: 1rem;">
+                            <h5 th:text="'Spigot ' + ${version}"></h5>
+                        </div>
+                        <input style="display: none;" class="spigot-version" th:value="${version}">
+                    </div>
+                </div>
+            </th:block>
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>

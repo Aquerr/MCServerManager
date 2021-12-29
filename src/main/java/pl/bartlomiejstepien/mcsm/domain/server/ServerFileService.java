@@ -7,7 +7,7 @@ import java.util.List;
 
 public interface ServerFileService
 {
-    List<FancyTreeNode> getFolderContent(String path);
+    List<FancyTreeNode> getFancyTreeFolderContent(String path);
 
     String getFileContent(String fileName, ServerDto serverDto);
 

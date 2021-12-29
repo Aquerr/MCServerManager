@@ -18,6 +18,7 @@ public class InstalledServer
 
     private final List<String> players = new LinkedList<>();
 
+    private Integer javaId;
     private String javaPath;
 
     public InstalledServer(int id, String name, Path serverDir, Path startFilePath)
@@ -26,6 +27,16 @@ public class InstalledServer
         this.name = name;
         this.serverDir = serverDir;
         this.startFilePath = startFilePath;
+    }
+
+    public void setJavaId(Integer javaId)
+    {
+        this.javaId = javaId;
+    }
+
+    public Integer getJavaId()
+    {
+        return javaId;
     }
 
     public void setJavaPath(String javaPath)

@@ -7,7 +7,7 @@
     <changeSet id="create_java_table" author="Nerdi">
         <createTable tableName="java">
             <column name="id" autoIncrement="true" type="int">
-                <constraints primaryKey="true" nullable="false" unique="true"/>
+                <constraints primaryKey="true"/>
             </column>
             <column name="name" type="VARCHAR(50)">
                 <constraints unique="true" nullable="false"/>

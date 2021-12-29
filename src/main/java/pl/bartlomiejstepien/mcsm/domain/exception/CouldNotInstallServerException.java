@@ -6,4 +6,9 @@ public class CouldNotInstallServerException extends RuntimeException
     {
         super(message);
     }
+
+    public CouldNotInstallServerException(Exception exception)
+    {
+        super(exception);
+    }
 }

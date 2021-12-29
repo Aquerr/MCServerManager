@@ -8,7 +8,7 @@ import java.util.List;
 
 public interface CurseForgeClient
 {
-    List<ModPack> getModpacks(int categoryId, String modpackName, String version, int count, int index);
+    List<ModPack> getModpacks(int categoryId, String modpackName, String version, int count, int startIndex);
 
     int getLatestServerFileId(int modpackId);
 

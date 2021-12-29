@@ -42,7 +42,7 @@ dependencies {
 	implementation 'com.github.t9t.minecraft-rcon-client:minecraft-rcon-client:1.0.0'
 	implementation 'io.springfox:springfox-boot-starter:3.0.0'
 	implementation 'io.springfox:springfox-swagger-ui:3.0.0'
-	implementation 'org.liquibase:liquibase-core:4.2.2'
+	implementation 'org.liquibase:liquibase-core'
 //	clover 'org.openclover:clover:4.4.1'
 
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
@@ -51,7 +51,7 @@ dependencies {
 	}
 	testImplementation('org.springframework.security:spring-security-test')
 
-	runtimeOnly 'com.h2database:h2:1.4.200'
+	runtimeOnly 'com.h2database:h2'
 }
 
 configurations {

@@ -25,7 +25,6 @@ import pl.bartlomiejstepien.mcsm.domain.server.ServerInstallationStatusMonitor;
 import pl.bartlomiejstepien.mcsm.domain.server.ServerManager;
 import pl.bartlomiejstepien.mcsm.domain.server.ServerFileService;
 import pl.bartlomiejstepien.mcsm.service.ServerService;
-import pl.bartlomiejstepien.mcsm.service.ServerServiceImpl;
 import pl.bartlomiejstepien.mcsm.service.UserService;
 
 import javax.validation.Valid;
@@ -194,7 +193,7 @@ public class ServersRestController
         else
             path = serverDir + (path.startsWith("/") ? path : File.separator + path);
 
-        List<FancyTreeNode> nodes = this.serverFileService.getFolderContent(path);
+        List<FancyTreeNode> nodes = this.serverFileService.getFancyTreeFolderContent(path);
         LOGGER.info("Returning file tree = " + Arrays.deepToString(nodes.toArray()));
         return ResponseEntity.ok(nodes);
     }

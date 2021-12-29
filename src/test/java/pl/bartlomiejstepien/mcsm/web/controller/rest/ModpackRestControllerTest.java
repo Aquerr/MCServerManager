@@ -9,7 +9,6 @@ import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
-import pl.bartlomiejstepien.mcsm.domain.model.InstalledServer;
 import pl.bartlomiejstepien.mcsm.domain.platform.Platform;
 import pl.bartlomiejstepien.mcsm.domain.server.forge.ForgeModpackInstallationRequest;
 import pl.bartlomiejstepien.mcsm.domain.server.ServerInstallationRequest;
@@ -52,7 +51,7 @@ class ModpackRestControllerTest extends BaseIntegrationTest
 
     @Test
     @WithUserDetails(value = USER_USERNAME, userDetailsServiceBeanName = "userDetailsServiceTest")
-    public void getModpackDescriptionShouldReturnCorrectModpackDescription() throws Exception
+    void getModpackDescriptionShouldReturnCorrectModpackDescription() throws Exception
     {
         final String url = GET_MODPACK_DESCRIPTION_URL.replace("{id}", String.valueOf(MODPACK_ID));
         when(curseForgeClient.getModpackDescription(MODPACK_ID)).thenReturn(MODPACK_DESCRIPTION);
@@ -66,13 +65,13 @@ class ModpackRestControllerTest extends BaseIntegrationTest
 
     @Test
     @WithUserDetails(value = USER_USERNAME, userDetailsServiceBeanName = "userDetailsServiceTest")
-    public void installServerStartsServerInstallation() throws Exception
+    void installServerStartsServerInstallation() throws Exception
     {
         final String url = POST_INSTALL_SERVER.replace("{modpackId}", String.valueOf(MODPACK_ID))
                 .replace("{serverPackId}", String.valueOf(SERVER_PACK_ID));
         final Integer serverId = 1;
 
-        when(this.serverManager.installServer(any(ServerInstallationRequest.class))).thenReturn(new InstalledServer(serverId, null, null, null));
+        when(this.serverManager.installServer(any(ServerInstallationRequest.class))).thenReturn(serverId);
 
         //when
         this.mockMvc.perform(MockMvcRequestBuilders.post(url))
@@ -83,7 +82,7 @@ class ModpackRestControllerTest extends BaseIntegrationTest
         verify(this.serverManager).installServer(requestArgumentCaptor.capture());
         assertThat(requestArgumentCaptor.getValue()).isInstanceOf(ForgeModpackInstallationRequest.class);
         assertThat(requestArgumentCaptor.getValue().getPlatform()).isEqualTo(Platform.FORGE);
-        assertThat(((ForgeModpackInstallationRequest)requestArgumentCaptor.getValue()).getUsername()).isEqualTo(getTestUser().getUsername());
+        assertThat(requestArgumentCaptor.getValue().getUsername()).isEqualTo(getTestUser().getUsername());
         assertThat(((ForgeModpackInstallationRequest)requestArgumentCaptor.getValue()).getModpackId()).isEqualTo(MODPACK_ID);
         assertThat(((ForgeModpackInstallationRequest)requestArgumentCaptor.getValue()).getServerPackId()).isEqualTo(SERVER_PACK_ID);
     }

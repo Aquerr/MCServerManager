@@ -1,9 +1,5 @@
 package pl.bartlomiejstepien.mcsm.repository.ds;
 
-import org.springframework.security.core.GrantedAuthority;
-import pl.bartlomiejstepien.mcsm.domain.dto.ServerDto;
-import pl.bartlomiejstepien.mcsm.domain.dto.UserDto;
-
 import javax.persistence.*;
 import java.util.*;
 
@@ -12,7 +8,7 @@ import java.util.*;
 public class User
 {
     @Id
-    @Column(name = "id", nullable = false, updatable = false, unique = true, insertable = false)
+    @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
@@ -39,17 +35,19 @@ public class User
 
     }
 
+    public User(String username, String password, Integer roleId)
+    {
+        this.username = username;
+        this.password = password;
+        this.roleId = roleId;
+    }
+
     public User(Integer id, String username, String password, Integer roleId)
     {
         this.id = id;
         this.username = username;
         this.password = password;
         this.roleId = roleId;
-    }
-
-    public Collection<? extends GrantedAuthority> getAuthorities()
-    {
-        return Collections.emptyList();
     }
 
     public String getPassword()

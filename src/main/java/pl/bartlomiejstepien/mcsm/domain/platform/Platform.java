@@ -3,7 +3,7 @@ package pl.bartlomiejstepien.mcsm.domain.platform;
 public enum Platform
 {
     BUKKIT("Bukkit", "Server that allows installation of plugins", "/icons/Bukkit@2x.png", false),
-    SPIGOT("Spigot", "A high performance customized CraftBukkit Minecraft server that support Bukkit and Spigot plugins", "/icons/Spigot@2x.png", false),
+    SPIGOT("Spigot", "A high performance customized CraftBukkit Minecraft server that support Bukkit and Spigot plugins", "/icons/Spigot@2x.png", true),
     FORGE("Forge", "Server that allows installation of mods", "/icons/Forge@2x.png", true),
     SPONGE("Sponge", "Server that allows installation of mods and Sponge plugins", "/icons/Sponge@2x.png", false);
 

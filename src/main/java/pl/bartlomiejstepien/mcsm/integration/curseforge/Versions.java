@@ -1,9 +1,15 @@
 package pl.bartlomiejstepien.mcsm.integration.curseforge;
 
-public class Versions
+public final class Versions
 {
-    public static String[] VERSIONS = {
+    private Versions()
+    {
+
+    }
+
+    public static final String[] VERSIONS = {
             "",
+            "1.18.1",
             "1.18",
             "1.17.2",
             "1.17.1",
@@ -33,6 +39,9 @@ public class Versions
             "1.11",
             "1.10.2",
             "1.10.1",
-            "1.10"
+            "1.10",
+            "1.8",
+            "1.7.10",
+            "1.6.4"
     };
 }

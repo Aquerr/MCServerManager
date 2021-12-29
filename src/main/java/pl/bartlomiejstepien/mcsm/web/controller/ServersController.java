@@ -48,6 +48,7 @@ public class ServersController
         {
             case BUKKIT:
             case SPIGOT:
+                return prepareSpigotModelAndView(modelAndView);
             case FORGE:
                 return prepareForgeModelAndView(modelAndView);
             case SPONGE:
@@ -90,12 +91,19 @@ public class ServersController
 
     private ModelAndView prepareForgeModelAndView(ModelAndView modelAndView)
     {
-        ModelMap model = modelAndView.getModelMap();
         final List<ModPack> modPacks = this.curseForgeClient.getModpacks(0, "", "", 24, 0);
-        model.addAttribute("modpacks", modPacks);
-        model.addAttribute("categories", Category.values());
-        model.addAttribute("versions", Versions.VERSIONS);
-        modelAndView.setViewName("servers/select-modpack");
+        modelAndView.addObject("modpacks", modPacks);
+        modelAndView.addObject("categories", Category.values());
+        modelAndView.addObject("versions", Versions.VERSIONS);
+        modelAndView.setViewName("servers/forge/select-modpack");
+        return modelAndView;
+    }
+
+    private ModelAndView prepareSpigotModelAndView(ModelAndView modelAndView)
+    {
+        modelAndView.addObject("versions", Versions.VERSIONS);
+        modelAndView.addObject("spigotIconPath", Platform.SPIGOT.getImagePath());
+        modelAndView.setViewName("servers/spigot/select-spigot");
         return modelAndView;
     }
 }

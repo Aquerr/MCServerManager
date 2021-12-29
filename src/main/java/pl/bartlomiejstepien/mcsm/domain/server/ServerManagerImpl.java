@@ -9,14 +9,18 @@ import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 import org.springframework.util.FileSystemUtils;
 import pl.bartlomiejstepien.mcsm.config.Config;
+import pl.bartlomiejstepien.mcsm.domain.dto.JavaDto;
 import pl.bartlomiejstepien.mcsm.domain.dto.ServerDto;
 import pl.bartlomiejstepien.mcsm.domain.exception.CouldNotInstallServerException;
+import pl.bartlomiejstepien.mcsm.domain.exception.MissingJavaConfigurationException;
 import pl.bartlomiejstepien.mcsm.domain.exception.ServerNotRunningException;
 import pl.bartlomiejstepien.mcsm.domain.model.InstalledServer;
 import pl.bartlomiejstepien.mcsm.domain.model.ServerProperties;
 import pl.bartlomiejstepien.mcsm.domain.platform.Platform;
 import pl.bartlomiejstepien.mcsm.domain.server.process.ServerProcessHandler;
+import pl.bartlomiejstepien.mcsm.service.JavaService;
 import pl.bartlomiejstepien.mcsm.service.ServerService;
+import pl.bartlomiejstepien.mcsm.service.UserService;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -39,6 +43,8 @@ public class ServerManagerImpl implements ServerManager
     private final ServerService serverService;
     private final ServerProcessHandler serverProcessHandler;
     private final ServerStartFileFinder serverStartFileFinder;
+    private final JavaService javaService;
+    private final UserService userService;
 
     private final Map<Platform, AbstractServerInstallationStrategy<? extends ServerInstallationRequest>> installationStrategyMap;
 
@@ -47,12 +53,16 @@ public class ServerManagerImpl implements ServerManager
                              @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection") final ServerProcessHandler serverProcessHandler,
                              final ServerService serverService,
                              final ServerStartFileFinder serverStartFileFinder,
+                             final JavaService javaService,
+                             final UserService userService,
                              final Map<Platform, AbstractServerInstallationStrategy<? extends ServerInstallationRequest>> installationStrategyMap)
     {
         this.config = config;
         this.serverProcessHandler = serverProcessHandler;
         this.serverService = serverService;
         this.serverStartFileFinder = serverStartFileFinder;
+        this.javaService = javaService;
+        this.userService = userService;
         this.installationStrategyMap = installationStrategyMap;
     }
 
@@ -92,7 +102,7 @@ public class ServerManagerImpl implements ServerManager
     @Override
     public void startServer(ServerDto serverDto)
     {
-        if (RUNNING_SERVERS.containsKey(serverDto.getId()))
+        if (isRunning(serverDto))
             throw new RuntimeException("Server is already running!");
 
         final InstalledServer installedServer = convertToInstalledServer(serverDto);
@@ -109,7 +119,7 @@ public class ServerManagerImpl implements ServerManager
     {
         try
         {
-            LOGGER.info("Sending stop command to server id=" + serverDto.getId());
+            LOGGER.info("Sending stop command to server id={}", serverDto.getId());
             sendCommand(serverDto, "stop");
         }
         catch (ServerNotRunningException exception)
@@ -118,7 +128,7 @@ public class ServerManagerImpl implements ServerManager
             return new FutureTask<>(()->true);
         }
 
-        LOGGER.info("Scheduling kill server process task for server id = " + serverDto.getId());
+        LOGGER.info("Scheduling kill server process task for server id = {}", serverDto.getId());
         LOGGER.info("Server process will be killed in 20 seconds");
         ScheduledFuture<Boolean> scheduledFuture = SCHEDULED_EXECUTOR_SERVICE.schedule(() -> {
             LOGGER.info("Killing process for server id=" + serverDto.getId());
@@ -220,7 +230,7 @@ public class ServerManagerImpl implements ServerManager
     @Override
     public void loadProperties(ServerDto serverDto)
     {
-        LOGGER.debug("Getting properties from " + SERVER_PROPERTIES_FILE_NAME + " file for server id=" + serverDto.getId());
+        LOGGER.debug("Getting properties from {} file for server id={}", SERVER_PROPERTIES_FILE_NAME, serverDto.getId());
 
         final Path serverPropertiesFilePath = Paths.get(serverDto.getServerDir()).resolve(SERVER_PROPERTIES_FILE_NAME);
         if (Files.exists(serverPropertiesFilePath))
@@ -237,21 +247,18 @@ public class ServerManagerImpl implements ServerManager
 
             final ServerProperties serverProperties = serverDto.getServerProperties();
             final Properties props = serverProperties.getProperties();
-            for (final Map.Entry<Object, Object> entry : properties.entrySet())
-            {
-                props.put(entry.getKey(), entry.getValue());
-            }
+            props.putAll(properties);
         }
         else
         {
-            LOGGER.warn(SERVER_PROPERTIES_FILE_NAME + " file does not exist for server id=" + serverDto.getId());
+            LOGGER.warn("{} file does not exist for server id={}", SERVER_PROPERTIES_FILE_NAME, serverDto.getId());
         }
     }
 
     @Override
     public void saveProperties(ServerDto serverDto, ServerProperties serverProperties)
     {
-        LOGGER.info("Saving server properties for server id=" + serverDto.getId());
+        LOGGER.info("Saving server properties for server id={}", serverDto.getId());
         final Path propertiesFilePath = Paths.get(serverDto.getServerDir()).resolve(SERVER_PROPERTIES_FILE_NAME);
 
         try
@@ -265,10 +272,7 @@ public class ServerManagerImpl implements ServerManager
             }
 
             //Add new values
-            for (final Map.Entry<Object, Object> entry : serverProperties.getProperties().entrySet())
-            {
-                properties.put(entry.getKey(), entry.getValue());
-            }
+            properties.putAll(serverProperties.getProperties());
 
             //Save
             try(final OutputStream outputStream = Files.newOutputStream(propertiesFilePath))
@@ -280,7 +284,7 @@ public class ServerManagerImpl implements ServerManager
         {
             e.printStackTrace();
         }
-        LOGGER.info("Saved server properties for server id=" + serverDto.getId());
+        LOGGER.info("Saved server properties for server id={}", serverDto.getId());
     }
 
     @Override
@@ -290,9 +294,9 @@ public class ServerManagerImpl implements ServerManager
             try
             {
                 boolean status = stopServer(serverDto).get();
+                LOGGER.info("Is server stopped={}", status);
                 if(status)
                 {
-                    LOGGER.info("Is server stopped=" + status);
                     LOGGER.info("Deleting server files");
                     Path path = Paths.get(serverDto.getServerDir());
                     FileSystemUtils.deleteRecursively(path);
@@ -303,18 +307,23 @@ public class ServerManagerImpl implements ServerManager
             {
                 e.printStackTrace();
             }
-        });
-        this.serverService.deleteServer(serverDto.getId());
+        }).thenRun(() -> this.serverService.deleteServer(serverDto.getId()));
     }
 
     @Override
-    public InstalledServer installServer(ServerInstallationRequest serverInstallationRequest)
+    public int installServer(ServerInstallationRequest serverInstallationRequest)
     {
         try
         {
             Platform platform = serverInstallationRequest.getPlatform();
             AbstractServerInstallationStrategy<? extends ServerInstallationRequest> serverInstallationStrategy = this.installationStrategyMap.get(platform);
-            return serverInstallationStrategy.installInternal(serverInstallationRequest);
+            InstalledServer installedServer = serverInstallationStrategy.installInternal(serverInstallationRequest);
+            JavaDto javaDto = Optional.ofNullable(this.javaService.findFirst())
+                    .orElseThrow(() -> new MissingJavaConfigurationException("No available java found!"));
+            int serverId = saveServerToDB(serverInstallationRequest.getUsername(), installedServer.getName(), serverInstallationRequest.getPlatform(), installedServer.getServerDir(), javaDto.getId());
+            LOGGER.info("Server id={} is ready!", serverId);
+
+            return serverId;
         }
         catch (Exception exception)
         {
@@ -355,5 +364,16 @@ public class ServerManagerImpl implements ServerManager
             e.printStackTrace();
         }
         return serverPath;
+    }
+
+    private int saveServerToDB(String username, String serverName, Platform platform, Path serverPath, int javaId)
+    {
+        ServerDto serverDto = new ServerDto(0, serverName, serverPath.toString());
+        serverDto.setJavaId(javaId);
+        serverDto.setPlatform(platform.getName());
+        this.serverService.addServer(userService.findByUsername(username).getId(), serverDto);
+        return this.serverService.getServerByPath(serverPath.toString())
+                .map(ServerDto::getId)
+                .orElse(-1);
     }
 }

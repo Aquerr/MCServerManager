@@ -8,7 +8,7 @@
     <changeSet id="create_role_table" author="Nerdi">
         <createTable tableName="role">
             <column name="id" autoIncrement="true" type="int">
-                <constraints primaryKey="true" nullable="false" unique="true"/>
+                <constraints primaryKey="true"/>
             </column>
             <column name="name" type="varchar(20)">
                 <constraints unique="true" nullable="false"/>

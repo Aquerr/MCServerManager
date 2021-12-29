@@ -8,15 +8,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.FileSystemUtils;
 import pl.bartlomiejstepien.mcsm.config.Config;
-import pl.bartlomiejstepien.mcsm.domain.dto.JavaDto;
-import pl.bartlomiejstepien.mcsm.domain.dto.ServerDto;
 import pl.bartlomiejstepien.mcsm.domain.exception.CouldNotDownloadServerFilesException;
 import pl.bartlomiejstepien.mcsm.domain.exception.CouldNotInstallServerException;
-import pl.bartlomiejstepien.mcsm.domain.exception.MissingJavaConfigurationException;
 import pl.bartlomiejstepien.mcsm.domain.model.InstallationStatus;
 import pl.bartlomiejstepien.mcsm.domain.model.InstalledServer;
 import pl.bartlomiejstepien.mcsm.domain.model.ModPack;
-import pl.bartlomiejstepien.mcsm.domain.platform.Platform;
 import pl.bartlomiejstepien.mcsm.domain.server.*;
 import pl.bartlomiejstepien.mcsm.integration.curseforge.CurseForgeClient;
 import pl.bartlomiejstepien.mcsm.service.JavaService;
@@ -25,8 +21,10 @@ import pl.bartlomiejstepien.mcsm.service.UserService;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.*;
-import java.util.Optional;
+import java.nio.file.FileVisitOption;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 @Component
 public class ForgeServerInstallationStrategy extends AbstractServerInstallationStrategy<ForgeModpackInstallationRequest>
@@ -35,13 +33,9 @@ public class ForgeServerInstallationStrategy extends AbstractServerInstallationS
 
     private final Config config;
     private final ServerInstallationStatusMonitor serverInstallationStatusMonitor;
-    private final EulaAcceptor eulaAcceptor;
     private final CurseForgeClient curseForgeClient;
     private final ServerDirNameCorrector serverDirNameCorrector;
-    private final JavaService javaService;
     private final ServerStartFileFinder serverStartFileFinder;
-    private final ServerService serverService;
-    private final UserService userService;
 
     @Autowired
     public ForgeServerInstallationStrategy(final Config config,
@@ -49,20 +43,14 @@ public class ForgeServerInstallationStrategy extends AbstractServerInstallationS
                                            final EulaAcceptor eulaAcceptor,
                                            final CurseForgeClient curseForgeClient,
                                            final ServerDirNameCorrector serverDirNameCorrector,
-                                           final JavaService javaService,
-                                           final ServerStartFileFinder serverStartFileFinder,
-                                           final ServerService serverService,
-                                           final UserService userService)
+                                           final ServerStartFileFinder serverStartFileFinder)
     {
+        super(eulaAcceptor);
         this.config = config;
         this.serverInstallationStatusMonitor = serverInstallationStatusMonitor;
-        this.eulaAcceptor = eulaAcceptor;
         this.curseForgeClient = curseForgeClient;
         this.serverDirNameCorrector = serverDirNameCorrector;
-        this.javaService = javaService;
         this.serverStartFileFinder = serverStartFileFinder;
-        this.serverService = serverService;
-        this.userService = userService;
     }
 
     // Modpack id ==> InstallationStatus
@@ -93,10 +81,6 @@ public class ForgeServerInstallationStrategy extends AbstractServerInstallationS
             }
         }
 
-        //TODO: Remove determineJavaVersionForModpack and set java to first found java. User should properly configure the server after the installation.
-        JavaDto javaDto = determineJavaVersionForModpack(modPack)
-                .orElseThrow(() -> new MissingJavaConfigurationException("No available java found!"));
-
         try
         {
             LOGGER.info("Unziping modpack id={} to path={}", modPack.getId(), serverPath.toAbsolutePath());
@@ -105,14 +89,9 @@ public class ForgeServerInstallationStrategy extends AbstractServerInstallationS
             final Path startFilePath = findServerStartFilePath(serverPath);
             LOGGER.info("Server's start file: {}", startFilePath.toAbsolutePath());
 
-            this.eulaAcceptor.acceptEula(serverPath);
-            LOGGER.info("Accepted EULA");
+            // TODO: Determine free server port
 
-            LOGGER.info("Saving information about the server to the database");
-            final int serverId = saveServerToDB(username, modPack.getName(), serverPath, javaDto.getId());
-
-            LOGGER.info("Server id={} is ready!", serverId);
-            return new InstalledServer(serverId, modPack.getName(), serverPath, startFilePath);
+            return new InstalledServer(0, modPack.getName(), serverPath, startFilePath);
         }
         catch (Exception exception)
         {
@@ -124,7 +103,7 @@ public class ForgeServerInstallationStrategy extends AbstractServerInstallationS
             {
                 e.printStackTrace();
             }
-            throw new CouldNotInstallServerException(exception.getMessage());
+            throw new CouldNotInstallServerException(exception);
         }
     }
 
@@ -188,15 +167,6 @@ public class ForgeServerInstallationStrategy extends AbstractServerInstallationS
         return Files.exists(this.config.getDownloadsDirPath().resolve(Paths.get(modPack.getName() + "_" + modPack.getVersion())));
     }
 
-    private Optional<JavaDto> determineJavaVersionForModpack(ModPack modPack)
-    {
-        if (modPack.getVersion().equals("1.17") || modPack.getVersion().equals("1.17.1") || modPack.getVersion().equals("1.17.2"))
-        {
-            return Optional.ofNullable(this.javaService.findFirst());
-        }
-        return Optional.ofNullable(this.javaService.findFirst());
-    }
-
     private Path findServerRootDirectory(Path serverPath)
     {
         try
@@ -215,17 +185,5 @@ public class ForgeServerInstallationStrategy extends AbstractServerInstallationS
             e.printStackTrace();
         }
         return serverPath;
-    }
-
-    private int saveServerToDB(String username, String serverName, Path serverPath, int javaId)
-    {
-        ServerDto serverDto = new ServerDto(0, serverName, serverPath.toString());
-        serverDto.setJavaId(javaId);
-        serverDto.setPlatform(Platform.FORGE.getName());
-        this.serverService.addServer(userService.findByUsername(username).getId(), serverDto);
-        final int serverId = this.serverService.getServerByPath(serverPath.toString())
-                .map(ServerDto::getId)
-                .orElse(-1);
-        return serverId;
     }
 }

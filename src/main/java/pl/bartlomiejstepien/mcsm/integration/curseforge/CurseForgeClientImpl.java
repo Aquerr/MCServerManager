@@ -48,12 +48,12 @@ public class CurseForgeClientImpl implements CurseForgeClient
     }
 
     @Override
-    public List<ModPack> getModpacks(final int categoryId, String modpackName, String version, final int count, int index)
+    public List<ModPack> getModpacks(final int categoryId, String modpackName, String version, final int count, int startIndex)
     {
         final String url = CurseForgeAPIRoutes.MODPACKS_SEARCH.replace("{categoryId}", String.valueOf(categoryId))
                 .replace("{version}", version)
                 .replace("{size}", String.valueOf(count))
-                .replace("{index}", String.valueOf(index))
+                .replace("{index}", String.valueOf(startIndex))
                 .replace("{modpackName}", modpackName);
         LOGGER.info("GET " + url);
         final ArrayNode modpacksJsonArray = REST_TEMPLATE.getForObject(url, ArrayNode.class);

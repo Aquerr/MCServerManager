@@ -20,7 +20,7 @@ public class ServerFileServiceImpl implements ServerFileService
     private static final Charset FILE_CHARSET = StandardCharsets.UTF_8;
 
     @Override
-    public List<FancyTreeNode> getFolderContent(String path)
+    public List<FancyTreeNode> getFancyTreeFolderContent(String path)
     {
         try
         {

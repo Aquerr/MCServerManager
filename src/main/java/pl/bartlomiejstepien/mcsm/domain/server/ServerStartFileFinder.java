@@ -54,6 +54,6 @@ public class ServerStartFileFinder
 
     private String[] getPossibleStartFileNames()
     {
-        return new String[]{"start", "launch", "run"};
+        return new String[]{"start", "launch", "run", "setup_server"};
     }
 }

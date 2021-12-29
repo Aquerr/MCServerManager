@@ -2,7 +2,6 @@ package pl.bartlomiejstepien.mcsm.domain.server;
 
 import pl.bartlomiejstepien.mcsm.domain.dto.ServerDto;
 import pl.bartlomiejstepien.mcsm.domain.exception.ServerNotRunningException;
-import pl.bartlomiejstepien.mcsm.domain.model.InstalledServer;
 import pl.bartlomiejstepien.mcsm.domain.model.ServerProperties;
 
 import java.util.List;
@@ -26,5 +25,5 @@ public interface ServerManager
 
     void deleteServer(final ServerDto serverDto);
 
-    <T extends ServerInstallationRequest> InstalledServer installServer(T serverInstallationRequest);
+    <T extends ServerInstallationRequest> int installServer(T serverInstallationRequest);
 }
