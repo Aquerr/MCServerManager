@@ -166,15 +166,13 @@ public class ServersRestController
     {
         LOGGER.info("Deleting server for id: " + id);
         AuthenticatedUser authenticatedUser = authenticationFacade.getCurrentUser();
-        if (this.serverService.getServersForUser(authenticatedUser.getId()).stream().anyMatch(serverDto -> serverDto.getId() == id))
-        {
-            serverService.deleteServer(id);
-            return "Server has been deleted";
-        }
-        else
-        {
-            throw new ServerNotOwnedException(ACCESS_DENIED);
-        }
+        ServerDto server = this.serverService.getServersForUser(authenticatedUser.getId()).stream()
+                .filter(serverDto -> serverDto.getId() == id)
+                .findFirst()
+                .orElseThrow(() -> new ServerNotOwnedException(ACCESS_DENIED));
+
+        serverManager.deleteServer(server);
+        return "Server has been deleted";
     }
 
     @GetMapping("/{id}/folder-content")

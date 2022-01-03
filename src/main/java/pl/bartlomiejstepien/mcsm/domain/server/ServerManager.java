@@ -11,7 +11,7 @@ public interface ServerManager
 {
     void startServer(final ServerDto serverDto);
 
-    Future<Boolean> stopServer(final ServerDto serverDto);
+    boolean stopServer(final ServerDto serverDto);
 
     List<String> getLatestServerLog(int serverId, int numberOfLines);
 

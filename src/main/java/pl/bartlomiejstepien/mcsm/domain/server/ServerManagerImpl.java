@@ -115,7 +115,7 @@ public class ServerManagerImpl implements ServerManager
     }
 
     @Override
-    public Future<Boolean> stopServer(ServerDto serverDto)
+    public boolean stopServer(ServerDto serverDto)
     {
         try
         {
@@ -125,7 +125,7 @@ public class ServerManagerImpl implements ServerManager
         catch (ServerNotRunningException exception)
         {
             LOGGER.warn("Server is not running");
-            return new FutureTask<>(()->true);
+            return true;
         }
 
         LOGGER.info("Scheduling kill server process task for server id = {}", serverDto.getId());
@@ -156,7 +156,19 @@ public class ServerManagerImpl implements ServerManager
 
             return true;
         }, 20, TimeUnit.SECONDS);
-        return scheduledFuture;
+        try
+        {
+            return scheduledFuture.get();
+        }
+        catch (InterruptedException e)
+        {
+            e.printStackTrace();
+        }
+        catch (ExecutionException e)
+        {
+            e.printStackTrace();
+        }
+        return false;
     }
 
     @Override
@@ -290,24 +302,24 @@ public class ServerManagerImpl implements ServerManager
     @Override
     public void deleteServer(ServerDto serverDto)
     {
-        CompletableFuture.runAsync(()->{
-            try
+        try
+        {
+            boolean status = stopServer(serverDto);
+            LOGGER.info("Is server stopped={}", status);
+            if(status)
             {
-                boolean status = stopServer(serverDto).get();
-                LOGGER.info("Is server stopped={}", status);
-                if(status)
-                {
-                    LOGGER.info("Deleting server files");
-                    Path path = Paths.get(serverDto.getServerDir());
-                    FileSystemUtils.deleteRecursively(path);
-                    Files.delete(path);
-                }
+                LOGGER.info("Deleting server files");
+                Path path = Paths.get(serverDto.getServerDir());
+                FileSystemUtils.deleteRecursively(path);
+                Files.delete(path);
             }
-            catch (InterruptedException | ExecutionException | IOException e)
-            {
-                e.printStackTrace();
-            }
-        }).thenRun(() -> this.serverService.deleteServer(serverDto.getId()));
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+
+        this.serverService.deleteServer(serverDto.getId());
     }
 
     @Override
