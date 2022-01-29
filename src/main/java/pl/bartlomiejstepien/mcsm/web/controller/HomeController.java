@@ -34,7 +34,7 @@ public class HomeController
     {
         final AuthenticatedUser authenticatedUser = authenticationFacade.getCurrentUser();
 
-        LOGGER.info("Accessing url / by user " + authenticatedUser.getUsername() + " " + authenticatedUser.getRemoteIpAddress());
+        LOGGER.info("{}, {}, /", authenticatedUser.getUsername(), authenticatedUser.getRemoteIpAddress());
 
         List<ServerDto> serverDtos = new ArrayList<>(this.serverService.getServersForUser(authenticatedUser.getId()));
 

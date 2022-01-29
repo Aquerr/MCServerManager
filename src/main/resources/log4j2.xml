@@ -1,13 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Configuration status="DEBUG">
     <Properties>
+<!--        <Property name="LOG_PATTERN">-->
+<!--            %d{${LOG_DATEFORMAT_PATTERN:-yyyy-MM-dd HH:mm:ss.SSS}} %highlight{${LOG_LEVEL_PATTERN:-%5p}}{FATAL=red blink, ERROR=red, WARN=yellow bold, INFO=green, DEBUG=green bold, TRACE=blue} %style{}{magenta} [%X{username}] %style{%40C}{cyan} : %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%xEx}-->
+<!--        </Property>-->
         <Property name="LOG_PATTERN">
-            %d{HH:mm:ss.SSS} %-5level [%t] %logger{36} : %msg%n
+            %d{YYYY-MM-ddTHH:mm:ss.SSS} %highlight{[%p] [%X{username}] [%X{correlationId}] %logger{36} : %msg%n}{FATAL=red blink, ERROR=red, WARN=yellow bold, INFO=WHITE, DEBUG=green bold, TRACE=blue}
         </Property>
     </Properties>
     <Appenders>
         <Console name="Console" target="SYSTEM_OUT" follow="true">
-            <PatternLayout pattern="${LOG_PATTERN}"/>
+            <PatternLayout disableAnsi="false" pattern="${LOG_PATTERN}"/>
         </Console>
         <RollingFile
                 name="McsmRollingFile"

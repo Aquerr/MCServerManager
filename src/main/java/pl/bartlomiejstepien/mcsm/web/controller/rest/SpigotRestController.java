@@ -31,7 +31,7 @@ public class SpigotRestController
     }
 
     @PostMapping(value = "/{version}/install", produces = MediaType.TEXT_PLAIN_VALUE)
-    public String installModpack(@PathVariable("version") final String version,
+    public String installSpigot(@PathVariable("version") final String version,
                                  Authentication authentication,
                                  final HttpServletRequest httpServletRequest)
     {

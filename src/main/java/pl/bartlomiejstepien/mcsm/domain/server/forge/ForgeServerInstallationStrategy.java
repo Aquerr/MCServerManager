@@ -15,9 +15,6 @@ import pl.bartlomiejstepien.mcsm.domain.model.InstalledServer;
 import pl.bartlomiejstepien.mcsm.domain.model.ModPack;
 import pl.bartlomiejstepien.mcsm.domain.server.*;
 import pl.bartlomiejstepien.mcsm.integration.curseforge.CurseForgeClient;
-import pl.bartlomiejstepien.mcsm.service.JavaService;
-import pl.bartlomiejstepien.mcsm.service.ServerService;
-import pl.bartlomiejstepien.mcsm.service.UserService;
 
 import java.io.File;
 import java.io.IOException;
@@ -52,8 +49,6 @@ public class ForgeServerInstallationStrategy extends AbstractServerInstallationS
         this.serverDirNameCorrector = serverDirNameCorrector;
         this.serverStartFileFinder = serverStartFileFinder;
     }
-
-    // Modpack id ==> InstallationStatus
 
     @Override
     public InstalledServer install(ForgeModpackInstallationRequest serverInstallationRequest)
