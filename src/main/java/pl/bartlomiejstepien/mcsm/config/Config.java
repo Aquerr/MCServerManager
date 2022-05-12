@@ -7,7 +7,6 @@ import org.springframework.context.annotation.PropertySource;
 import pl.bartlomiejstepien.mcsm.domain.platform.Platform;
 import pl.bartlomiejstepien.mcsm.domain.server.AbstractServerInstallationStrategy;
 import pl.bartlomiejstepien.mcsm.domain.server.ServerInstallationRequest;
-import pl.bartlomiejstepien.mcsm.domain.server.ServerInstallationStrategy;
 import pl.bartlomiejstepien.mcsm.domain.server.forge.ForgeServerInstallationStrategy;
 import pl.bartlomiejstepien.mcsm.domain.server.spigot.SpigotServerInstallationStrategy;
 
@@ -17,7 +16,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Configuration
-@PropertySource("classpath:application.properties")
+@PropertySource("classpath:application.yml")
 public class Config
 {
     @Value("${downloads-dir}")
