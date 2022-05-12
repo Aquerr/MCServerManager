@@ -311,7 +311,6 @@ public class ServerManagerImpl implements ServerManager
                 LOGGER.info("Deleting server files");
                 Path path = Paths.get(serverDto.getServerDir());
                 FileSystemUtils.deleteRecursively(path);
-                Files.delete(path);
             }
         }
         catch (IOException e)

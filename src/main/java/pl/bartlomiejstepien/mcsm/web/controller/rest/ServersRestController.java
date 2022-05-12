@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.MimeTypeUtils;
@@ -161,8 +162,8 @@ public class ServersRestController
         return isRunning ? "Running" : "Not Running";
     }
 
-    @DeleteMapping(value = "/{id}", produces = MediaType.TEXT_PLAIN_VALUE)
-    public String deleteServer(@PathVariable final int id)
+    @DeleteMapping(value = "/{id}")
+    public McsmGeneralResponse deleteServer(@PathVariable final int id)
     {
         LOGGER.info("Deleting server for id: " + id);
         AuthenticatedUser authenticatedUser = authenticationFacade.getCurrentUser();
@@ -172,7 +173,7 @@ public class ServersRestController
                 .orElseThrow(() -> new ServerNotOwnedException(ACCESS_DENIED));
 
         serverManager.deleteServer(server);
-        return "Server has been deleted";
+        return new McsmGeneralResponse(HttpStatus.OK.value(), "Server has been deleted");
     }
 
     @GetMapping("/{id}/folder-content")
