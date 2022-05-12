@@ -224,7 +224,7 @@ public class ServerManagerImpl implements ServerManager
         }
         catch(final Exception exception)
         {
-            LOGGER.error("Could not send command to the server. Server id=" + serverDto.getId() + " | Server name=" + serverDto.getName(), exception);
+            LOGGER.error("Could not send command to server id={}, name={}. Reason: {}", serverDto.getId(), serverDto.getName(), exception.getMessage());
         }
     }
 
