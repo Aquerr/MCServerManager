@@ -37,6 +37,6 @@ public class SpigotRestController
     {
         final AuthenticatedUser authenticatedUser = (AuthenticatedUser)authentication.getPrincipal();
         LOGGER.info("Install spigot version={} by {} from {}", version, authenticatedUser.getUsername(), httpServletRequest.getLocalAddr());
-        return String.valueOf(this.serverManager.installServer(new SpigotInstallationRequest(authenticatedUser.getUsername(), version)));
+        return String.valueOf(this.serverManager.queueServerInstallation(new SpigotInstallationRequest(authenticatedUser.getUsername(), version)));
     }
 }

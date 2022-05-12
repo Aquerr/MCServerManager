@@ -12,6 +12,8 @@ public interface ServerRepository
 
     int save(Server server);
 
+    void saveNewServer(Server server);
+
     void update(Server server);
 
     void delete(int id);
@@ -19,4 +21,6 @@ public interface ServerRepository
     Server findByPath(String path);
 
     List<Server> findByUserId(int userId);
+
+    Integer getLastFreeServerId();
 }

@@ -37,7 +37,7 @@ public class SpigotServerInstallationStrategy extends AbstractServerInstallation
     }
 
     @Override
-    public InstalledServer install(SpigotInstallationRequest serverInstallRequest)
+    public InstalledServer install(int serverId, SpigotInstallationRequest serverInstallRequest)
     {
         final String username = serverInstallRequest.getUsername();
         final String version = serverInstallRequest.getVersion();
@@ -49,7 +49,7 @@ public class SpigotServerInstallationStrategy extends AbstractServerInstallation
         try
         {
             // Download spigot
-            Path downloadedFilePath = this.getBukkitClient.downloadServer(version);
+            Path downloadedFilePath = this.getBukkitClient.downloadServer(serverId, version);
             Files.createDirectories(serverPath);
 
             // Copy spigot
@@ -59,7 +59,7 @@ public class SpigotServerInstallationStrategy extends AbstractServerInstallation
             // Create start file
             createStartFile(serverPath, destSpigotPath);
 
-            return new InstalledServer(0, serverPath.getFileName().toString(), serverPath, destSpigotPath);
+            return new InstalledServer(serverId, serverPath.getFileName().toString(), serverPath, destSpigotPath);
         }
         catch (CouldNotDownloadServerFilesException | IOException exception)
         {

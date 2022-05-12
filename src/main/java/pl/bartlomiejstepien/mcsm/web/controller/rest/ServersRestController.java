@@ -62,11 +62,11 @@ public class ServersRestController
         this.serverInstallationStatusMonitor = serverInstallationStatusMonitor;
     }
 
-    @GetMapping(value = "/installation-status/{modpackId}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public InstallationStatus getInstallationStatus(@PathVariable final int modpackId)
+    @GetMapping(value = "/installation-status/{serverId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public InstallationStatus getInstallationStatus(@PathVariable final int serverId)
     {
-        LOGGER.info("Getting installation status for id = " + modpackId);
-        return this.serverInstallationStatusMonitor.getInstallationStatus(modpackId).orElse(new InstallationStatus(0, ""));
+        LOGGER.info("Getting installation status for server id = " + serverId);
+        return this.serverInstallationStatusMonitor.getInstallationStatus(serverId).orElse(new InstallationStatus(0, 0, ""));
     }
 
     @GetMapping(value = "/{id}/latest-log/{lines}", produces = MediaType.APPLICATION_JSON_VALUE)

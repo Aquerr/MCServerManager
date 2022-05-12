@@ -2,9 +2,12 @@ package pl.bartlomiejstepien.mcsm.integration.getbukkit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import pl.bartlomiejstepien.mcsm.config.Config;
 import pl.bartlomiejstepien.mcsm.domain.exception.CouldNotDownloadServerFilesException;
+import pl.bartlomiejstepien.mcsm.domain.model.InstallationStatus;
+import pl.bartlomiejstepien.mcsm.domain.server.ServerInstallationStatusMonitor;
 
 import java.io.BufferedInputStream;
 import java.io.FileNotFoundException;
@@ -25,14 +28,17 @@ public class GetBukkitClientImpl implements GetBukkitClient
     private static final String SPIGOT_DOWNLOAD_DIR = "spigot";
 
     private final Config config;
+    private final ServerInstallationStatusMonitor serverInstallationStatusMonitor;
 
-    public GetBukkitClientImpl(final Config config)
+    @Autowired
+    public GetBukkitClientImpl(final Config config, final ServerInstallationStatusMonitor serverInstallationStatusMonitor)
     {
         this.config = config;
+        this.serverInstallationStatusMonitor = serverInstallationStatusMonitor;
     }
 
     @Override
-    public Path downloadServer(String version) throws CouldNotDownloadServerFilesException
+    public Path downloadServer(int serverId, String version) throws CouldNotDownloadServerFilesException
     {
         String downloadUrl = DOWNLOAD_URL.replace("{version}", version);
         Path downloadPath = prepareDownloadPath(version);
@@ -47,7 +53,7 @@ public class GetBukkitClientImpl implements GetBukkitClient
         try
         {
             Files.createDirectories(this.config.getDownloadsDirPath().resolve(SPIGOT_DOWNLOAD_DIR));
-            downloadSpigot(downloadUrl, downloadPath);
+            downloadSpigot(serverId, downloadUrl, downloadPath);
         }
         catch (FileNotFoundException exception)
         {
@@ -55,7 +61,7 @@ public class GetBukkitClientImpl implements GetBukkitClient
             {
                 downloadUrl = OLD_DOWNLOAD_URL.replace("{version}", version);
                 LOGGER.info("Retrying download with old url: {}", downloadUrl);
-                downloadSpigot(downloadUrl, downloadPath);
+                downloadSpigot(serverId, downloadUrl, downloadPath);
             }
             catch (Exception e)
             {
@@ -75,13 +81,13 @@ public class GetBukkitClientImpl implements GetBukkitClient
         return this.config.getDownloadsDirPath().resolve(SPIGOT_DOWNLOAD_DIR).resolve("spigot-" + version + ".jar");
     }
 
-    private void downloadSpigot(String downloadUrl, Path downloadPath) throws IOException
+    private void downloadSpigot(int serverId, String downloadUrl, Path downloadPath) throws IOException
     {
         final URL url = new URL(downloadUrl);
         HttpURLConnection httpURLConnection = (HttpURLConnection) url.openConnection();
-//            long totalToDownload = httpURLConnection.getContentLengthLong();
-//            long alreadyDownloaded = 0;
-//            this.serverInstallationStatusMonitor.setInstallationStatus(modPack.getId(), new InstallationStatus(0, "Downloading server files..."));
+        long totalToDownload = httpURLConnection.getContentLengthLong();
+        long alreadyDownloaded = 0;
+        this.serverInstallationStatusMonitor.setInstallationStatus(serverId, new InstallationStatus(1, 0, "Downloading server files..."));
 
         try(BufferedInputStream bufferedInputStream = new BufferedInputStream(httpURLConnection.getInputStream());
             FileOutputStream fileOutputStream = new FileOutputStream(downloadPath.toAbsolutePath().toString()))
@@ -90,11 +96,11 @@ public class GetBukkitClientImpl implements GetBukkitClient
             int bytesRead;
             while ((bytesRead = bufferedInputStream.read(dataBuffer, 0, 1024)) != -1)
             {
-//                    final InstallationStatus installationStatus = this.serverInstallationStatusMonitor.getInstallationStatus(modPack.getId()).orElse(new InstallationStatus(0, "Downloading server files..."));
-//                    alreadyDownloaded += 1024;
-//                    int percentage = (int)(alreadyDownloaded * 100 / totalToDownload);
-//                    installationStatus.setPercent(percentage);
-//                    this.serverInstallationStatusMonitor.setInstallationStatus(modPack.getId(), installationStatus);
+                final InstallationStatus installationStatus = this.serverInstallationStatusMonitor.getInstallationStatus(serverId).orElse(new InstallationStatus(1, 0, "Downloading server files..."));
+                alreadyDownloaded += 1024;
+                int percentage = (int)(alreadyDownloaded * 100 / totalToDownload);
+                installationStatus.setPercent(percentage);
+                this.serverInstallationStatusMonitor.setInstallationStatus(serverId, installationStatus);
                 fileOutputStream.write(dataBuffer, 0, bytesRead);
             }
         }

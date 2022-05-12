@@ -154,7 +154,7 @@ public class CurseForgeClientImpl implements CurseForgeClient
      * @return the name of the zip file (with .zip extension)
      */
     @Override
-    public boolean downloadServerFile(final ModPack modPack, String serverDownloadUrl) throws CouldNotDownloadServerFilesException
+    public boolean downloadServerFile(int serverId, final ModPack modPack, String serverDownloadUrl) throws CouldNotDownloadServerFilesException
     {
         LOGGER.info("Downloading server files for modpack {id=" + modPack.getId() + ", name=" + modPack.getName() + "}");
         try
@@ -163,7 +163,7 @@ public class CurseForgeClientImpl implements CurseForgeClient
             HttpURLConnection httpURLConnection = (HttpURLConnection) url.openConnection();
             long totalToDownload = httpURLConnection.getContentLengthLong();
             long alreadyDownloaded = 0;
-            this.serverInstallationStatusMonitor.setInstallationStatus(modPack.getId(), new InstallationStatus(0, "Downloading server files..."));
+            this.serverInstallationStatusMonitor.setInstallationStatus(serverId, new InstallationStatus(1, 0, "Downloading server files..."));
 
             try(BufferedInputStream bufferedInputStream = new BufferedInputStream(httpURLConnection.getInputStream());
                 FileOutputStream fileOutputStream = new FileOutputStream(this.config.getDownloadsDir() + File.separator + modPack.getName() + "_" + modPack.getVersion()))
@@ -172,11 +172,11 @@ public class CurseForgeClientImpl implements CurseForgeClient
                 int bytesRead;
                 while ((bytesRead = bufferedInputStream.read(dataBuffer, 0, 1024)) != -1)
                 {
-                    final InstallationStatus installationStatus = this.serverInstallationStatusMonitor.getInstallationStatus(modPack.getId()).orElse(new InstallationStatus(0, "Downloading server files..."));
+                    final InstallationStatus installationStatus = this.serverInstallationStatusMonitor.getInstallationStatus(modPack.getId()).orElse(new InstallationStatus(1, 0, "Downloading server files..."));
                     alreadyDownloaded += 1024;
                     int percentage = (int)(alreadyDownloaded * 100 / totalToDownload);
                     installationStatus.setPercent(percentage);
-                    this.serverInstallationStatusMonitor.setInstallationStatus(modPack.getId(), installationStatus);
+                    this.serverInstallationStatusMonitor.setInstallationStatus(serverId, installationStatus);
                     fileOutputStream.write(dataBuffer, 0, bytesRead);
                 }
             }

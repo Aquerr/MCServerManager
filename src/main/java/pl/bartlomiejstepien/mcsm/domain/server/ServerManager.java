@@ -5,7 +5,6 @@ import pl.bartlomiejstepien.mcsm.domain.exception.ServerNotRunningException;
 import pl.bartlomiejstepien.mcsm.domain.model.ServerProperties;
 
 import java.util.List;
-import java.util.concurrent.Future;
 
 public interface ServerManager
 {
@@ -25,5 +24,5 @@ public interface ServerManager
 
     void deleteServer(final ServerDto serverDto);
 
-    <T extends ServerInstallationRequest> int installServer(T serverInstallationRequest);
+    <T extends ServerInstallationRequest> int queueServerInstallation(T serverInstallationRequest);
 }

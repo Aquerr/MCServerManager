@@ -61,7 +61,7 @@ public class ModpackRestController
     {
         final AuthenticatedUser authenticatedUser = (AuthenticatedUser)authentication.getPrincipal();
         LOGGER.info("Install modpack id=" + modpackId + " by " + authenticatedUser.getUsername() + " " + httpServletRequest.getLocalAddr());
-        return String.valueOf(this.serverManager.installServer(new ForgeModpackInstallationRequest(authenticatedUser.getUsername(), modpackId, serverPackId)));
+        return String.valueOf(this.serverManager.queueServerInstallation(new ForgeModpackInstallationRequest(authenticatedUser.getUsername(), modpackId, serverPackId)));
     }
 
     @GetMapping(value = "/search", produces = MediaType.APPLICATION_JSON_VALUE)

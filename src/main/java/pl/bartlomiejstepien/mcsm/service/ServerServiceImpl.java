@@ -56,10 +56,18 @@ public class ServerServiceImpl implements ServerService
 
     @Transactional
     @Override
-    public void addServer(final int userId, final ServerDto serverDto)
+    public void addServerToUser(final int userId, final ServerDto serverDto)
     {
         serverDto.getUsersIds().add(userId);
-        this.serverRepository.save(this.serverConverter.convertToServer(serverDto));
+        Server serverToSave = this.serverConverter.convertToServer(serverDto);
+        this.serverRepository.update(serverToSave);
+    }
+
+    @Transactional
+    @Override
+    public void saveNewServer(final ServerDto serverDto)
+    {
+        this.serverRepository.saveNewServer(this.serverConverter.convertToServer(serverDto));
     }
 
     @Transactional
@@ -151,5 +159,12 @@ public class ServerServiceImpl implements ServerService
         server.setJavaId(javaId);
         this.serverRepository.update(server);
         return true;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Integer getLastFreeServerId()
+    {
+        return this.serverRepository.getLastFreeServerId();
     }
 }

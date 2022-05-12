@@ -14,10 +14,12 @@ import pl.bartlomiejstepien.mcsm.domain.dto.ServerDto;
 import pl.bartlomiejstepien.mcsm.domain.exception.CouldNotInstallServerException;
 import pl.bartlomiejstepien.mcsm.domain.exception.MissingJavaConfigurationException;
 import pl.bartlomiejstepien.mcsm.domain.exception.ServerNotRunningException;
+import pl.bartlomiejstepien.mcsm.domain.model.InstallationStatus;
 import pl.bartlomiejstepien.mcsm.domain.model.InstalledServer;
 import pl.bartlomiejstepien.mcsm.domain.model.ServerProperties;
 import pl.bartlomiejstepien.mcsm.domain.platform.Platform;
 import pl.bartlomiejstepien.mcsm.domain.server.process.ServerProcessHandler;
+import pl.bartlomiejstepien.mcsm.domain.server.task.ServerInstallationTask;
 import pl.bartlomiejstepien.mcsm.service.JavaService;
 import pl.bartlomiejstepien.mcsm.service.ServerService;
 import pl.bartlomiejstepien.mcsm.service.UserService;
@@ -35,6 +37,7 @@ public class ServerManagerImpl implements ServerManager
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(ServerManagerImpl.class);
     private static final ScheduledExecutorService SCHEDULED_EXECUTOR_SERVICE = Executors.newSingleThreadScheduledExecutor();
+    private static final ExecutorService SERVER_INSTALLATION_EXECUTOR_SERVICE = Executors.newSingleThreadExecutor();
     private static final Map<Integer, Process> SERVER_PROCESSES = new HashMap<>();
     private static final Map<Integer, InstalledServer> RUNNING_SERVERS = new HashMap<>();
     private static final String SERVER_PROPERTIES_FILE_NAME = "server.properties";
@@ -48,6 +51,11 @@ public class ServerManagerImpl implements ServerManager
 
     private final Map<Platform, AbstractServerInstallationStrategy<? extends ServerInstallationRequest>> installationStrategyMap;
 
+    private final Set<Integer> serverIdsUnderInstallation = new HashSet<>();
+    private final Queue<ServerInstallationTask> serverInstallationQueue = new ConcurrentLinkedQueue<>();
+
+    private final ServerInstallationStatusMonitor serverInstallationStatusMonitor;
+
     @Autowired
     public ServerManagerImpl(final Config config,
                              @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection") final ServerProcessHandler serverProcessHandler,
@@ -55,6 +63,7 @@ public class ServerManagerImpl implements ServerManager
                              final ServerStartFileFinder serverStartFileFinder,
                              final JavaService javaService,
                              final UserService userService,
+                             final ServerInstallationStatusMonitor serverInstallationStatusMonitor,
                              final Map<Platform, AbstractServerInstallationStrategy<? extends ServerInstallationRequest>> installationStrategyMap)
     {
         this.config = config;
@@ -63,6 +72,7 @@ public class ServerManagerImpl implements ServerManager
         this.serverStartFileFinder = serverStartFileFinder;
         this.javaService = javaService;
         this.userService = userService;
+        this.serverInstallationStatusMonitor = serverInstallationStatusMonitor;
         this.installationStrategyMap = installationStrategyMap;
     }
 
@@ -96,6 +106,7 @@ public class ServerManagerImpl implements ServerManager
         }
 
         LOGGER.info("Structure generated!");
+        SERVER_INSTALLATION_EXECUTOR_SERVICE.submit(this::installQueuedServers);
     }
 
 
@@ -322,24 +333,71 @@ public class ServerManagerImpl implements ServerManager
     }
 
     @Override
-    public int installServer(ServerInstallationRequest serverInstallationRequest)
+    public int queueServerInstallation(ServerInstallationRequest serverInstallationRequest)
     {
+        Integer serverId = requestNewServerId();
+        this.serverIdsUnderInstallation.add(serverId);
+        this.serverInstallationQueue.add(new ServerInstallationTask(serverId, serverInstallationRequest));
+        return serverId;
+    }
+
+    private void installQueuedServers()
+    {
+        while (true)
+        {
+            if (this.serverInstallationQueue.isEmpty())
+            {
+                try
+                {
+                    Thread.sleep(4000);
+                }
+                catch (InterruptedException e)
+                {
+                    e.printStackTrace();
+                }
+            }
+            else
+            {
+                installServer(this.serverInstallationQueue.poll());
+            }
+        }
+    }
+
+    private void installServer(ServerInstallationTask task)
+    {
+        int serverId = task.getServerId();
+        ServerInstallationRequest serverInstallationRequest = task.getServerInstallationRequest();
+
         try
         {
-            Platform platform = serverInstallationRequest.getPlatform();
-            AbstractServerInstallationStrategy<? extends ServerInstallationRequest> serverInstallationStrategy = this.installationStrategyMap.get(platform);
-            InstalledServer installedServer = serverInstallationStrategy.installInternal(serverInstallationRequest);
             JavaDto javaDto = Optional.ofNullable(this.javaService.findFirst())
                     .orElseThrow(() -> new MissingJavaConfigurationException("No available java found!"));
-            int serverId = saveServerToDB(serverInstallationRequest.getUsername(), installedServer.getName(), serverInstallationRequest.getPlatform(), installedServer.getServerDir(), javaDto.getId());
-            LOGGER.info("Server id={} is ready!", serverId);
 
-            return serverId;
+            Platform platform = serverInstallationRequest.getPlatform();
+            AbstractServerInstallationStrategy<? extends ServerInstallationRequest> serverInstallationStrategy = this.installationStrategyMap.get(platform);
+            InstalledServer installedServer = serverInstallationStrategy.installInternal(serverId, serverInstallationRequest);
+            serverId = saveServerToDB(serverId, serverInstallationRequest.getUsername(), installedServer.getName(), serverInstallationRequest.getPlatform(), installedServer.getServerDir(), javaDto.getId());
+            LOGGER.info("Server id={} is ready!", serverId);
+            serverInstallationStatusMonitor.setInstallationStatus(serverId, new InstallationStatus(5, 100, "Server installed!"));
+            SCHEDULED_EXECUTOR_SERVICE.schedule(() -> serverInstallationStatusMonitor.clearStatus(task.getServerId()), 1, TimeUnit.HOURS);
         }
         catch (Exception exception)
         {
+            this.serverInstallationStatusMonitor.setInstallationStatus(serverId, new InstallationStatus(-1, 0, exception.getMessage()));
             throw new CouldNotInstallServerException(exception.getMessage());
         }
+        finally
+        {
+            this.serverIdsUnderInstallation.remove(serverId);
+        }
+    }
+
+    private Integer requestNewServerId()
+    {
+        Integer serverId = this.serverService.getLastFreeServerId();
+        while (this.serverIdsUnderInstallation.contains(serverId))
+            serverId++;
+        return serverId;
     }
 
     private InstalledServer convertToInstalledServer(final ServerDto serverDto)
@@ -377,12 +435,14 @@ public class ServerManagerImpl implements ServerManager
         return serverPath;
     }
 
-    private int saveServerToDB(String username, String serverName, Platform platform, Path serverPath, int javaId)
+    private int saveServerToDB(Integer serverId, String username, String serverName, Platform platform, Path serverPath, int javaId)
     {
-        ServerDto serverDto = new ServerDto(0, serverName, serverPath.toString());
+        ServerDto serverDto = new ServerDto(serverId, serverName, serverPath.toString());
         serverDto.setJavaId(javaId);
         serverDto.setPlatform(platform.getName());
-        this.serverService.addServer(userService.findByUsername(username).getId(), serverDto);
+        this.serverService.saveNewServer(serverDto);
+
+        this.serverService.addServerToUser(userService.findByUsername(username).getId(), serverDto);
         return this.serverService.getServerByPath(serverPath.toString())
                 .map(ServerDto::getId)
                 .orElse(-1);

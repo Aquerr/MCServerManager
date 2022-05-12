@@ -17,6 +17,7 @@ $("#install-server").on("click", function () {
     $("#spigot-modal").modal("hide");
     $("#server-install-modal").modal("show");
 
+    let serverId = 0;
     let installationStatusMessageInterval;
     const spigotVersion = $("#install-server").attr("spigot-version");
 
@@ -35,10 +36,7 @@ $("#install-server").on("click", function () {
         method: "POST",
         success: function (response) {
             console.log(response);
-            clearInterval(installationStatusMessageInterval);
-            $("#server-install-modal .modal-body").text("Your server is ready!");
-            $("#server-install-modal #open-server").show();
-            $("#server-install-modal #open-server").attr("href", "/servers/" + response);
+            serverId = response;
         },
         error: function (errorResponse) {
             console.log(errorResponse);
@@ -48,14 +46,25 @@ $("#install-server").on("click", function () {
     });
 
     function showInstallationStatus() {
-        //TODO: Show installation status for the given user.
+        console.log("Getting status for server id = " + serverId);
         $.ajax({
-            url: "/api/servers/installation-status/" + spigotVersion,
+            url: "/api/servers/installation-status/" + serverId,
             method: "GET"
         }).done(function (response) {
             let message = response["message"];
             let percent = response["percent"];
-            $("#server-install-modal #installation-status").text(percent + "% " + message);
+            let phase = response["phase"];
+
+            if (phase === 5) {
+                clearInterval(installationStatusMessageInterval);
+                $("#server-install-modal .modal-body").text("Your server is ready!");
+                $("#server-install-modal #open-server").show();
+                $("#server-install-modal #open-server").attr("href", "/servers/" + serverId);
+            } else if (phase === -1) {
+                $("#server-install-modal .modal-body").text("ERROR: " + message);
+            } else {
+                $("#server-install-modal #installation-status").text(percent + "% " + message);
+            }
         });
     }
 

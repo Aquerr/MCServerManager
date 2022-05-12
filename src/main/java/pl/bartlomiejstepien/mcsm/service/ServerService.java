@@ -1,17 +1,19 @@
 package pl.bartlomiejstepien.mcsm.service;
 
+import org.springframework.transaction.annotation.Transactional;
 import pl.bartlomiejstepien.mcsm.domain.dto.JavaDto;
 import pl.bartlomiejstepien.mcsm.domain.dto.ServerDto;
-import pl.bartlomiejstepien.mcsm.domain.model.InstallationStatus;
 import pl.bartlomiejstepien.mcsm.domain.platform.Platform;
-import pl.bartlomiejstepien.mcsm.repository.ds.Server;
 
 import java.util.List;
 import java.util.Optional;
 
 public interface ServerService
 {
-    void addServer(int userId, ServerDto serverDto);
+    void addServerToUser(int userId, ServerDto serverDto);
+
+    @Transactional
+    void saveNewServer(ServerDto serverDto);
 
     List<ServerDto> getServers();
 
@@ -28,4 +30,6 @@ public interface ServerService
     JavaDto getJavaForServer(int serverId);
 
     boolean addJavaToServer(int serverId, int javaId);
+
+    Integer getLastFreeServerId();
 }

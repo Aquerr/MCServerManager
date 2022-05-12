@@ -28,6 +28,7 @@ import static org.mockito.BDDMockito.given;
 @ExtendWith(MockitoExtension.class)
 class ForgeServerInstallationStrategyTest
 {
+    private static final Integer SERVER_ID = 3;
     private static final String USERNAME = "USERNAME";
     private static final int MOD_PACK_ID = 1;
     private static final String MOD_PACK_NAME = "Modpack Name";
@@ -62,12 +63,12 @@ class ForgeServerInstallationStrategyTest
         given(serverDirNameCorrector.convert(any())).willReturn(EMPTY_STRING);
         given(curseForgeClient.getModpack(MOD_PACK_ID)).willReturn(modPack);
         given(curseForgeClient.getServerDownloadUrl(MOD_PACK_ID, SERVER_PACK_ID)).willReturn(SERVER_DOWNLOAD_URL);
-        given(curseForgeClient.downloadServerFile(modPack, FIXED_SERVER_DOWNLOAD_URL)).willThrow(CouldNotDownloadServerFilesException.class);
+        given(curseForgeClient.downloadServerFile(SERVER_ID, modPack, FIXED_SERVER_DOWNLOAD_URL)).willThrow(CouldNotDownloadServerFilesException.class);
 
         MockedStatic<Files> mockedFiles = Mockito.mockStatic(Files.class);
         mockedFiles.when(() -> Files.exists(any())).thenReturn(false);
 
-        Throwable throwable = Assertions.catchThrowable(() -> forgeServerInstallationStrategy.install(prepareForgeModpackInstallationRequest()));
+        Throwable throwable = Assertions.catchThrowable(() -> forgeServerInstallationStrategy.install(SERVER_ID, prepareForgeModpackInstallationRequest()));
 
         assertThat(throwable).isInstanceOf(CouldNotInstallServerException.class);
     }

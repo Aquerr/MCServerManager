@@ -10,15 +10,20 @@ import java.util.Optional;
 @Component
 public class ServerInstallationStatusMonitor
 {
-    private final Map<Integer, InstallationStatus> modpackInstallationStatus = new HashMap<>();
+    private final Map<Integer, InstallationStatus> serverInstallationStatus = new HashMap<>();
 
     public void setInstallationStatus(final int serverId, final InstallationStatus installationStatus)
     {
-        this.modpackInstallationStatus.put(serverId, installationStatus);
+        this.serverInstallationStatus.put(serverId, installationStatus);
     }
 
     public Optional<InstallationStatus> getInstallationStatus(final int serverId)
     {
-        return Optional.ofNullable(this.modpackInstallationStatus.get(serverId));
+        return Optional.ofNullable(this.serverInstallationStatus.get(serverId));
+    }
+
+    public void clearStatus(final int serverId)
+    {
+        this.serverInstallationStatus.remove(serverId);
     }
 }

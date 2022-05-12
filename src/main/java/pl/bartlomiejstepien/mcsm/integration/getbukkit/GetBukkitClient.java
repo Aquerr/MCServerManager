@@ -11,5 +11,5 @@ public interface GetBukkitClient
      * @param version of spigot to download
      * @return {@link Path} to the downloaded file
      */
-    Path downloadServer(String version) throws CouldNotDownloadServerFilesException;
+    Path downloadServer(int serverId, String version) throws CouldNotDownloadServerFilesException;
 }

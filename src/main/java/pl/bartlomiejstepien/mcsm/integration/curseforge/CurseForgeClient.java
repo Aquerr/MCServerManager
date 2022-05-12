@@ -18,7 +18,7 @@ public interface CurseForgeClient
 
     String getServerDownloadUrl(int modpackId, int serverFileId);
 
-    boolean downloadServerFile(ModPack modPack, String serverDownloadUrl) throws CouldNotDownloadServerFilesException;
+    boolean downloadServerFile(int serverId, ModPack modPack, String serverDownloadUrl) throws CouldNotDownloadServerFilesException;
 
     List<ModPack.ModpackFile> getModPackFiles(int modpackId);
 

@@ -18,12 +18,12 @@ public abstract class AbstractServerInstallationStrategy<T extends ServerInstall
         this.eulaAcceptor = eulaAcceptor;
     }
 
-    public InstalledServer installInternal(ServerInstallationRequest serverInstallationRequest)
+    public InstalledServer installInternal(int serverId, ServerInstallationRequest serverInstallationRequest)
     {
         try
         {
             //TODO: Remove determineJavaVersionForModpack and set java to first found java. User should properly configure the server after the installation.
-            InstalledServer installedServer = install((T)serverInstallationRequest);
+            InstalledServer installedServer = install(serverId, (T)serverInstallationRequest);
             this.eulaAcceptor.acceptEula(installedServer.getServerDir());
 
             LOGGER.info("Accepted EULA");

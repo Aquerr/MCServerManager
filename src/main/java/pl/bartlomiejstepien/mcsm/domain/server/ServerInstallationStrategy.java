@@ -4,5 +4,5 @@ import pl.bartlomiejstepien.mcsm.domain.model.InstalledServer;
 
 public interface ServerInstallationStrategy<T extends ServerInstallationRequest>
 {
-    InstalledServer install(T serverInstallationRequest);
+    InstalledServer install(int serverId, T serverInstallationRequest);
 }

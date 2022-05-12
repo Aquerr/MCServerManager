@@ -51,7 +51,7 @@ public class ForgeServerInstallationStrategy extends AbstractServerInstallationS
     }
 
     @Override
-    public InstalledServer install(ForgeModpackInstallationRequest serverInstallationRequest)
+    public InstalledServer install(int serverId, ForgeModpackInstallationRequest serverInstallationRequest)
     {
         int serverPackId = serverInstallationRequest.getServerPackId();
         int modpackId = serverInstallationRequest.getModpackId();
@@ -67,7 +67,7 @@ public class ForgeServerInstallationStrategy extends AbstractServerInstallationS
             try
             {
                 //TODO: Add download status...
-                downloadServerFilesForModpack(modPack, serverPackId);
+                downloadServerFilesForModpack(serverId, modPack, serverPackId);
             }
             catch (CouldNotDownloadServerFilesException e)
             {
@@ -79,14 +79,14 @@ public class ForgeServerInstallationStrategy extends AbstractServerInstallationS
         try
         {
             LOGGER.info("Unziping modpack id={} to path={}", modPack.getId(), serverPath.toAbsolutePath());
-            unzipModpack(modPack, serverPath);
+            unzipModpack(serverId, modPack, serverPath);
 
             final Path startFilePath = findServerStartFilePath(serverPath);
             LOGGER.info("Server's start file: {}", startFilePath.toAbsolutePath());
 
             // TODO: Determine free server port
 
-            return new InstalledServer(0, modPack.getName(), serverPath, startFilePath);
+            return new InstalledServer(serverId, modPack.getName(), serverPath, startFilePath);
         }
         catch (Exception exception)
         {
@@ -113,11 +113,11 @@ public class ForgeServerInstallationStrategy extends AbstractServerInstallationS
         return serverStartFilePath;
     }
 
-    private void unzipModpack(ModPack modPack, Path serverPath) throws IOException
+    private void unzipModpack(int serverId, ModPack modPack, Path serverPath) throws IOException
     {
         Files.createDirectories(serverPath);
 
-        this.serverInstallationStatusMonitor.setInstallationStatus(modPack.getId(), new InstallationStatus(0, "Unpacking files..."));
+        this.serverInstallationStatusMonitor.setInstallationStatus(serverId, new InstallationStatus(2, 0, "Unpacking files..."));
         final ZipFile zipFile = new ZipFile(this.config.getDownloadsDir() + File.separator + modPack.getName() + "_" + modPack.getVersion());
         zipFile.setRunInThread(true);
         ProgressMonitor progressMonitor = zipFile.getProgressMonitor();
@@ -126,7 +126,7 @@ public class ForgeServerInstallationStrategy extends AbstractServerInstallationS
         {
             zipFile.extractAll(serverPath.toString());
             while (!progressMonitor.getState().equals(ProgressMonitor.State.READY)) {
-                this.serverInstallationStatusMonitor.setInstallationStatus(modPack.getId(), new InstallationStatus(progressMonitor.getPercentDone(), "Unpacking files..."));
+                this.serverInstallationStatusMonitor.setInstallationStatus(serverId, new InstallationStatus(2, progressMonitor.getPercentDone(), "Unpacking files..."));
 
                 Thread.sleep(100);
             }
@@ -136,15 +136,15 @@ public class ForgeServerInstallationStrategy extends AbstractServerInstallationS
             e.printStackTrace();
         }
 
-        this.serverInstallationStatusMonitor.setInstallationStatus(modPack.getId(), new InstallationStatus(100, "Unpacking completed!"));
+        this.serverInstallationStatusMonitor.setInstallationStatus(serverId, new InstallationStatus(2, 100, "Unpacking completed!"));
     }
 
-    private void downloadServerFilesForModpack(final ModPack modPack, int serverPackId) throws CouldNotDownloadServerFilesException
+    private void downloadServerFilesForModpack(int serverId, final ModPack modPack, int serverPackId) throws CouldNotDownloadServerFilesException
     {
         String serverDownloadUrl = this.curseForgeClient.getServerDownloadUrl(modPack.getId(), serverPackId);
         //TODO: Fix url. Parenthesis "(" and ")" still not work
         serverDownloadUrl = serverDownloadUrl.replaceAll(" ", "%20");
-        this.curseForgeClient.downloadServerFile(modPack, serverDownloadUrl);
+        this.curseForgeClient.downloadServerFile(serverId, modPack, serverDownloadUrl);
     }
 
     private Path prepareServerPathForNewModpack(String username, ModPack modPack) {

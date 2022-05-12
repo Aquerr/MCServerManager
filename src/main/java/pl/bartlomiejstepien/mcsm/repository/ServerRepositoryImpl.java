@@ -1,5 +1,6 @@
 package pl.bartlomiejstepien.mcsm.repository;
 
+import org.hibernate.Session;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import pl.bartlomiejstepien.mcsm.repository.ds.Server;
@@ -7,6 +8,7 @@ import pl.bartlomiejstepien.mcsm.repository.ds.Server;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public class ServerRepositoryImpl implements ServerRepository
@@ -37,13 +39,24 @@ public class ServerRepositoryImpl implements ServerRepository
     {
         final Server mergedServer = this.entityManager.merge(server);
         return mergedServer.getId();
-//        this.entityManager.flush();
+    }
+
+    @Override
+    public void saveNewServer(final Server server)
+    {
+        Session session = this.entityManager.unwrap(Session.class);
+        session.save(server);
+        session.flush();
+        session.evict(server);
     }
 
     @Override
     public void update(final Server server)
     {
-        this.entityManager.merge(server);
+        Session session = this.entityManager.unwrap(Session.class);
+        session.update(server);
+        session.flush();
+        session.evict(server);
     }
 
     @Override
@@ -76,5 +89,12 @@ public class ServerRepositoryImpl implements ServerRepository
         query.setParameter("userId", userId);
         List<Server> servers = query.getResultList();
         return servers;
+    }
+
+    @Override
+    public Integer getLastFreeServerId()
+    {
+        return Optional.ofNullable(this.entityManager.createQuery("SELECT MAX(server.id) FROM Server AS server", Integer.class).getSingleResult())
+                .orElse(0) + 1;
     }
 }

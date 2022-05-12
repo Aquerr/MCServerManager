@@ -71,7 +71,7 @@ class ModpackRestControllerTest extends BaseIntegrationTest
                 .replace("{serverPackId}", String.valueOf(SERVER_PACK_ID));
         final Integer serverId = 1;
 
-        when(this.serverManager.installServer(any(ServerInstallationRequest.class))).thenReturn(serverId);
+        when(this.serverManager.queueServerInstallation(any(ServerInstallationRequest.class))).thenReturn(serverId);
 
         //when
         this.mockMvc.perform(MockMvcRequestBuilders.post(url))
@@ -79,7 +79,7 @@ class ModpackRestControllerTest extends BaseIntegrationTest
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.content().string(String.valueOf(1)));
 
-        verify(this.serverManager).installServer(requestArgumentCaptor.capture());
+        verify(this.serverManager).queueServerInstallation(requestArgumentCaptor.capture());
         assertThat(requestArgumentCaptor.getValue()).isInstanceOf(ForgeModpackInstallationRequest.class);
         assertThat(requestArgumentCaptor.getValue().getPlatform()).isEqualTo(Platform.FORGE);
         assertThat(requestArgumentCaptor.getValue().getUsername()).isEqualTo(getTestUser().getUsername());
