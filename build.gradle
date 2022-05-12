@@ -40,8 +40,7 @@ dependencies {
 
 	implementation 'net.lingala.zip4j:zip4j:2.9.0'
 	implementation 'com.github.t9t.minecraft-rcon-client:minecraft-rcon-client:1.0.0'
-	implementation 'io.springfox:springfox-boot-starter:3.0.0'
-	implementation 'io.springfox:springfox-swagger-ui:3.0.0'
+	implementation 'org.springdoc:springdoc-openapi-ui:1.6.8'
 	implementation 'org.liquibase:liquibase-core'
 //	clover 'org.openclover:clover:4.4.1'
 

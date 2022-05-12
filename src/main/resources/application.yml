@@ -12,7 +12,6 @@ spring:
       ddl-auto: none
     database-platform: org.hibernate.dialect.H2Dialect
 
-
   liquibase:
     enabled: true
     change-log: db/changelog/db.changelog-master.xml
@@ -21,6 +20,14 @@ spring:
 
 server:
   port: 8081
+
+springdoc:
+  api-docs:
+    enabled: true
+  paths-to-match: /**
+  packages-to-scan: pl.bartlomiejstepien.mcsm.web.controller.rest
+  swagger-ui:
+    disable-swagger-default-url: true
 
 servers-dir: servers
 downloads-dir: downloads
