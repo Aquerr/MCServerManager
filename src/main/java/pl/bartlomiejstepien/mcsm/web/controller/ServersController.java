@@ -8,6 +8,7 @@ import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 import pl.bartlomiejstepien.mcsm.auth.AuthenticatedUser;
+import pl.bartlomiejstepien.mcsm.domain.dto.Role;
 import pl.bartlomiejstepien.mcsm.domain.platform.Platform;
 import pl.bartlomiejstepien.mcsm.integration.curseforge.Category;
 import pl.bartlomiejstepien.mcsm.integration.curseforge.CurseForgeClient;
@@ -70,10 +71,19 @@ public class ServersController
     {
         final AuthenticatedUser authenticatedUser = (AuthenticatedUser)authentication.getPrincipal();
 
-        ServerDto serverDto = this.serverService.getServersForUser(authenticatedUser.getId()).stream()
-                .filter(s -> s.getId() == id)
-                .findFirst()
-                .orElseThrow(() -> new RuntimeException("Access denied!"));
+        ServerDto serverDto;
+
+        if (authenticatedUser.getRole().hasMorePrivilegesThan(Role.USER))
+        {
+            serverDto = this.serverService.getServer(id);
+        }
+        else
+        {
+            serverDto = this.serverService.getServersForUser(authenticatedUser.getId()).stream()
+                    .filter(s -> s.getId() == id)
+                    .findFirst()
+                    .orElseThrow(() -> new RuntimeException("Access denied!"));
+        }
 
         this.serverManager.loadProperties(serverDto);
 

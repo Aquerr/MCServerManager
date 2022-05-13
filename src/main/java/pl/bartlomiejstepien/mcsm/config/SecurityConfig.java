@@ -32,6 +32,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter
                 .antMatchers(HttpMethod.PUT, "/api/config/java").hasAnyAuthority("ADMIN", "OWNER")
                 .antMatchers(HttpMethod.DELETE, "/api/config/java").hasAnyAuthority("ADMIN", "OWNER")
                 .antMatchers(HttpMethod.GET, "/api/config/java").permitAll()
+                .antMatchers("/users/**").hasAnyAuthority("ADMIN", "OWNER")
                 .antMatchers("/h2-console/**").permitAll()
                 .and().headers().frameOptions().sameOrigin()
             .and()

@@ -14,6 +14,7 @@ import pl.bartlomiejstepien.mcsm.Routes;
 import pl.bartlomiejstepien.mcsm.auth.AuthenticatedUser;
 import pl.bartlomiejstepien.mcsm.auth.AuthenticationFacade;
 import pl.bartlomiejstepien.mcsm.domain.dto.JavaDto;
+import pl.bartlomiejstepien.mcsm.domain.dto.Role;
 import pl.bartlomiejstepien.mcsm.domain.exception.ServerNotOwnedException;
 import pl.bartlomiejstepien.mcsm.domain.exception.ServerNotRunningException;
 import pl.bartlomiejstepien.mcsm.domain.model.FancyTreeNode;
@@ -82,14 +83,14 @@ public class ServersRestController
         LOGGER.info("Posting command {" + command + "} to server id = " + serverId);
 
         final AuthenticatedUser authenticatedUser = authenticationFacade.getCurrentUser();
-        final ServerDto serverDto = this.serverService.getServersForUser(authenticatedUser.getId()).stream()
-                .filter(s -> s.getId() == serverId)
-                .findFirst()
-                .orElseThrow(() -> new ServerNotOwnedException(ACCESS_DENIED));
+        if (!hasAccessToServer(authenticatedUser, serverId))
+        {
+            throw new ServerNotOwnedException(ACCESS_DENIED);
+        }
 
         try
         {
-            this.serverManager.sendCommand(serverDto, command);
+            this.serverManager.sendCommand(this.serverService.getServer(serverId), command);
         }
         catch (final ServerNotRunningException exception)
         {
@@ -103,10 +104,10 @@ public class ServersRestController
         LOGGER.info("Toggling server. Server Id = " + serverId);
 
         AuthenticatedUser authenticatedUser = authenticationFacade.getCurrentUser();
-        final UserDto userDto = this.userService.find(authenticatedUser.getId());
-
-        if(userDto.getServerIds().stream().noneMatch(id -> id == serverId))
-            throw new RuntimeException(ACCESS_DENIED);
+        if (!hasAccessToServer(authenticatedUser, serverId))
+        {
+            throw new ServerNotOwnedException(ACCESS_DENIED);
+        }
 
         final ServerDto serverDto = this.serverService.getServer(serverId);
         if (this.serverManager.isRunning(serverDto))
@@ -125,12 +126,12 @@ public class ServersRestController
         LOGGER.info("Saving server settings " + serverProperties + " for server id " + serverId);
 
         AuthenticatedUser authenticatedUser = authenticationFacade.getCurrentUser();
-        final ServerDto serverDto = this.serverService.getServersForUser(authenticatedUser.getId()).stream()
-                .filter(s -> s.getId() == serverId)
-                .findFirst()
-                .orElseThrow(() -> new RuntimeException("Access denied!"));
+        if (!hasAccessToServer(authenticatedUser, serverId))
+        {
+            throw new ServerNotOwnedException(ACCESS_DENIED);
+        }
 
-        this.serverManager.saveProperties(serverDto, serverProperties);
+        this.serverManager.saveProperties(this.serverService.getServer(serverId), serverProperties);
         LOGGER.debug("Saved server settings for server id = " + serverId);
     }
 
@@ -167,12 +168,13 @@ public class ServersRestController
     {
         LOGGER.info("Deleting server for id: " + id);
         AuthenticatedUser authenticatedUser = authenticationFacade.getCurrentUser();
-        ServerDto server = this.serverService.getServersForUser(authenticatedUser.getId()).stream()
-                .filter(serverDto -> serverDto.getId() == id)
-                .findFirst()
-                .orElseThrow(() -> new ServerNotOwnedException(ACCESS_DENIED));
 
-        serverManager.deleteServer(server);
+        if (!hasAccessToServer(authenticatedUser, id))
+        {
+            throw new ServerNotOwnedException(ACCESS_DENIED);
+        }
+
+        serverManager.deleteServer(this.serverService.getServer(id));
         return new McsmGeneralResponse(HttpStatus.OK.value(), "Server has been deleted");
     }
 
@@ -251,6 +253,9 @@ public class ServersRestController
 
     private boolean hasAccessToServer(final AuthenticatedUser authenticatedUser, final int serverId)
     {
+        if (authenticatedUser.getRole().hasMorePrivilegesThan(Role.USER))
+            return true;
+
         return this.serverService.getServersForUser(authenticatedUser.getId()).stream().anyMatch(serverDto -> serverDto.getId() == serverId);
     }
 }

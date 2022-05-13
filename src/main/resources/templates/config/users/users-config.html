@@ -20,7 +20,7 @@
         <tbody>
             <tr th:each="user : ${users}">
                 <td th:text="${user.id}"></td>
-                <td><span th:text="${user.username}"></span></td>
+                <td><a th:href="@{/users/{id}(id=${user.id})}"><span th:text="${user.username}"></span></a></td>
                 <td><span th:text="${user.role}"></span></td>
                 <td class="text-center">
                     <div>

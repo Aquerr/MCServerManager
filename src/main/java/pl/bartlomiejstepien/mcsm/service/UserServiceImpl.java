@@ -19,7 +19,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-@Transactional
 public class UserServiceImpl implements UserService
 {
     private final PasswordEncoder passwordEncoder;
@@ -40,30 +39,35 @@ public class UserServiceImpl implements UserService
     }
 
     @Override
+    @Transactional(readOnly = true)
     public UserDto find(final int id)
     {
         return this.userConverter.convertToDto(this.userRepository.find(id));
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<UserDto> findAll()
     {
         return this.userRepository.findAll().stream().map(this.userConverter::convertToDto).collect(Collectors.toList());
     }
 
     @Override
+    @Transactional
     public void delete(final int id)
     {
         this.userRepository.delete(id);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public UserDto findByUsername(String username)
     {
         return this.userConverter.convertToDto(this.userRepository.findByUsername(username));
     }
 
     @Override
+    @Transactional
     public void register(UserRegUpdatePayload userRegUpdatePayload)
     {
         if(findByUsername(userRegUpdatePayload.getUsername()) != null)
@@ -79,6 +83,7 @@ public class UserServiceImpl implements UserService
     }
 
     @Override
+    @Transactional
     public void update(Integer userId, UserRegUpdatePayload userRegUpdatePayload)
     {
         final UserDto existingUser = find(userId);
