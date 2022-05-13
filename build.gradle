@@ -50,6 +50,7 @@ dependencies {
 	}
 	testImplementation('org.springframework.security:spring-security-test')
 	testImplementation 'org.mockito:mockito-inline'
+	testImplementation 'com.tngtech.archunit:archunit-junit5:0.23.1'
 
 	runtimeOnly 'com.h2database:h2'
 }

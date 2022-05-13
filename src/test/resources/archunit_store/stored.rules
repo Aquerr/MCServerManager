@@ -1,0 +1,4 @@
+#
+#Fri May 13 13:09:30 CEST 2022
+no\ classes\ that\ are\ annotated\ with\ @Controller\ should\ depend\ on\ classes\ that\ reside\ in\ a\ package\ '..repository..'=18bd9afa-b5d4-491f-92bd-dea109699f26
+no\ classes\ that\ reside\ in\ any\ package\ ['..service..',\ '..repository..']\ should\ depend\ on\ classes\ that\ reside\ in\ a\ package\ '..web..'=ee35457c-f5e7-4430-abf7-53e8df815fa8
