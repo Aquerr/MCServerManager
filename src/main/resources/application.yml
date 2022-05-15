@@ -9,7 +9,7 @@ spring:
       enabled: false
   jpa:
     hibernate:
-      ddl-auto: none
+      ddl-auto: validate
     database-platform: org.hibernate.dialect.H2Dialect
 
   liquibase:
