@@ -1,6 +1,10 @@
 package pl.bartlomiejstepien.mcsm.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -50,6 +54,18 @@ public class UserServiceImpl implements UserService
     public List<UserDto> findAll()
     {
         return this.userRepository.findAll().stream().map(this.userConverter::convertToDto).collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<UserDto> findPaginated(Pageable pageable)
+    {
+        List<UserDto> userDtos = this.userRepository.findPaginated(pageable).stream()
+                .map(this.userConverter::convertToDto)
+                .collect(Collectors.toList());
+        Long totalUsers = this.userRepository.countAllUsers();
+
+        return new PageImpl<>(userDtos, PageRequest.of(pageable.getPageNumber(), pageable.getPageSize()), totalUsers);
     }
 
     @Override
