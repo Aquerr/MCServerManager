@@ -4,6 +4,7 @@ import pl.bartlomiejstepien.mcsm.domain.exception.CouldNotDownloadServerFilesExc
 import pl.bartlomiejstepien.mcsm.domain.model.ModPack;
 import pl.bartlomiejstepien.mcsm.domain.model.ServerPack;
 
+import java.nio.file.Path;
 import java.util.List;
 
 public interface CurseForgeClient
@@ -18,7 +19,7 @@ public interface CurseForgeClient
 
     String getServerDownloadUrl(int modpackId, int serverFileId);
 
-    boolean downloadServerFile(int serverId, ModPack modPack, String serverDownloadUrl) throws CouldNotDownloadServerFilesException;
+    Path downloadServerFile(int serverId, ModPack modPack, String serverDownloadUrl) throws CouldNotDownloadServerFilesException;
 
     List<ModPack.ModpackFile> getModPackFiles(int modpackId);
 

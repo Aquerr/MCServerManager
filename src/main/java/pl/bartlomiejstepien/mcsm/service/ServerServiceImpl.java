@@ -60,7 +60,7 @@ public class ServerServiceImpl implements ServerService
     {
         serverDto.getUsersIds().add(userId);
         Server serverToSave = this.serverConverter.convertToServer(serverDto);
-        this.serverRepository.update(serverToSave);
+        this.serverRepository.save(serverToSave);
     }
 
     @Transactional

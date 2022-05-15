@@ -22,6 +22,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.Instant;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -151,12 +153,14 @@ public class CurseForgeClientImpl implements CurseForgeClient
      *
      * @param modPack to download
      * @param serverDownloadUrl the link to download from
-     * @return the name of the zip file (with .zip extension)
+     * @return path to the downloaded zip file
      */
     @Override
-    public boolean downloadServerFile(int serverId, final ModPack modPack, String serverDownloadUrl) throws CouldNotDownloadServerFilesException
+    public Path downloadServerFile(int serverId, final ModPack modPack, String serverDownloadUrl) throws CouldNotDownloadServerFilesException
     {
         LOGGER.info("Downloading server files for modpack {id=" + modPack.getId() + ", name=" + modPack.getName() + "}");
+        Path downloadPath = Paths.get(this.config.getDownloadsDir() + File.separator + modPack.getName() + "_" + modPack.getVersion() + ".zip");
+
         try
         {
             final URL url = new URL(serverDownloadUrl);
@@ -166,7 +170,7 @@ public class CurseForgeClientImpl implements CurseForgeClient
             this.serverInstallationStatusMonitor.setInstallationStatus(serverId, new InstallationStatus(1, 0, "Downloading server files..."));
 
             try(BufferedInputStream bufferedInputStream = new BufferedInputStream(httpURLConnection.getInputStream());
-                FileOutputStream fileOutputStream = new FileOutputStream(this.config.getDownloadsDir() + File.separator + modPack.getName() + "_" + modPack.getVersion()))
+                FileOutputStream fileOutputStream = new FileOutputStream(downloadPath.toAbsolutePath().toString()))
             {
                 byte[] dataBuffer = new byte[1024];
                 int bytesRead;
@@ -180,6 +184,7 @@ public class CurseForgeClientImpl implements CurseForgeClient
                     fileOutputStream.write(dataBuffer, 0, bytesRead);
                 }
             }
+            return downloadPath;
         }
         catch (Exception exception)
         {
@@ -197,8 +202,6 @@ public class CurseForgeClientImpl implements CurseForgeClient
 //        {
 //            e.printStackTrace();
 //        }
-
-        return true;
     }
 
     @Override

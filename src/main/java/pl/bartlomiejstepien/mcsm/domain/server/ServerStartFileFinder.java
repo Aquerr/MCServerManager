@@ -7,10 +7,13 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
+import java.util.stream.Stream;
 
 @Component
 public class ServerStartFileFinder
 {
+    private static final String[] POSSIBLE_START_FILE_NAME_SEGMENTS = {"start", "launch", "run", "setup_server"};
+
     public Path findServerStartFile(final Path serverDir)
     {
         try
@@ -28,32 +31,39 @@ public class ServerStartFileFinder
 
     private Path findStartFileUnix(Path serverDir) throws IOException
     {
-        return Files.list(serverDir)
-                .map(Path::getFileName)
-                .filter(this::isStartFile)
-                .filter(fileName -> fileName.toString().endsWith(".sh"))
-                .findFirst()
-                .orElse(null);
+        try(Stream<Path> walkStream = Files.walk(serverDir))
+        {
+            return walkStream.filter(this::canBeStartFile)
+                    .filter(this::isShellFile)
+                    .findFirst()
+                    .orElse(null);
+        }
     }
 
     private Path findStartFileWindows(Path serverDir) throws IOException
     {
-        return Files.list(serverDir)
-                .map(Path::getFileName)
-                .filter(this::isStartFile)
-                .filter(fileName -> fileName.toString().endsWith(".bat"))
-                .findFirst()
-                .orElse(null);
+        try(Stream<Path> walkStream = Files.walk(serverDir))
+        {
+            return walkStream.filter(this::canBeStartFile)
+                    .filter(this::isBatFile)
+                    .findFirst()
+                    .orElse(null);
+        }
     }
 
-    private boolean isStartFile(Path fileName)
+    private boolean canBeStartFile(Path fileName)
     {
-        return Arrays.stream(getPossibleStartFileNames())
+        return Arrays.stream(POSSIBLE_START_FILE_NAME_SEGMENTS)
                 .anyMatch(possibleStartFileName -> fileName.toString().toUpperCase().contains(possibleStartFileName.toUpperCase()));
     }
 
-    private String[] getPossibleStartFileNames()
+    private boolean isShellFile(Path path)
     {
-        return new String[]{"start", "launch", "run", "setup_server"};
+        return path.toString().endsWith(".sh");
+    }
+
+    private boolean isBatFile(Path path)
+    {
+        return path.toString().endsWith(".bat");
     }
 }

@@ -1,6 +1,5 @@
 package pl.bartlomiejstepien.mcsm.service;
 
-import org.springframework.transaction.annotation.Transactional;
 import pl.bartlomiejstepien.mcsm.domain.dto.JavaDto;
 import pl.bartlomiejstepien.mcsm.domain.dto.ServerDto;
 import pl.bartlomiejstepien.mcsm.domain.platform.Platform;
@@ -12,7 +11,6 @@ public interface ServerService
 {
     void addServerToUser(int userId, ServerDto serverDto);
 
-    @Transactional
     void saveNewServer(ServerDto serverDto);
 
     List<ServerDto> getServers();
