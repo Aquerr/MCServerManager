@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="fragments/fragments :: head (pageTitle='Java Configuration')">
+<head th:replace="fragments/common :: head (pageTitle='Java Configuration')">
 </head>
 <script type="text/javascript" th:src="@{/js/config-java.js}" defer></script>
 <body>
-<div th:replace="fragments/fragments :: header"></div>
+<div th:replace="fragments/common :: header"></div>
   <div class="container mt-4">
       <div id="java-list" class="accordion">
           <th:block th:each="javaDto : ${javaList}">

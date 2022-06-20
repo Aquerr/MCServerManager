@@ -116,10 +116,35 @@ $("#console-input").on("keydown", function (event) {
             url: "/api/servers/" + serverId + "/command",
             method: "POST",
             contentType: "text/plain",
-            data: command
-        }).done(function (response) {
-            console.log("Command sent!");
-            console.log(response);
+            data: command,
+            success: function (response) {
+                console.log("Command sent!");
+                console.log(response);
+                $(".toast").toast();
+            },
+            error: function (response) {
+                let responseJSON = response.responseJSON;
+                console.error(responseJSON);
+
+                let toastTemplate = $("#toast-template").clone();
+                toastTemplate.removeAttr("id");
+                toastTemplate.removeAttr("hidden");
+                toastTemplate.find(".toast-heading").text(responseJSON.error);
+                toastTemplate.find(".toast-body").text(responseJSON.message);
+                toastTemplate.find(".toast-body").css("color", "red");
+                toastTemplate.css("opacity", 1.00);
+                $("#notifications").append(toastTemplate);
+
+                toastTemplate.attr("data-created-time", new Date().getTime());
+
+                let intervalId = setInterval(toastIntervalHandler, 1000, toastTemplate)
+                toastTemplate.data("delay", 20000);
+                toastTemplate.toast('show');
+                setTimeout(function () {
+                    window.clearInterval(intervalId);
+                    toastTemplate.remove();
+                }, 20000);
+            }
         });
     }
 });
@@ -149,6 +174,16 @@ $("#save-java").on("click", function () {
         }
     });
 });
+
+function toastIntervalHandler(toast) {
+    console.log(toast);
+    let createdTime = $(toast).attr("data-created-time");
+    let now = new Date().getTime();
+    let difference = Math.round((now - createdTime) / 1000);
+    console.log(difference);
+    $(toast).find(".toast-time").text(difference + " seconds ago");
+    $(toast).css("opacity", $(toast).css("opacity") - 0.05);
+}
 
 showStartStopButton();
 consoleUpdateIntervalId = setInterval(updateConsole, 5000);

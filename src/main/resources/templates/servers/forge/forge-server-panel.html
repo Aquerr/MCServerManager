@@ -1,0 +1,87 @@
+<html>
+<head></head>
+<body>
+<main class="container" th:fragment="forge-server-panel-container">
+    <!--/*@thymesVar id="server" type="pl.bartlomiejstepien.mcsm.domain.dto.ServerDto"*/-->
+    <!--/*@thymesVar id="java" type="pl.bartlomiejstepien.mcsm.domain.dto.JavaDto"*/-->
+    <div id="server-panel" class="mt-3">
+        <h4 th:text="${server.getName()}"></h4>
+        <input id="server-id" type="text" th:value="${server.getId()}" hidden>
+
+        <ul class="nav nav-tabs" id="tabs" role="tablist" style="display: inline-flex">
+            <li class="nav-item float-right" role="presentation" id="server-li-item">
+                <a id="toggle-button" class="nav-link" style="color: #007bff;text-decoration: none;background-color: transparent; cursor: pointer;" disabled="true"><span class='spinner-border spinner-border-sm' role='status' aria-hidden='true'></span></a>
+            </li>
+            <li class="nav-item" role="presentation">
+                <a class="nav-link active" id="server-console-tab" data-toggle="tab" href="#server-console" role="tab" aria-controls="server-console" aria-selected="true">Console</a>
+            </li>
+            <li class="nav-item" role="presentation">
+                <a class="nav-link" id="server-settings-tab" data-toggle="tab" href="#server-settings" role="tab" aria-controls="server-settings" aria-selected="false">Settings</a>
+            </li>
+            <li class="nav-item" role="presentation">
+                <a class="nav-link" id="server-files" th:href="'/servers/' + ${server.getId()} + '/files'" aria-selected="false">Files</a>
+            </li>
+        </ul>
+        <div style="float: right; display: inline-flex">
+            <a class="btn btn-danger" id="delete-button">Delete Server</a>
+        </div>
+        <div class="tab-content" id="tab-content">
+            <div id="server-console" class="tab-pane fade show active" role="tabpanel" aria-labelledby="server-console-tab">
+                <div class="mt-2">
+                        <textarea disabled class="form-control" id="console" style="resize: none; background-color: #343a40; color: white; min-height: 400px;">
+                        </textarea>
+                    <input id="console-input" class="form-control" type="text" placeholder="Enter command here...">
+                </div>
+            </div>
+
+            <div id="server-settings" class="tab-pane fade" role="tabpanel" aria-labelledby="server-settings-tab">
+                <div class="accordion">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>
+                                <button class="btn" data-toggle="collapse" data-target="#collapseJava">Java</button>
+                            </h3>
+                        </div>
+                        <div id="collapseJava" class="collapse">
+                            <div class="card-body">
+                                <div class="form-group">
+                                    <label>Java used by the server</label>
+                                    <select id="java-select" class="form-control">
+                                        <th:block th:each="java : ${allJavaVersions}">
+                                            <option th:if="${server.javaId == java.id}" th:value="${java.id}" th:label="${java.name}" selected></option>
+                                            <option th:if="${server.javaId != java.id}" th:value="${java.id}" th:label="${java.name}"></option>
+                                        </th:block>
+                                    </select>
+                                </div>
+                                <button id="save-java"  class="btn btn-primary">Save</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>
+                                <button class="btn" data-toggle="collapse" data-target="#collapseProperties">Properties</button>
+                            </h3>
+                        </div>
+                        <div id="collapseProperties" class="collapse">
+                            <div class="card-body">
+                                <th:block th:each="property : ${server.getServerProperties().getAsMap().entrySet()}">
+                                    <div class="col-sm server-property">
+                                        <label th:for="${property.getKey()}" th:text="${property.getKey()}"></label>
+                                        <input class="form-control" th:name="${property.getKey()}" th:id="'property-' + ${property.getKey()}" type="text" th:value="${property.getValue()}">
+                                    </div>
+                                </th:block>
+                                <hr>
+                                <div class="mt-2 float-right">
+                                    <button id="save-settings" class="btn btn-primary" type="button">Save</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+</body>
+</html>

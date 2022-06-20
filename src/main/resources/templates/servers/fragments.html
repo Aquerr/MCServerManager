@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<!--/*@thymesVar id="server" type="pl.bartlomiejstepien.mcsm.domain.dto.ServerDto"*/-->
+  <div th:fragment="server-panel-info">
+    <table>
+      <tr>
+        <td>
+          <label>Name</label>
+          <label th:text="${server.name}"></label>
+        </td>
+        <td>
+          <label>Level Type</label>
+          <label th:text="${server.serverProperties.getProperty('level-type')}"></label>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <label>Players</label>
+          <label>0/0</label>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <label>Plugins</label>
+          <label>100</label>
+        </td>
+      </tr>
+    </table>
+  </div>
+</body>
+</html>

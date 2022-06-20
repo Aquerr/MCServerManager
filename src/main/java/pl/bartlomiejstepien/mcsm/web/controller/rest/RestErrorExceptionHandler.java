@@ -9,24 +9,24 @@ import pl.bartlomiejstepien.mcsm.domain.exception.ServerNotOwnedException;
 import pl.bartlomiejstepien.mcsm.domain.exception.ServerNotRunningException;
 
 @RestControllerAdvice
-public class RestErrorControllerAdvice
+public class RestErrorExceptionHandler
 {
     @ExceptionHandler(ServerNotRunningException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ResponseStatus(value = HttpStatus.SERVICE_UNAVAILABLE, reason = "Server is not running")
     public RestErrorResponse handleException(final ServerNotRunningException exception)
     {
-        return new RestErrorResponse(HttpStatus.SERVICE_UNAVAILABLE.value(), exception.getMessage());
+        return new RestErrorResponse(HttpStatus.SERVICE_UNAVAILABLE.value(), "Server is not running");
     }
 
     @ExceptionHandler(ServerAlreadyOwnedException.class)
-    @ResponseStatus(HttpStatus.CONFLICT)
+    @ResponseStatus(value = HttpStatus.CONFLICT, reason = "Server with given path is already owned")
     public RestErrorResponse handleException(final ServerAlreadyOwnedException exception)
     {
         return new RestErrorResponse(HttpStatus.CONFLICT.value(), "Server with the given path is already owned by the user!");
     }
 
     @ExceptionHandler(ServerNotOwnedException.class)
-    @ResponseStatus(HttpStatus.FORBIDDEN)
+    @ResponseStatus(value = HttpStatus.FORBIDDEN, reason = "Access denied")
     public RestErrorResponse handleException(final ServerNotOwnedException exception)
     {
         return new RestErrorResponse(HttpStatus.FORBIDDEN.value(), exception.getMessage());

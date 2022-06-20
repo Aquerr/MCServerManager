@@ -1,6 +1,6 @@
 package pl.bartlomiejstepien.mcsm.domain.exception;
 
-public class ServerNotRunningException extends Exception
+public class ServerNotRunningException extends RuntimeException
 {
     public ServerNotRunningException()
     {

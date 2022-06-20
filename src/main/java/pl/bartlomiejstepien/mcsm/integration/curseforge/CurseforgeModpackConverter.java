@@ -7,10 +7,7 @@ import org.springframework.stereotype.Component;
 import pl.bartlomiejstepien.mcsm.domain.model.ModPack;
 
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 @Component
 public class CurseforgeModpackConverter
@@ -23,8 +20,8 @@ public class CurseforgeModpackConverter
         final int id = objectNode.get("id").intValue();
         final String name = objectNode.get("name").textValue();
         final String summary = objectNode.get("summary").textValue();
-        final String thumbnail = objectNode.get("attachments").get(0).get("thumbnailUrl").textValue();
-        final String version = objectNode.get("gameVersionLatestFiles").get(0).get("gameVersion").textValue();
+        final String thumbnail = objectNode.get("logo").get("thumbnailUrl").textValue();
+        final String version = objectNode.get("latestFilesIndexes").get(0).get("gameVersion").textValue();
 
         final ArrayNode latestFilesNode = (ArrayNode) objectNode.get("latestFiles");
         final List<ModPack.ModpackFile> latestFiles = new ArrayList<>(latestFilesNode.size());
@@ -50,7 +47,9 @@ public class CurseforgeModpackConverter
         final String fileName = objectNode.get("fileName").textValue();
         final Instant fileDate = Instant.parse(objectNode.get("fileDate").textValue());
         final String downloadUrl = objectNode.get("downloadUrl").textValue();
-        final int serverPackFileId = objectNode.get("serverPackFileId").intValue();
+        final int serverPackFileId = Optional.ofNullable(objectNode.get("serverPackFileId"))
+                .map(JsonNode::intValue)
+                .orElse(0);
         return new ModPack.ModpackFile(fileId, displayName, fileName, fileDate, downloadUrl, serverPackFileId);
     }
 

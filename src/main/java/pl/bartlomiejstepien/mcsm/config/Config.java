@@ -1,9 +1,11 @@
 package pl.bartlomiejstepien.mcsm.config;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.web.client.RestTemplate;
 import pl.bartlomiejstepien.mcsm.domain.platform.Platform;
 import pl.bartlomiejstepien.mcsm.domain.server.AbstractServerInstallationStrategy;
 import pl.bartlomiejstepien.mcsm.domain.server.ServerInstallationRequest;
@@ -25,6 +27,9 @@ public class Config
     @Value("${servers-dir}")
     private String serversDir;
 
+    @Value("${CURSEFORGE_API_KEY}")
+    private String curseForgeApiKey;
+
     public String getServersDir()
     {
         return serversDir;
@@ -45,6 +50,10 @@ public class Config
         return Paths.get(".").resolve(downloadsDir);
     }
 
+    public String getCurseForgeApiKey() {
+        return curseForgeApiKey;
+    }
+
     @Bean
     public Map<Platform, AbstractServerInstallationStrategy<? extends ServerInstallationRequest>> installationStrategyMap(
             ForgeServerInstallationStrategy forgeServerInstallationStrategy,
@@ -54,5 +63,13 @@ public class Config
         serverInstallationStrategyMap.put(Platform.FORGE, forgeServerInstallationStrategy);
         serverInstallationStrategyMap.put(Platform.SPIGOT, spigotServerInstallationStrategy);
         return serverInstallationStrategyMap;
+    }
+
+    @Bean
+    public RestTemplate curseForgeRestTemplate()
+    {
+        return new RestTemplateBuilder()
+                .defaultHeader("x-api-key", this.curseForgeApiKey)
+                .build();
     }
 }

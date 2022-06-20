@@ -17,10 +17,10 @@ public class ServerDto
 
 //    private final List<UserDto> userDtos = new ArrayList<>();
     private List<Integer> usersIds = new ArrayList<>();
-    private final List<String> players = new LinkedList<>();
+    private List<String> players = new LinkedList<>();
     private Path startFilePath;
     private String platform;
-    private final ServerProperties serverProperties = new ServerProperties();
+    private ServerProperties serverProperties = new ServerProperties();
 
     private Integer javaId;
 
