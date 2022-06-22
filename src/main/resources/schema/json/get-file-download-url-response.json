@@ -1,0 +1,15 @@
+{
+  "$id": "/schema/json/get-file-download-url-response.json",
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "GetFileDownloadUrlResponse",
+  "type": "object",
+  "properties": {
+    "data": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "data"
+  ]
+}
+

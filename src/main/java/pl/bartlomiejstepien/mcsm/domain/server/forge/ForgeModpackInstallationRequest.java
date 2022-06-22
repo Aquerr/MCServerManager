@@ -7,18 +7,18 @@ import java.util.Objects;
 
 public class ForgeModpackInstallationRequest implements ServerInstallationRequest
 {
-    private final int modpackId;
+    private final Long modpackId;
     private final int serverPackId;
     private final String username;
 
-    public ForgeModpackInstallationRequest(final String username, final int modpackId, final int serverPackId)
+    public ForgeModpackInstallationRequest(final String username, final Long modpackId, final int serverPackId)
     {
         this.username = username;
         this.modpackId = modpackId;
         this.serverPackId = serverPackId;
     }
 
-    public int getModpackId()
+    public Long getModpackId()
     {
         return modpackId;
     }

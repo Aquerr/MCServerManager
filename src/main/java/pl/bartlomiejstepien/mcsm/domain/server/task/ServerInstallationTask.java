@@ -22,4 +22,13 @@ public class ServerInstallationTask
     {
         return serverInstallationRequest;
     }
+
+    @Override
+    public String toString()
+    {
+        return "ServerInstallationTask{" +
+                "serverId=" + serverId +
+                ", serverInstallationRequest=" + serverInstallationRequest +
+                '}';
+    }
 }

@@ -34,7 +34,7 @@ public class CorrelationIdFilter extends OncePerRequestFilter
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException
     {
-        MDC.put("username", getSecurityUsername());
+        MDC.put(USERNAME_LOG_KEY, getSecurityUsername());
 
         Optional<String> correlationId = getCorrelationIdFromHttpHeader(request);
 

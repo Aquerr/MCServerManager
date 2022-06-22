@@ -17,7 +17,7 @@ public class ServerInstallationStatusMonitor
         this.serverInstallationStatus.put(serverId, installationStatus);
     }
 
-    public Optional<InstallationStatus> getInstallationStatus(final int serverId)
+    public Optional<InstallationStatus> getInstallationStatus(final long serverId)
     {
         return Optional.ofNullable(this.serverInstallationStatus.get(serverId));
     }

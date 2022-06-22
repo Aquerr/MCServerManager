@@ -10,14 +10,14 @@ import java.time.Instant;
 import java.util.*;
 
 @Component
-public class CurseforgeModpackConverter
+public class CurseForgeModpackJsonConverter
 {
     public ModPack convertToModpack(final ObjectNode objectNode)
     {
         if (objectNode == null)
             return null;
 
-        final int id = objectNode.get("id").intValue();
+        final Long id = objectNode.get("id").longValue();
         final String name = objectNode.get("name").textValue();
         final String summary = objectNode.get("summary").textValue();
         final String thumbnail = objectNode.get("logo").get("thumbnailUrl").textValue();
@@ -42,14 +42,14 @@ public class CurseforgeModpackConverter
         if (objectNode == null)
             return null;
 
-        final int fileId = objectNode.get("id").intValue();
+        final Long fileId = objectNode.get("id").longValue();
         final String displayName = objectNode.get("displayName").textValue();
         final String fileName = objectNode.get("fileName").textValue();
         final Instant fileDate = Instant.parse(objectNode.get("fileDate").textValue());
         final String downloadUrl = objectNode.get("downloadUrl").textValue();
-        final int serverPackFileId = Optional.ofNullable(objectNode.get("serverPackFileId"))
-                .map(JsonNode::intValue)
-                .orElse(0);
+        final Long serverPackFileId = Optional.ofNullable(objectNode.get("serverPackFileId"))
+                .map(JsonNode::longValue)
+                .orElse(0L);
         return new ModPack.ModpackFile(fileId, displayName, fileName, fileDate, downloadUrl, serverPackFileId);
     }
 

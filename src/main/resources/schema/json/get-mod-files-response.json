@@ -1,0 +1,40 @@
+{
+  "$id": "/schema/json/get-mod-files-response.json",
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "data": {
+      "type": "array",
+      "items": {
+        "$ref": "mod-file.json"
+      }
+    },
+    "pagination": {
+      "type": "object",
+      "properties": {
+        "index": {
+          "type": "integer"
+        },
+        "pageSize": {
+          "type": "integer"
+        },
+        "resultCount": {
+          "type": "integer"
+        },
+        "totalCount": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "index",
+        "pageSize",
+        "resultCount",
+        "totalCount"
+      ]
+    }
+  },
+  "required": [
+    "data",
+    "pagination"
+  ]
+}

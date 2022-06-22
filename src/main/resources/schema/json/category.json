@@ -1,0 +1,54 @@
+{
+  "$id": "/schema/json/category.json",
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "Category",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "integer"
+    },
+    "gameId": {
+      "type": "integer"
+    },
+    "name": {
+      "type": "string"
+    },
+    "slug": {
+      "type": "string"
+    },
+    "url": {
+      "type": "string"
+    },
+    "iconUrl": {
+      "type": "string"
+    },
+    "dateModified": {
+      "type": "string"
+    },
+    "isClass": {
+      "type": "boolean"
+    },
+    "classId": {
+      "type": "integer"
+    },
+    "parentCategoryId": {
+      "type": "integer"
+    },
+    "displayIndex": {
+      "type": "integer"
+    }
+  },
+  "required": [
+    "id",
+    "gameId",
+    "name",
+    "slug",
+    "url",
+    "iconUrl",
+    "dateModified",
+    "isClass",
+    "classId",
+    "parentCategoryId",
+    "displayIndex"
+  ]
+}

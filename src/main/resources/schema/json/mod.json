@@ -1,0 +1,125 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "Mod",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "integer"
+    },
+    "gameId": {
+      "type": "integer"
+    },
+    "name": {
+      "type": "string"
+    },
+    "slug": {
+      "type": "string"
+    },
+    "links": {
+      "$ref": "mod-links.json"
+    },
+    "summary": {
+      "type": "string"
+    },
+    "status": {
+      "type": "integer"
+    },
+    "downloadCount": {
+      "type": "integer"
+    },
+    "isFeatured": {
+      "type": "boolean"
+    },
+    "primaryCategoryId": {
+      "type": "integer"
+    },
+    "categories": {
+      "type": "array",
+      "items": {
+        "$ref": "category.json"
+      }
+    },
+    "classId": {
+      "type": "integer"
+    },
+    "authors": {
+      "type": "array",
+      "items": {
+        "$ref": "mod-author.json"
+      }
+    },
+    "logo": {
+      "$ref": "logo.json"
+    },
+    "screenshots": {
+      "type": "array",
+      "items": {
+        "$ref": "mod-screenshot.json"
+      }
+    },
+    "mainFileId": {
+      "type": "integer"
+    },
+    "latestFiles": {
+      "type": "array",
+      "items": {
+        "$ref": "mod-file.json"
+      }
+    },
+    "latestFilesIndexes": {
+      "type": "array",
+      "items": {
+        "$ref": "mod-file-index.json"
+      }
+    },
+    "dateCreated": {
+      "type": "string"
+    },
+    "dateModified": {
+      "type": "string"
+    },
+    "dateReleased": {
+      "type": "string"
+    },
+    "allowModDistribution": {
+      "type": "boolean"
+    },
+    "gamePopularityRank": {
+      "type": "integer"
+    },
+    "isAvailable": {
+      "type": "boolean"
+    },
+    "thumbsUpCount": {
+      "type": "integer"
+    }
+  },
+  "required": [
+    "id",
+    "gameId",
+    "name",
+    "slug",
+    "links",
+    "summary",
+    "status",
+    "downloadCount",
+    "isFeatured",
+    "primaryCategoryId",
+    "categories",
+    "classId",
+    "authors",
+    "logo",
+    "screenshots",
+    "mainFileId",
+    "latestFiles",
+    "latestFilesIndexes",
+    "dateCreated",
+    "dateModified",
+    "dateReleased",
+    "allowModDistribution",
+    "gamePopularityRank",
+    "isAvailable",
+    "thumbsUpCount"
+  ]
+}
+

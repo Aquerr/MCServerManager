@@ -367,6 +367,7 @@ public class ServerManagerImpl implements ServerManager
 
     private void installServer(ServerInstallationTask task)
     {
+        LOGGER.info("Starting server installation for {}, ", task);
         int serverId = task.getServerId();
         ServerInstallationRequest serverInstallationRequest = task.getServerInstallationRequest();
 
@@ -386,6 +387,7 @@ public class ServerManagerImpl implements ServerManager
         catch (Exception exception)
         {
             this.serverInstallationStatusMonitor.setInstallationStatus(serverId, new InstallationStatus(-1, 0, exception.getMessage()));
+            LOGGER.error(exception.getMessage(), exception);
             throw new CouldNotInstallServerException(exception.getMessage());
         }
         finally

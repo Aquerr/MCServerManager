@@ -23,6 +23,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import static java.lang.String.format;
+
 @Component
 public class ForgeServerInstallationStrategy extends AbstractServerInstallationStrategy<ForgeModpackInstallationRequest>
 {
@@ -54,7 +56,7 @@ public class ForgeServerInstallationStrategy extends AbstractServerInstallationS
     public InstalledServer install(int serverId, ForgeModpackInstallationRequest serverInstallationRequest)
     {
         int serverPackId = serverInstallationRequest.getServerPackId();
-        int modpackId = serverInstallationRequest.getModpackId();
+        Long modpackId = serverInstallationRequest.getModpackId();
         String username = serverInstallationRequest.getUsername();
 
         final ModPack modPack = this.curseForgeClient.getModpack(modpackId);
@@ -97,7 +99,7 @@ public class ForgeServerInstallationStrategy extends AbstractServerInstallationS
             {
                 e.printStackTrace();
             }
-            throw new CouldNotInstallServerException(exception);
+            throw new CouldNotInstallServerException(format("Could not install modpack '%s'", modPack.getName()), exception);
         }
     }
 

@@ -2,13 +2,10 @@ package pl.bartlomiejstepien.mcsm.integration.curseforge;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
@@ -19,6 +16,7 @@ import pl.bartlomiejstepien.mcsm.domain.model.InstallationStatus;
 import pl.bartlomiejstepien.mcsm.domain.model.ModPack;
 import pl.bartlomiejstepien.mcsm.domain.model.ServerPack;
 import pl.bartlomiejstepien.mcsm.domain.server.ServerInstallationStatusMonitor;
+import pl.bartlomiejstepien.schema.*;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -39,7 +37,7 @@ public class CurseForgeClientImpl implements CurseForgeClient
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(CurseForgeClientImpl.class);
 
-    private final CurseforgeModpackConverter curseforgeModpackConverter;
+    private final CurseForgeModpackConverter curseForgeModpackConverter;
     private final Config config;
     private final ServerInstallationStatusMonitor serverInstallationStatusMonitor;
     private final RestTemplate restTemplate;
@@ -47,12 +45,12 @@ public class CurseForgeClientImpl implements CurseForgeClient
     @Autowired
     public CurseForgeClientImpl(final Config config,
                                 final ServerInstallationStatusMonitor serverInstallationStatusMonitor,
-                                final CurseforgeModpackConverter curseforgeModpackConverter,
+                                final CurseForgeModpackConverter curseForgeModpackConverter,
                                 @Qualifier("curseForgeRestTemplate") final RestTemplate restTemplate)
     {
         this.config = config;
         this.serverInstallationStatusMonitor = serverInstallationStatusMonitor;
-        this.curseforgeModpackConverter = curseforgeModpackConverter;
+        this.curseForgeModpackConverter = curseForgeModpackConverter;
         this.restTemplate = restTemplate;
     }
 
@@ -65,17 +63,15 @@ public class CurseForgeClientImpl implements CurseForgeClient
                 .replace("{index}", String.valueOf(startIndex))
                 .replace("{modpackName}", modpackName);
         LOGGER.info("GET " + url);
-        final ObjectNode modpacksResponse = restTemplate.getForObject(url, ObjectNode.class);
+        final CFGetModsResponse modpacksResponse = restTemplate.getForObject(url, CFGetModsResponse.class);
         LOGGER.debug("Response: " + modpacksResponse);
         final LinkedList<ModPack> modPacks = new LinkedList<>();
-        final Iterator<JsonNode> jsonIterator = modpacksResponse.get("data").elements();
-        while (jsonIterator.hasNext())
+        final Iterator<CFMod> modIterator = modpacksResponse.getData().iterator();
+        while (modIterator.hasNext())
         {
-            final JsonNode jsonNode = jsonIterator.next();
-            if (!jsonNode.isObject())
-                continue;
+            final CFMod mod = modIterator.next();
+            final ModPack modPack = this.curseForgeModpackConverter.convertToModpack(mod);
 
-            final ModPack modPack = this.curseforgeModpackConverter.convertToModpack((ObjectNode) jsonNode);
             modPacks.add(modPack);
         }
 
@@ -83,7 +79,7 @@ public class CurseForgeClientImpl implements CurseForgeClient
     }
 
     @Override
-    public int getLatestServerFileId(final int modpackId)
+    public int getLatestServerFileId(final Long modpackId)
     {
         final String url = CurseForgeAPIRoutes.MODPACK_FILES.replace("{modpackId}", String.valueOf(modpackId));
         LOGGER.info("GET " + url);
@@ -122,37 +118,37 @@ public class CurseForgeClientImpl implements CurseForgeClient
     }
 
     @Override
-    public ModPack getModpack(final int id)
+    public ModPack getModpack(final Long id)
     {
         final String url = CurseForgeAPIRoutes.MODPACK_INFO.replace("{modpackId}", String.valueOf(id));
         LOGGER.info("GET " + url);
-        final ObjectNode modpackJson = restTemplate.getForObject(url, ObjectNode.class);
-        LOGGER.debug("Response: " + modpackJson);
-        if (modpackJson == null)
+        final CFGetModResponse modpackResponse = restTemplate.getForObject(url, CFGetModResponse.class);
+        LOGGER.debug("Response: " + modpackResponse);
+        if (modpackResponse == null)
             throw new RuntimeException("Could not find modpack with id " + id);
 
-        final ModPack modPack = this.curseforgeModpackConverter.convertToModpack(modpackJson);
+        final ModPack modPack = this.curseForgeModpackConverter.convertToModpack(modpackResponse.getData());
         return modPack;
     }
 
     @Override
-    public String getModpackDescription(final int id)
+    public String getModpackDescription(final Long id)
     {
         final String url = CurseForgeAPIRoutes.MODPACK_DESCRIPTION.replace("{modpackId}", String.valueOf(id));
         LOGGER.info("GET " + url);
-        final String modpackDescription = restTemplate.getForObject(url, String.class);
+        final CFGetModDescriptionResponse modpackDescription = restTemplate.getForObject(url, CFGetModDescriptionResponse.class);
         LOGGER.debug("Response: " + modpackDescription);
-        return modpackDescription;
+        return modpackDescription.getData();
     }
 
     @Override
-    public String getServerDownloadUrl(final int modpackId, final int serverFileId)
+    public String getServerDownloadUrl(final Long modpackId, final int serverFileId)
     {
         final String url = CurseForgeAPIRoutes.MODPACK_LATEST_SERVER_DOWNLOAD_URL.replace("{modpackId}", String.valueOf(modpackId)).replace("{fileId}", String.valueOf(serverFileId));
         LOGGER.info("GET " + url);
-        final String serverDownloadUrl = restTemplate.getForObject(url, String.class);
+        final CFGetFileDownloadUrlResponse serverDownloadUrl = restTemplate.getForObject(url, CFGetFileDownloadUrlResponse.class);
         LOGGER.debug("Response: " + serverDownloadUrl);
-        return serverDownloadUrl;
+        return serverDownloadUrl.getData();
     }
 
     /**
@@ -212,17 +208,17 @@ public class CurseForgeClientImpl implements CurseForgeClient
     }
 
     @Override
-    public List<ModPack.ModpackFile> getModPackFiles(int modpackId)
+    public List<ModPack.ModpackFile> getModPackFiles(Long modpackId)
     {
         final String url = CurseForgeAPIRoutes.MODPACK_FILES.replace("{modpackId}", String.valueOf(modpackId));
         LOGGER.info("GET " + url);
-        final ArrayNode filesJsonArray = restTemplate.getForObject(url, ArrayNode.class);
-        LOGGER.debug("Response: " + filesJsonArray);
-        return this.curseforgeModpackConverter.convertToModPackFiles(filesJsonArray);
+        final CFGetModFilesResponse modFilesResponse = restTemplate.getForObject(url, CFGetModFilesResponse.class);
+        LOGGER.debug("Response: " + modFilesResponse);
+        return this.curseForgeModpackConverter.convertToModPackFiles(modFilesResponse.getData().toArray(new CFModFile[0]));
     }
 
     @Override
-    public List<ServerPack> getServerPacks(int modpackId)
+    public List<ServerPack> getServerPacks(Long modpackId)
     {
         final List<ModPack.ModpackFile> modpackFiles = getModPackFiles(modpackId);
         return modpackFiles.stream()
@@ -239,8 +235,8 @@ public class CurseForgeClientImpl implements CurseForgeClient
                 .replace("{modpackId}", String.valueOf(modPack.getId()))
                 .replace("{fileId}", String.valueOf(fileId));
         LOGGER.info("GET " + url);
-        final ObjectNode modpackFileJson = restTemplate.getForObject(url, ObjectNode.class);
-        LOGGER.debug("Response: " + modpackFileJson);
-        return this.curseforgeModpackConverter.convertToModPackFile(modpackFileJson);
+        final CFModFile modpackFile = restTemplate.getForObject(url, CFModFile.class);
+        LOGGER.debug("Response: " + modpackFile);
+        return this.curseForgeModpackConverter.convertToModPackFile(modpackFile);
     }
 }

@@ -1,0 +1,15 @@
+{
+  "$id": "/schema/json/get-mod-description-response.json",
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "GetModDescriptionResponse",
+  "type": "object",
+  "properties": {
+    "data": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "data"
+  ]
+}
+

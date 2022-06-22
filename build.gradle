@@ -1,18 +1,21 @@
-//buildscript {
-//	repositories {
-//		jcenter()
-//	}
-//
-//	dependencies {
-//		classpath 'com.bmuschko:gradle-clover-plugin:3.0.1'
-//	}
-//}
+buildscript {
+	repositories {
+		mavenCentral()
+	}
+
+	dependencies {
+		classpath 'org.jsonschema2pojo:jsonschema2pojo-gradle-plugin:1.1.2'
+	}
+}
 
 plugins {
 	id 'org.springframework.boot' version '2.6.7'
 	id 'io.spring.dependency-management' version '1.0.11.RELEASE'
 	id 'java'
 }
+
+apply plugin: 'jsonschema2pojo'
+
 //apply plugin: 'com.bmuschko.clover'
 
 group = 'pl.bartlomiejstepien.mcsm'
@@ -64,4 +67,118 @@ configurations {
 
 test {
 	useJUnitPlatform()
+}
+
+bootJar {
+	exclude("schema")
+}
+
+jsonSchema2Pojo {
+
+	// Location of the JSON Schema file(s). This may refer to a single file or a directory of files.
+	source = files("${sourceSets.main.output.resourcesDir}/schema/json")
+
+	// Target directory for generated Java source files. The plugin will add this directory to the
+	// java source set so the compiler will find and compile the newly generated source files.
+	targetDirectory = file("${project.buildDir}/generated-sources/js2p")
+
+	// Package name used for generated Java classes (for types where a fully qualified name has not
+	// been supplied in the schema using the 'javaType' property).
+	targetPackage = 'pl.bartlomiejstepien.schema'
+
+	refFragmentPathDelimiters = "#/."
+
+	// Whether to allow 'additional' properties to be supported in classes by adding a map to
+	// hold these. This is true by default, meaning that the schema rule 'additionalProperties'
+	// controls whether the map is added. Set this to false to globabally disable additional properties.
+	includeAdditionalProperties = false
+
+	// Whether to include a javax.annotation.Generated (Java 8 and lower) or
+	// javax.annotation.processing.Generated (Java 9+) in on generated types (default true).
+	includeGeneratedAnnotation = true
+
+	// Whether to use primitives (long, double, boolean) instead of wrapper types where possible
+	// when generating bean properties (has the side-effect of making those properties non-null).
+	usePrimitives = false
+
+	// Whether to use the java type long (or Long) instead of int (or Integer) when representing the
+	// JSON Schema type 'integer'.
+	useLongIntegers = true
+
+	// Whether to use the java type BigInteger when representing the JSON Schema type 'integer'. Note
+	// that this configuration overrides useLongIntegers
+	useBigIntegers = false
+
+	// Whether to use the java type double (or Double) instead of float (or Float) when representing
+	// the JSON Schema type 'number'.
+	useDoubleNumbers = true
+
+	// Whether to include hashCode and equals methods in generated Java types.
+	includeHashcodeAndEquals = true
+
+	// Whether to include a toString method in generated Java types.
+	includeToString = true
+	annotationStyle = 'jackson'
+
+	// A fully qualified class name, referring to a custom annotator class that implements
+	// org.jsonschema2pojo.Annotator and will be used in addition to the one chosen
+	// by annotationStyle. If you want to use the custom annotator alone, set annotationStyle to none.
+	customAnnotator = 'org.jsonschema2pojo.NoopAnnotator'
+
+	// The Level of inclusion to set in the generated Java types (for Jackson serializers)
+	inclusionLevel = 'NON_NULL'
+
+	// Whether to use the 'title' property of the schema to decide the class name (if not
+	// set to true, the filename and property names are used).
+	useTitleAsClassname = true
+
+	// The type of input documents that will be read. Supported values:
+	//  - jsonschema (schema documents, containing formal rules that describe the structure of JSON data)
+	//  - json (documents that represent an example of the kind of JSON data that the generated Java types
+	//          will be mapped to)
+	//  - yamlschema (JSON schema documents, represented as YAML)
+	//  - yaml (documents that represent an example of the kind of YAML (or JSON) data that the generated Java types
+	//          will be mapped to)
+	sourceType = 'jsonschema'
+
+	// The character encoding that should be used when writing the generated Java source files
+	outputEncoding = 'UTF-8'
+
+	// Whether to add JsonFormat annotations when using Jackson 2 that cause format "date", "time", and "date-time"
+	// fields to be formatted as yyyy-MM-dd, HH:mm:ss.SSS and yyyy-MM-dd'T'HH:mm:ss.SSSZ respectively. To customize these
+	// patterns, use customDatePattern, customTimePattern, and customDateTimePattern config options or add these inside a
+	// schema to affect an individual field
+	formatDateTimes = true
+	formatDates = true
+	formatTimes = true
+
+	// Whether to initialize Set and List fields as empty collections, or leave them as null.
+	initializeCollections = true
+
+	// Whether to add a prefix to generated classes.
+	classNamePrefix = "CF"
+
+	// Whether to add a suffix to generated classes.
+	classNameSuffix = ""
+
+	// What type to use instead of string when adding string properties of format "date" to Java types
+	dateType = "java.time.LocalDate"
+
+	// What type to use instead of string when adding string properties of format "date-time" to Java types
+	dateTimeType = "java.time.LocalDateTime"
+
+	// What type to use instead of string when adding string properties of format "time" to Java types
+	timeType = "java.time.LocalDate"
+
+	// A custom pattern to use when formatting date fields during serialization. Requires support from
+	// your JSON binding library.
+	customDatePattern = "yyyy-MM-dd"
+
+	// A custom pattern to use when formatting date-time fields during serialization. Requires support from
+	// your JSON binding library.
+	customDateTimePattern = "yyyy-MM-dd HH:mm"
+
+	// A custom pattern to use when formatting time fields during serialization. Requires support from
+	// your JSON binding library.
+	customTimePattern = "HH:mm"
 }

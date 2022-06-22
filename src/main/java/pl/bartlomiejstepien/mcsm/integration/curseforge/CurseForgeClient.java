@@ -11,24 +11,24 @@ public interface CurseForgeClient
 {
     List<ModPack> getModpacks(int categoryId, String modpackName, String version, int count, int startIndex);
 
-    int getLatestServerFileId(int modpackId);
+    int getLatestServerFileId(Long modpackId);
 
-    ModPack getModpack(int id);
+    ModPack getModpack(Long id);
 
-    String getModpackDescription(int id);
+    String getModpackDescription(Long id);
 
-    String getServerDownloadUrl(int modpackId, int serverFileId);
+    String getServerDownloadUrl(Long modpackId, int serverFileId);
 
     Path downloadServerFile(int serverId, ModPack modPack, String serverDownloadUrl) throws CouldNotDownloadServerFilesException;
 
-    List<ModPack.ModpackFile> getModPackFiles(int modpackId);
+    List<ModPack.ModpackFile> getModPackFiles(Long modpackId);
 
     /**
      * Gets server packs for the given modpack
      * @param modpackId the modpack id
      * @return list of serverpacks
      */
-    List<ServerPack> getServerPacks(int modpackId);
+    List<ServerPack> getServerPacks(Long modpackId);
 
     ModPack.ModpackFile getModPackFile(ModPack modPack, int fileId);
 }

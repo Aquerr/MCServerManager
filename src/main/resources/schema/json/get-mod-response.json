@@ -1,0 +1,13 @@
+{
+  "$id": "/schema/json/get-mod-response.json",
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "data": {
+      "$ref": "mod.json"
+    }
+  },
+  "required": [
+    "data"
+  ]
+}

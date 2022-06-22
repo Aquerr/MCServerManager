@@ -1,0 +1,187 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "title": "ModFile",
+  "properties": {
+    "id": {
+      "type": "integer"
+    },
+    "gameId": {
+      "type": "integer"
+    },
+    "modId": {
+      "type": "integer"
+    },
+    "isAvailable": {
+      "type": "boolean"
+    },
+    "displayName": {
+      "type": "string"
+    },
+    "fileName": {
+      "type": "string"
+    },
+    "releaseType": {
+      "type": "integer"
+    },
+    "fileStatus": {
+      "type": "integer"
+    },
+    "hashes": {
+      "type": "array",
+      "items": [
+        {
+          "type": "object",
+          "properties": {
+            "value": {
+              "type": "string"
+            },
+            "algo": {
+              "type": "integer"
+            }
+          },
+          "required": [
+            "value",
+            "algo"
+          ]
+        }
+      ]
+    },
+    "fileDate": {
+      "type": "string"
+    },
+    "fileLength": {
+      "type": "integer"
+    },
+    "downloadCount": {
+      "type": "integer"
+    },
+    "downloadUrl": {
+      "type": "string"
+    },
+    "gameVersions": {
+      "type": "array",
+      "items": [
+        {
+          "type": "string"
+        }
+      ]
+    },
+    "sortableGameVersions": {
+      "type": "array",
+      "items": [
+        {
+          "type": "object",
+          "properties": {
+            "gameVersionName": {
+              "type": "string"
+            },
+            "gameVersionPadded": {
+              "type": "string"
+            },
+            "gameVersion": {
+              "type": "string"
+            },
+            "gameVersionReleaseDate": {
+              "type": "string"
+            },
+            "gameVersionTypeId": {
+              "type": "integer"
+            }
+          },
+          "required": [
+            "gameVersionName",
+            "gameVersionPadded",
+            "gameVersion",
+            "gameVersionReleaseDate",
+            "gameVersionTypeId"
+          ]
+        }
+      ]
+    },
+    "dependencies": {
+      "type": "array",
+      "items": [
+        {
+          "type": "object",
+          "properties": {
+            "modId": {
+              "type": "integer"
+            },
+            "relationType": {
+              "type": "integer"
+            }
+          },
+          "required": [
+            "modId",
+            "relationType"
+          ]
+        }
+      ]
+    },
+    "exposeAsAlternative": {
+      "type": "boolean"
+    },
+    "parentProjectFileId": {
+      "type": "integer"
+    },
+    "alternateFileId": {
+      "type": "integer"
+    },
+    "isServerPack": {
+      "type": "boolean"
+    },
+    "serverPackFileId": {
+      "type": "integer"
+    },
+    "fileFingerprint": {
+      "type": "integer"
+    },
+    "modules": {
+      "type": "array",
+      "items": [
+        {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "fingerprint": {
+              "type": "integer"
+            }
+          },
+          "required": [
+            "name",
+            "fingerprint"
+          ]
+        }
+      ]
+    }
+  },
+  "required": [
+    "id",
+    "gameId",
+    "modId",
+    "isAvailable",
+    "displayName",
+    "fileName",
+    "releaseType",
+    "fileStatus",
+    "hashes",
+    "fileDate",
+    "fileLength",
+    "downloadCount",
+    "downloadUrl",
+    "gameVersions",
+    "sortableGameVersions",
+    "dependencies",
+    "exposeAsAlternative",
+    "parentProjectFileId",
+    "alternateFileId",
+    "isServerPack",
+    "serverPackFileId",
+    "fileFingerprint",
+    "modules"
+  ]
+}
+

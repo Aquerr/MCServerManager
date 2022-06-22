@@ -25,7 +25,7 @@ import static org.mockito.Mockito.when;
 
 class ModpackRestControllerTest extends BaseIntegrationTest
 {
-    private static final Integer MODPACK_ID = 1;
+    private static final Long MODPACK_ID = 1L;
     private static final Integer CATEGORY_ID = 2;
     private static final Integer SERVER_PACK_ID = 3;
 

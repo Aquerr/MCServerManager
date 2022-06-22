@@ -6,7 +6,7 @@ import java.util.List;
 
 public class ModPack
 {
-    private final int id;
+    private final Long id;
     private final String name;
     private final String summary;
 
@@ -16,7 +16,7 @@ public class ModPack
 
     private final String thumbnailUrl;
 
-    public ModPack(int id, String name, String summary, String thumbnailUrl, final String version, final List<ModpackFile> latestFiles)
+    public ModPack(Long id, String name, String summary, String thumbnailUrl, final String version, final List<ModpackFile> latestFiles)
     {
         this.id = id;
         this.name = name;
@@ -26,7 +26,7 @@ public class ModPack
         this.latestFiles = latestFiles;
     }
 
-    public int getId()
+    public Long getId()
     {
         return id;
     }
@@ -58,14 +58,14 @@ public class ModPack
 
     public static final class ModpackFile
     {
-        private final int id;
+        private final Long id;
         private final String displayName;
         private final String fileName;
         private final Instant fileDate;
         private final String downloadUrl;
-        private final int serverPackFileId;
+        private final Long serverPackFileId;
 
-        public ModpackFile(int id, String displayName, String fileName, Instant fileDate, String downloadUrl, int serverPackFileId)
+        public ModpackFile(Long id, String displayName, String fileName, Instant fileDate, String downloadUrl, Long serverPackFileId)
         {
             this.id = id;
             this.displayName = displayName;
@@ -75,7 +75,7 @@ public class ModPack
             this.serverPackFileId = serverPackFileId;
         }
 
-        public int getId()
+        public Long getId()
         {
             return id;
         }
@@ -100,7 +100,7 @@ public class ModPack
             return downloadUrl;
         }
 
-        public int getServerPackFileId()
+        public Long getServerPackFileId()
         {
             return serverPackFileId;
         }

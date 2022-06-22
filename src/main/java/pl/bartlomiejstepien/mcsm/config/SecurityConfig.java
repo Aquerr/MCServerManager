@@ -47,7 +47,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter
                 .logoutUrl(Routes.LOGOUT)
                 .logoutSuccessUrl(Routes.LOGIN)
                 .invalidateHttpSession(true)
-                .deleteCookies("JSESSIONID")
                 .permitAll()
             .and()
             .authorizeRequests()

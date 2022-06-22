@@ -30,7 +30,7 @@ class ForgeServerInstallationStrategyTest
 {
     private static final Integer SERVER_ID = 3;
     private static final String USERNAME = "USERNAME";
-    private static final int MOD_PACK_ID = 1;
+    private static final Long MOD_PACK_ID = 1L;
     private static final String MOD_PACK_NAME = "Modpack Name";
     private static final String MOD_PACK_SUMMARY = "Modpack Summary";
     private static final String MOD_PACK_THUMBNAIL_URL = "Modpack Thumbnail Url";

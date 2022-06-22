@@ -39,14 +39,14 @@ public class ModpackRestController
     }
 
     @GetMapping(value = "/{id}/description", produces = MediaType.TEXT_HTML_VALUE)
-    public String getModpackDescription(@PathVariable("id") final int id, final HttpServletRequest httpServletRequest)
+    public String getModpackDescription(@PathVariable("id") final Long id, final HttpServletRequest httpServletRequest)
     {
         LOGGER.info("Getting modpack description for id=" +id + " from " + httpServletRequest.getLocalAddr());
         return this.curseForgeClient.getModpackDescription(id);
     }
 
     @GetMapping(value = "/{modpackId}/serverpacks", produces = MediaType.APPLICATION_JSON_VALUE)
-    public List<ServerPack> getServerPacksForModPack(@PathVariable("modpackId") final int modpackId)
+    public List<ServerPack> getServerPacksForModPack(@PathVariable("modpackId") final Long modpackId)
     {
         final AuthenticatedUser authenticatedUser = authenticationFacade.getCurrentUser();
         LOGGER.info("Get server packs for modpack id=" + modpackId + " by " + authenticatedUser.getUsername() + " " + authenticatedUser.getRemoteIpAddress());
@@ -54,7 +54,7 @@ public class ModpackRestController
     }
 
     @PostMapping(value = "/{modpackId}/serverpacks/{serverPackId}/install", produces = MediaType.TEXT_PLAIN_VALUE)
-    public String installModpack(@PathVariable("modpackId") final int modpackId,
+    public String installModpack(@PathVariable("modpackId") final Long modpackId,
                                  @PathVariable("serverPackId") final int serverPackId,
                                  Authentication authentication,
                                  final HttpServletRequest httpServletRequest)

@@ -1,0 +1,26 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "title": "ModLinks",
+  "properties": {
+    "websiteUrl": {
+      "type": "string"
+    },
+    "wikiUrl": {
+      "type": "string"
+    },
+    "issuesUrl": {
+      "type": "string"
+    },
+    "sourceUrl": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "websiteUrl",
+    "wikiUrl",
+    "issuesUrl",
+    "sourceUrl"
+  ]
+}
+
