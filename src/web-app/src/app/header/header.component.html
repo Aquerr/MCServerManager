@@ -1,0 +1,27 @@
+<mat-toolbar color="primary">
+  <mat-toolbar-row>
+<!--    <button mat-icon-button>-->
+    <!--    <button mat-icon-button (click)="sidenav.toggle()" fxShow="true" fxHide.gt-sm>-->
+<!--      <mat-icon>menu</mat-icon>-->
+<!--    </button>-->
+    <span>MC Server Manager</span>
+    <span class="spacer"></span>
+    <div *ngIf="isAuthenticated()">
+      <button *ngIf="hasRole('USER')" href="#" mat-icon-button>
+        <mat-icon>settings</mat-icon>
+      </button>
+      <a mat-button href="#"><mat-icon>person</mat-icon> {{ getUsername() }}</a>
+      <a mat-button href="/logout"><mat-icon>logout</mat-icon> Logout</a>
+    </div>
+  </mat-toolbar-row>
+</mat-toolbar>
+
+<!--<mat-sidenav-container fxFlexFill>-->
+<!--  <mat-sidenav #sidenav>-->
+<!--    <mat-nav-list>-->
+<!--      <a (click)="sidenav.toggle()" href="" mat-list-item>Close</a>-->
+<!--      <a href="#" mat-list-item>Menu Item 1</a>-->
+<!--    </mat-nav-list>-->
+<!--  </mat-sidenav>-->
+<!--  <mat-sidenav-content fxFlexFill>Main content</mat-sidenav-content>-->
+<!--</mat-sidenav-container>-->
