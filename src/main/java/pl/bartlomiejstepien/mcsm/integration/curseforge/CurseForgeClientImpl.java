@@ -154,15 +154,16 @@ public class CurseForgeClientImpl implements CurseForgeClient
     /**
      * Downloads the zip file that contains server files.
      *
+     * @param serverId the id of the server the file should be downloaded for
      * @param modPack to download
      * @param serverDownloadUrl the link to download from
+     * @param downloadPath path where to download the file
      * @return path to the downloaded zip file
      */
     @Override
-    public Path downloadServerFile(int serverId, final ModPack modPack, String serverDownloadUrl) throws CouldNotDownloadServerFilesException
+    public Path downloadServerFile(int serverId, final ModPack modPack, String serverDownloadUrl, Path downloadPath) throws CouldNotDownloadServerFilesException
     {
         LOGGER.info("Downloading server files for modpack {id=" + modPack.getId() + ", name=" + modPack.getName() + "}");
-        Path downloadPath = Paths.get(this.config.getDownloadsDir() + File.separator + modPack.getName() + "_" + modPack.getVersion() + ".zip");
 
         try
         {

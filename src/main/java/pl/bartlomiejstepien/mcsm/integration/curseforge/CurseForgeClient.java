@@ -19,7 +19,7 @@ public interface CurseForgeClient
 
     String getServerDownloadUrl(Long modpackId, int serverFileId);
 
-    Path downloadServerFile(int serverId, ModPack modPack, String serverDownloadUrl) throws CouldNotDownloadServerFilesException;
+    Path downloadServerFile(int serverId, ModPack modPack, String serverDownloadUrl, Path downloadPath) throws CouldNotDownloadServerFilesException;
 
     List<ModPack.ModpackFile> getModPackFiles(Long modpackId);
 

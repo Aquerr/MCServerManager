@@ -62,13 +62,13 @@ public class ForgeServerInstallationStrategy extends AbstractServerInstallationS
         final ModPack modPack = this.curseForgeClient.getModpack(modpackId);
         Path serverPath = prepareServerPathForNewModpack(username, modPack);
 
-        Path downloadPath = null;
-        if (!isModPackAlreadyDownloaded(modPack))
+        Path downloadPath = getDownloadPath(modPack);
+        if (!isModPackAlreadyDownloaded(downloadPath))
         {
             try
             {
                 //TODO: Add download status...
-                downloadPath = downloadServerFilesForModpack(serverId, modPack, serverPackId);
+                downloadPath = downloadServerFilesForModpack(serverId, modPack, serverPackId, downloadPath);
             }
             catch (CouldNotDownloadServerFilesException e)
             {
@@ -101,6 +101,11 @@ public class ForgeServerInstallationStrategy extends AbstractServerInstallationS
             }
             throw new CouldNotInstallServerException(format("Could not install modpack '%s'", modPack.getName()), exception);
         }
+    }
+
+    private Path getDownloadPath(ModPack modPack)
+    {
+        return this.config.getDownloadsDirPath().resolve(modPack.getName() + "_" + modPack.getVersion() + ".zip");
     }
 
     private Path findServerStartFilePath(Path serverPath)
@@ -140,12 +145,12 @@ public class ForgeServerInstallationStrategy extends AbstractServerInstallationS
         this.serverInstallationStatusMonitor.setInstallationStatus(serverId, new InstallationStatus(2, 100, "Unpacking completed!"));
     }
 
-    private Path downloadServerFilesForModpack(int serverId, final ModPack modPack, int serverPackId) throws CouldNotDownloadServerFilesException
+    private Path downloadServerFilesForModpack(int serverId, final ModPack modPack, int serverPackId, Path downloadPath) throws CouldNotDownloadServerFilesException
     {
         String serverDownloadUrl = this.curseForgeClient.getServerDownloadUrl(modPack.getId(), serverPackId);
         //TODO: Fix url. Parenthesis "(" and ")" still not work
         serverDownloadUrl = serverDownloadUrl.replaceAll(" ", "%20");
-        return this.curseForgeClient.downloadServerFile(serverId, modPack, serverDownloadUrl);
+        return this.curseForgeClient.downloadServerFile(serverId, modPack, serverDownloadUrl, downloadPath);
     }
 
     private Path prepareServerPathForNewModpack(String username, ModPack modPack) {
@@ -167,9 +172,9 @@ public class ForgeServerInstallationStrategy extends AbstractServerInstallationS
         return Files.exists(serverPath);
     }
 
-    private boolean isModPackAlreadyDownloaded(final ModPack modPack)
+    private boolean isModPackAlreadyDownloaded(final Path downloadPath)
     {
-        return Files.exists(this.config.getDownloadsDirPath().resolve(Paths.get(modPack.getName() + "_" + modPack.getVersion())));
+        return Files.exists(downloadPath);
     }
 
     private Path findServerRootDirectory(Path serverPath)

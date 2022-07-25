@@ -10,9 +10,9 @@ import java.util.Optional;
 @Component
 public class ServerInstallationStatusMonitor
 {
-    private final Map<Integer, InstallationStatus> serverInstallationStatus = new HashMap<>();
+    private final Map<Long, InstallationStatus> serverInstallationStatus = new HashMap<>();
 
-    public void setInstallationStatus(final int serverId, final InstallationStatus installationStatus)
+    public void setInstallationStatus(final long serverId, final InstallationStatus installationStatus)
     {
         this.serverInstallationStatus.put(serverId, installationStatus);
     }
