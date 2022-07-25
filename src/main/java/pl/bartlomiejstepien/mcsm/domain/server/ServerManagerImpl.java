@@ -227,7 +227,7 @@ public class ServerManagerImpl implements ServerManager
         loadProperties(serverDto);
 
         try(final RconClient rconClient = RconClient.open("localhost",
-                serverDto.getServerProperties().getProperty(ServerProperties.PROPERTY_NAME_RCON_PORT),
+                serverDto.getServerProperties().getIntProperty(ServerProperties.PROPERTY_NAME_RCON_PORT),
                 serverDto.getServerProperties().getProperty(ServerProperties.PROPERTY_NAME_RCON_PASSWORD)))
         {
             final String response = rconClient.sendCommand(command);
