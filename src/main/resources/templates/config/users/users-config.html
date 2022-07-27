@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="fragments/fragments :: head (pageTitle='Users Config')">
+<head th:replace="fragments/common :: head (pageTitle='Users Config')">
 </head>
 <script type="text/javascript" th:src="@{/js/config-users.js}" defer></script>
 <body>
-<div th:replace="fragments/fragments :: header"></div>
+<div th:replace="fragments/common :: header"></div>
 <div class="container mt-4">
     <table class="table table-striped">
         <input id="current-user-id" th:value="${#authentication.principal.id}" disabled hidden>
