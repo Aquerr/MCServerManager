@@ -27,7 +27,7 @@ public class Config
     @Value("${servers-dir}")
     private String serversDir;
 
-    @Value("${CURSEFORGE_API_KEY}")
+    @Value("${CURSEFORGE_API_KEY:}")
     private String curseForgeApiKey;
 
     public String getServersDir()
