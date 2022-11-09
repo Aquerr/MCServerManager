@@ -36,7 +36,7 @@ public class UnixServerProcessHandler implements ServerProcessHandler
 
         try
         {
-            final String[] commandArray = new String[] {"sh", "-f", serverStartFile.getFileName().toString()};
+            final String[] commandArray = new String[] {"sh", "-c", "nohup", serverStartFile.getFileName().toString(), "&"};
             final ProcessBuilder processBuilder = new ProcessBuilder(commandArray);
             processBuilder.directory(installedServer.getServerDir().toFile());
             Map<String, String> environment = processBuilder.environment();

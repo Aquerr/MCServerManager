@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import pl.bartlomiejstepien.mcsm.auth.AuthenticatedUser;
 import pl.bartlomiejstepien.mcsm.auth.AuthenticationFacade;
 import pl.bartlomiejstepien.mcsm.domain.dto.ServerDto;
-import pl.bartlomiejstepien.mcsm.service.ServerServiceImpl;
+import pl.bartlomiejstepien.mcsm.service.ServerService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,11 +19,11 @@ public class HomeController
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(HomeController.class);
 
-    private final ServerServiceImpl serverService;
+    private final ServerService serverService;
     private final AuthenticationFacade authenticationFacade;
 
     @Autowired
-    public HomeController(final AuthenticationFacade authenticationFacade, final ServerServiceImpl serverService)
+    public HomeController(final AuthenticationFacade authenticationFacade, final ServerService serverService)
     {
         this.authenticationFacade = authenticationFacade;
         this.serverService = serverService;
