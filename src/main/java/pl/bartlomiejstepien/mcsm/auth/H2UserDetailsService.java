@@ -9,7 +9,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
-import pl.bartlomiejstepien.mcsm.domain.dto.Role;
+import pl.bartlomiejstepien.mcsm.domain.model.Role;
 import pl.bartlomiejstepien.mcsm.repository.UserRepository;
 import pl.bartlomiejstepien.mcsm.repository.ds.User;
 

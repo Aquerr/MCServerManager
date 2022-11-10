@@ -1,6 +1,9 @@
 package pl.bartlomiejstepien.mcsm.domain.dto;
 
-import java.util.*;
+import pl.bartlomiejstepien.mcsm.domain.model.Role;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class UserDto
 {

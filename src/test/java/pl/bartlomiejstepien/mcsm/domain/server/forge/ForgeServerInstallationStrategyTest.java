@@ -8,6 +8,7 @@ import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.util.FileSystemUtils;
 import pl.bartlomiejstepien.mcsm.config.Config;
 import pl.bartlomiejstepien.mcsm.domain.exception.CouldNotDownloadServerFilesException;
 import pl.bartlomiejstepien.mcsm.domain.exception.CouldNotInstallServerException;
@@ -67,11 +68,15 @@ class ForgeServerInstallationStrategyTest
         given(curseForgeClient.getServerDownloadUrl(MOD_PACK_ID, SERVER_PACK_ID)).willReturn(SERVER_DOWNLOAD_URL);
         given(curseForgeClient.downloadServerFile(SERVER_ID, modPack, FIXED_SERVER_DOWNLOAD_URL, downloadPath)).willThrow(CouldNotDownloadServerFilesException.class);
 
-        MockedStatic<Files> mockedFiles = Mockito.mockStatic(Files.class);
-        mockedFiles.when(() -> Files.exists(any())).thenReturn(false);
+        Throwable throwable = null;
+        try(MockedStatic<Files> mockedFiles = Mockito.mockStatic(Files.class);
+            MockedStatic<FileSystemUtils> mockedFileSystemUtils = Mockito.mockStatic(FileSystemUtils.class))
+        {
+            mockedFiles.when(() -> Files.exists(any())).thenReturn(false);
+            mockedFileSystemUtils.when(() -> FileSystemUtils.deleteRecursively(any(Path.class))).thenReturn(false);
 
-        Throwable throwable = Assertions.catchThrowable(() -> forgeServerInstallationStrategy.install(SERVER_ID, prepareForgeModpackInstallationRequest()));
-
+            throwable = Assertions.catchThrowable(() -> forgeServerInstallationStrategy.install(SERVER_ID, prepareForgeModpackInstallationRequest()));
+        }
         assertThat(throwable).isInstanceOf(CouldNotInstallServerException.class);
     }
 

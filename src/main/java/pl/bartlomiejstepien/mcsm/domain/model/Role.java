@@ -1,4 +1,4 @@
-package pl.bartlomiejstepien.mcsm.domain.dto;
+package pl.bartlomiejstepien.mcsm.domain.model;
 
 public enum Role
 {

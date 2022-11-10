@@ -3,7 +3,7 @@ package pl.bartlomiejstepien.mcsm.auth;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-import pl.bartlomiejstepien.mcsm.domain.dto.Role;
+import pl.bartlomiejstepien.mcsm.domain.model.Role;
 
 import java.util.Collection;
 import java.util.Collections;

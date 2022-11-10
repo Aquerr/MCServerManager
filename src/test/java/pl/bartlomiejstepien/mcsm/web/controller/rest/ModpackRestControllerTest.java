@@ -3,27 +3,35 @@ package pl.bartlomiejstepien.mcsm.web.controller.rest;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
-import org.mockito.InjectMocks;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.security.test.context.support.WithUserDetails;
+import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+import pl.bartlomiejstepien.mcsm.SpringSecurityTestConfiguration;
+import pl.bartlomiejstepien.mcsm.auth.AuthenticationFacade;
 import pl.bartlomiejstepien.mcsm.domain.platform.Platform;
-import pl.bartlomiejstepien.mcsm.domain.server.forge.ForgeModpackInstallationRequest;
 import pl.bartlomiejstepien.mcsm.domain.server.ServerInstallationRequest;
 import pl.bartlomiejstepien.mcsm.domain.server.ServerManager;
+import pl.bartlomiejstepien.mcsm.domain.server.forge.ForgeModpackInstallationRequest;
 import pl.bartlomiejstepien.mcsm.integration.curseforge.CurseForgeClient;
-import pl.bartlomiejstepien.mcsm.service.ServerServiceImpl;
-import pl.bartlomiejstepien.mcsm.service.UserServiceImpl;
-import pl.bartlomiejstepien.mcsm.web.controller.BaseIntegrationTest;
+import pl.bartlomiejstepien.mcsm.service.ServerService;
+import pl.bartlomiejstepien.mcsm.service.UserService;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static pl.bartlomiejstepien.mcsm.SpringSecurityTestConfiguration.AUTHENTICATED_ADMIN;
+import static pl.bartlomiejstepien.mcsm.SpringSecurityTestConfiguration.USER_USERNAME;
 
-class ModpackRestControllerTest extends BaseIntegrationTest
+@WebMvcTest(ModpackRestController.class)
+@Import(SpringSecurityTestConfiguration.class)
+class ModpackRestControllerTest
 {
     private static final Long MODPACK_ID = 1L;
     private static final Integer CATEGORY_ID = 2;
@@ -39,18 +47,20 @@ class ModpackRestControllerTest extends BaseIntegrationTest
     @MockBean
     private CurseForgeClient curseForgeClient;
     @MockBean
-    private ServerServiceImpl serverService;
+    private ServerService serverService;
     @MockBean
-    private UserServiceImpl userService;
+    private UserService userService;
+    @MockBean
+    private AuthenticationFacade authenticationFacade;
 
-    @InjectMocks
-    private ModpackRestController modpackRestController;
+    @Autowired
+    private MockMvc mockMvc;
 
     @Captor
     private final ArgumentCaptor<ServerInstallationRequest> requestArgumentCaptor = ArgumentCaptor.forClass(ServerInstallationRequest.class);
 
     @Test
-    @WithUserDetails(value = USER_USERNAME, userDetailsServiceBeanName = "userDetailsServiceTest")
+    @WithUserDetails(value = USER_USERNAME)
     void getModpackDescriptionShouldReturnCorrectModpackDescription() throws Exception
     {
         final String url = GET_MODPACK_DESCRIPTION_URL.replace("{id}", String.valueOf(MODPACK_ID));
@@ -64,7 +74,7 @@ class ModpackRestControllerTest extends BaseIntegrationTest
     }
 
     @Test
-    @WithUserDetails(value = USER_USERNAME, userDetailsServiceBeanName = "userDetailsServiceTest")
+    @WithUserDetails(value = USER_USERNAME)
     void installServerStartsServerInstallation() throws Exception
     {
         final String url = POST_INSTALL_SERVER.replace("{modpackId}", String.valueOf(MODPACK_ID))
@@ -82,7 +92,7 @@ class ModpackRestControllerTest extends BaseIntegrationTest
         verify(this.serverManager).queueServerInstallation(requestArgumentCaptor.capture());
         assertThat(requestArgumentCaptor.getValue()).isInstanceOf(ForgeModpackInstallationRequest.class);
         assertThat(requestArgumentCaptor.getValue().getPlatform()).isEqualTo(Platform.FORGE);
-        assertThat(requestArgumentCaptor.getValue().getUsername()).isEqualTo(getTestUser().getUsername());
+        assertThat(requestArgumentCaptor.getValue().getUsername()).isEqualTo(AUTHENTICATED_ADMIN.getUsername());
         assertThat(((ForgeModpackInstallationRequest)requestArgumentCaptor.getValue()).getModpackId()).isEqualTo(MODPACK_ID);
         assertThat(((ForgeModpackInstallationRequest)requestArgumentCaptor.getValue()).getServerPackId()).isEqualTo(SERVER_PACK_ID);
     }

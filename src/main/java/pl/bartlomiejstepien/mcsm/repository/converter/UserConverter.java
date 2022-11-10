@@ -1,7 +1,7 @@
 package pl.bartlomiejstepien.mcsm.repository.converter;
 
 import org.springframework.stereotype.Component;
-import pl.bartlomiejstepien.mcsm.domain.dto.Role;
+import pl.bartlomiejstepien.mcsm.domain.model.Role;
 import pl.bartlomiejstepien.mcsm.domain.dto.UserDto;
 import pl.bartlomiejstepien.mcsm.repository.ds.User;
 

@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pl.bartlomiejstepien.mcsm.auth.AuthenticatedUser;
 import pl.bartlomiejstepien.mcsm.auth.AuthenticationFacade;
-import pl.bartlomiejstepien.mcsm.domain.dto.Role;
+import pl.bartlomiejstepien.mcsm.domain.model.Role;
 import pl.bartlomiejstepien.mcsm.domain.dto.UserDto;
 import pl.bartlomiejstepien.mcsm.domain.exception.UsernameAreadyExistsException;
 import pl.bartlomiejstepien.mcsm.domain.model.UserRegUpdatePayload;
