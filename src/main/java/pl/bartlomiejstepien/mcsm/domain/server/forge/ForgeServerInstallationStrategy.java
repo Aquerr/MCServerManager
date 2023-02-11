@@ -155,7 +155,7 @@ public class ForgeServerInstallationStrategy extends AbstractServerInstallationS
 
     private Path prepareServerPathForNewModpack(String username, ModPack modPack) {
         String modpackName = this.serverDirNameCorrector.convert(modPack.getName());
-        Path path = Paths.get(config.getServersDir()).resolve(username).resolve(modpackName);
+        Path path = Paths.get(config.getServersDir()).resolve(username).resolve(modpackName.replace(" ", "-"));
 
         Path resultPath = path;
         int number = 1;
