@@ -60,7 +60,7 @@ class ForgeServerInstallationStrategyTest
     void shouldInstallThrowCouldNotInstallServerExceptionWhenServerFilesCouldNotBeDownloaded() throws CouldNotDownloadServerFilesException
     {
         ModPack modPack = prepareModpack();
-        Path downloadPath = Paths.get(modPack.getName() + "_" + modPack.getVersion() + ".zip");
+        Path downloadPath = Paths.get(modPack.getName().replace(" ", "-") + "_" + modPack.getVersion() + ".zip");
         given(config.getServersDir()).willReturn(EMPTY_STRING);
         given(config.getDownloadsDirPath()).willReturn(Paths.get(EMPTY_STRING));
         given(serverDirNameCorrector.convert(any())).willReturn(EMPTY_STRING);

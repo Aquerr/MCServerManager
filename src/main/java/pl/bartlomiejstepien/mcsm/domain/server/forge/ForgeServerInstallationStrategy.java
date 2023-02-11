@@ -105,7 +105,7 @@ public class ForgeServerInstallationStrategy extends AbstractServerInstallationS
 
     private Path getDownloadPath(ModPack modPack)
     {
-        return this.config.getDownloadsDirPath().resolve(modPack.getName() + "_" + modPack.getVersion() + ".zip");
+        return this.config.getDownloadsDirPath().resolve(modPack.getName().replace(" ", "-") + "_" + modPack.getVersion() + ".zip");
     }
 
     private Path findServerStartFilePath(Path serverPath)
