@@ -388,7 +388,7 @@ public class ServerManagerImpl implements ServerManager
         {
             this.serverInstallationStatusMonitor.setInstallationStatus(serverId, new InstallationStatus(-1, 0, exception.getMessage()));
             LOGGER.error(exception.getMessage(), exception);
-            throw new CouldNotInstallServerException(exception.getMessage());
+            this.serverIdsUnderInstallation.remove(serverId);
         }
         finally
         {
