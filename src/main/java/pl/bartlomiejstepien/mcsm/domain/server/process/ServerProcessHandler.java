@@ -16,4 +16,6 @@ public interface ServerProcessHandler
      * Implementations are expected to return -1 if the server is not running.
      */
     long getServerProcessId(final ServerDto serverDto);
+
+    boolean isRunning(ServerDto serverDto);
 }

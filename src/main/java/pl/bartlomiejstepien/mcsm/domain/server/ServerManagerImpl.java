@@ -1,8 +1,7 @@
 package pl.bartlomiejstepien.mcsm.domain.server;
 
 import com.github.t9t.minecraftrconclient.RconClient;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
@@ -11,7 +10,7 @@ import org.springframework.util.FileSystemUtils;
 import pl.bartlomiejstepien.mcsm.config.Config;
 import pl.bartlomiejstepien.mcsm.domain.dto.JavaDto;
 import pl.bartlomiejstepien.mcsm.domain.dto.ServerDto;
-import pl.bartlomiejstepien.mcsm.domain.exception.CouldNotInstallServerException;
+import pl.bartlomiejstepien.mcsm.domain.exception.CouldNotStartServerException;
 import pl.bartlomiejstepien.mcsm.domain.exception.MissingJavaConfigurationException;
 import pl.bartlomiejstepien.mcsm.domain.exception.ServerNotRunningException;
 import pl.bartlomiejstepien.mcsm.domain.model.InstallationStatus;
@@ -28,18 +27,31 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.*;
-import java.util.*;
-import java.util.concurrent.*;
+import java.nio.file.FileVisitOption;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Properties;
+import java.util.Set;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 @Component
+@Slf4j
 public class ServerManagerImpl implements ServerManager
 {
-    private static final Logger LOGGER = LoggerFactory.getLogger(ServerManagerImpl.class);
     private static final ScheduledExecutorService SCHEDULED_EXECUTOR_SERVICE = Executors.newSingleThreadScheduledExecutor();
-    private static final ExecutorService SERVER_INSTALLATION_EXECUTOR_SERVICE = Executors.newSingleThreadExecutor();
-    private static final Map<Integer, Process> SERVER_PROCESSES = new HashMap<>();
-    private static final Map<Integer, InstalledServer> RUNNING_SERVERS = new HashMap<>();
+    private static final ExecutorService SERVER_INSTALLATION_EXECUTOR_SERVICE = Executors.newCachedThreadPool();
     private static final String SERVER_PROPERTIES_FILE_NAME = "server.properties";
 
     private final Config config;
@@ -52,8 +64,6 @@ public class ServerManagerImpl implements ServerManager
     private final Map<Platform, AbstractServerInstallationStrategy<? extends ServerInstallationRequest>> installationStrategyMap;
 
     private final Set<Integer> serverIdsUnderInstallation = new HashSet<>();
-    private final Queue<ServerInstallationTask> serverInstallationQueue = new ConcurrentLinkedQueue<>();
-
     private final ServerInstallationStatusMonitor serverInstallationStatusMonitor;
 
     @Autowired
@@ -79,7 +89,7 @@ public class ServerManagerImpl implements ServerManager
     @EventListener(ApplicationReadyEvent.class)
     public void startup()
     {
-        LOGGER.info("Preparing file structure...");
+        log.info("Preparing file structure...");
 
         final Path serversDirectoryPath = this.config.getServersDirPath();
         if (Files.notExists(serversDirectoryPath))
@@ -105,8 +115,7 @@ public class ServerManagerImpl implements ServerManager
             }
         }
 
-        LOGGER.info("Structure generated!");
-        SERVER_INSTALLATION_EXECUTOR_SERVICE.submit(this::installQueuedServers);
+        log.info("Structure generated!");
     }
 
 
@@ -114,15 +123,12 @@ public class ServerManagerImpl implements ServerManager
     public void startServer(ServerDto serverDto)
     {
         if (isRunning(serverDto))
-            throw new RuntimeException("Server is already running!");
+            throw new CouldNotStartServerException("Server is already running!");
 
         final InstalledServer installedServer = convertToInstalledServer(serverDto);
         final Process process = serverProcessHandler.startServerProcess(installedServer);
         if (process == null)
-            throw new RuntimeException("Could not start server with id= " + serverDto.getId());
-
-        RUNNING_SERVERS.put(installedServer.getId(), installedServer);
-        SERVER_PROCESSES.put(serverDto.getId(), process);
+            throw new CouldNotStartServerException("Could not start server with id= " + serverDto.getId());
     }
 
     @Override
@@ -130,52 +136,26 @@ public class ServerManagerImpl implements ServerManager
     {
         try
         {
-            LOGGER.info("Sending stop command to server id={}", serverDto.getId());
+            log.info("Sending stop command to server id={}", serverDto.getId());
             sendCommand(serverDto, "stop");
         }
         catch (ServerNotRunningException exception)
         {
-            LOGGER.warn("Server is not running");
+            log.warn("Server is not running");
             return true;
         }
 
-        LOGGER.info("Scheduling kill server process task for server id = {}", serverDto.getId());
-        LOGGER.info("Server process will be killed in 20 seconds");
+        log.info("Scheduling kill server process task for server id = {}", serverDto.getId());
+        log.info("Server process will be killed in 20 seconds");
         ScheduledFuture<Boolean> scheduledFuture = SCHEDULED_EXECUTOR_SERVICE.schedule(() -> {
-            LOGGER.info("Killing process for server id=" + serverDto.getId());
-            final Process process = SERVER_PROCESSES.get(serverDto.getId());
-
-            if (process != null)
-            {
-                if (process.isAlive())
-                {
-                    process.destroy();
-                }
-            }
-
-            try
-            {
-                this.serverProcessHandler.stopServerProcess(serverDto);
-            }
-            catch (IOException e)
-            {
-                e.printStackTrace();
-            }
-
-            SERVER_PROCESSES.remove(serverDto.getId());
-            RUNNING_SERVERS.remove(serverDto.getId());
-
+            serverProcessHandler.stopServerProcess(serverDto);
             return true;
         }, 20, TimeUnit.SECONDS);
         try
         {
             return scheduledFuture.get();
         }
-        catch (InterruptedException e)
-        {
-            e.printStackTrace();
-        }
-        catch (ExecutionException e)
+        catch (InterruptedException | ExecutionException e)
         {
             e.printStackTrace();
         }
@@ -207,7 +187,7 @@ public class ServerManagerImpl implements ServerManager
             e.printStackTrace();
             try
             {
-                LOGGER.warn("Something went wrong with reading the log file. It will be removed and created again...");
+                log.warn("Something went wrong with reading the log file. It will be removed and created again...");
                 Files.delete(latestLogPath);
                 Files.createFile(latestLogPath);
             }
@@ -237,25 +217,20 @@ public class ServerManagerImpl implements ServerManager
         }
         catch(final Exception exception)
         {
-            LOGGER.error("Could not send command to server id={}, name={}. Reason: {}", serverDto.getId(), serverDto.getName(), exception.getMessage());
+            log.error("Could not send command to server id={}, name={}. Reason: {}", serverDto.getId(), serverDto.getName(), exception.getMessage());
         }
     }
 
     @Override
     public boolean isRunning(ServerDto serverDto)
     {
-        final Process serverProcess = SERVER_PROCESSES.get(serverDto.getId());
-        if (serverProcess != null && serverProcess.isAlive())
-            return true;
-
-        final long serverProcessId = this.serverProcessHandler.getServerProcessId(serverDto);
-        return serverProcessId != -1;
+        return serverProcessHandler.isRunning(serverDto);
     }
 
     @Override
     public void loadProperties(ServerDto serverDto)
     {
-        LOGGER.debug("Getting properties from {} file for server id={}", SERVER_PROPERTIES_FILE_NAME, serverDto.getId());
+        log.debug("Getting properties from {} file for server id={}", SERVER_PROPERTIES_FILE_NAME, serverDto.getId());
 
         final Path serverPropertiesFilePath = Paths.get(serverDto.getServerDir()).resolve(SERVER_PROPERTIES_FILE_NAME);
         if (Files.exists(serverPropertiesFilePath))
@@ -276,14 +251,14 @@ public class ServerManagerImpl implements ServerManager
         }
         else
         {
-            LOGGER.warn("{} file does not exist for server id={}", SERVER_PROPERTIES_FILE_NAME, serverDto.getId());
+            log.warn("{} file does not exist for server id={}", SERVER_PROPERTIES_FILE_NAME, serverDto.getId());
         }
     }
 
     @Override
     public void saveProperties(ServerDto serverDto, ServerProperties serverProperties)
     {
-        LOGGER.info("Saving server properties for server id={}", serverDto.getId());
+        log.info("Saving server properties for server id={}", serverDto.getId());
         final Path propertiesFilePath = Paths.get(serverDto.getServerDir()).resolve(SERVER_PROPERTIES_FILE_NAME);
 
         try
@@ -309,7 +284,7 @@ public class ServerManagerImpl implements ServerManager
         {
             e.printStackTrace();
         }
-        LOGGER.info("Saved server properties for server id={}", serverDto.getId());
+        log.info("Saved server properties for server id={}", serverDto.getId());
     }
 
     @Override
@@ -318,10 +293,10 @@ public class ServerManagerImpl implements ServerManager
         try
         {
             boolean status = stopServer(serverDto);
-            LOGGER.info("Is server stopped={}", status);
+            log.info("Is server stopped={}", status);
             if(status)
             {
-                LOGGER.info("Deleting server files");
+                log.info("Deleting server files");
                 Path path = Paths.get(serverDto.getServerDir());
                 FileSystemUtils.deleteRecursively(path);
             }
@@ -339,35 +314,13 @@ public class ServerManagerImpl implements ServerManager
     {
         Integer serverId = requestNewServerId();
         this.serverIdsUnderInstallation.add(serverId);
-        this.serverInstallationQueue.add(new ServerInstallationTask(serverId, serverInstallationRequest));
+        SERVER_INSTALLATION_EXECUTOR_SERVICE.submit(() -> installServer(new ServerInstallationTask(serverId, serverInstallationRequest)));
         return serverId;
-    }
-
-    private void installQueuedServers()
-    {
-        while (true)
-        {
-            if (this.serverInstallationQueue.isEmpty())
-            {
-                try
-                {
-                    Thread.sleep(4000);
-                }
-                catch (InterruptedException e)
-                {
-                    e.printStackTrace();
-                }
-            }
-            else
-            {
-                installServer(this.serverInstallationQueue.poll());
-            }
-        }
     }
 
     private void installServer(ServerInstallationTask task)
     {
-        LOGGER.info("Starting server installation for {}, ", task);
+        log.info("Starting server installation for {}, ", task);
         int serverId = task.getServerId();
         ServerInstallationRequest serverInstallationRequest = task.getServerInstallationRequest();
 
@@ -380,14 +333,14 @@ public class ServerManagerImpl implements ServerManager
             AbstractServerInstallationStrategy<? extends ServerInstallationRequest> serverInstallationStrategy = this.installationStrategyMap.get(platform);
             InstalledServer installedServer = serverInstallationStrategy.installInternal(serverId, serverInstallationRequest);
             serverId = saveServerToDB(serverId, serverInstallationRequest.getUsername(), installedServer.getName(), serverInstallationRequest.getPlatform(), installedServer.getServerDir(), javaDto.getId());
-            LOGGER.info("Server id={} is ready!", serverId);
+            log.info("Server id={} is ready!", serverId);
             serverInstallationStatusMonitor.setInstallationStatus(serverId, new InstallationStatus(5, 100, "Server installed!"));
             SCHEDULED_EXECUTOR_SERVICE.schedule(() -> serverInstallationStatusMonitor.clearStatus(task.getServerId()), 1, TimeUnit.HOURS);
         }
         catch (Exception exception)
         {
             this.serverInstallationStatusMonitor.setInstallationStatus(serverId, new InstallationStatus(-1, 0, exception.getMessage()));
-            LOGGER.error(exception.getMessage(), exception);
+            log.error(exception.getMessage(), exception);
             this.serverIdsUnderInstallation.remove(serverId);
         }
         finally
@@ -406,7 +359,7 @@ public class ServerManagerImpl implements ServerManager
 
     private InstalledServer convertToInstalledServer(final ServerDto serverDto)
     {
-        LOGGER.info("Looking for server start file...");
+        log.info("Looking for server start file...");
         Path serverPath = Paths.get(serverDto.getServerDir());
         Path serverRootDirectory = findServerRootDirectory(serverPath);
         Path serverStartFilePath = serverStartFileFinder.findServerStartFile(serverRootDirectory);

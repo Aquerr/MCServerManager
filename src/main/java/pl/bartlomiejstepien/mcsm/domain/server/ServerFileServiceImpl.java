@@ -8,7 +8,12 @@ import pl.bartlomiejstepien.mcsm.domain.model.FancyTreeNode;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.*;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.StandardOpenOption;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Collections;
 import java.util.List;
@@ -18,6 +23,14 @@ import java.util.stream.Collectors;
 public class ServerFileServiceImpl implements ServerFileService
 {
     private static final Charset FILE_CHARSET = StandardCharsets.UTF_8;
+
+    private static final String ILLEGAL_CHARACTERS_PATTERN = "[ #%&{}\\\\<>*?/$!'\":@+`|=^~]";
+
+    @Override
+    public String prepareFilePath(String path)
+    {
+        return path.replaceAll(ILLEGAL_CHARACTERS_PATTERN, "-");
+    }
 
     @Override
     public List<FancyTreeNode> getFancyTreeFolderContent(String path)

@@ -2,10 +2,12 @@ package pl.bartlomiejstepien.mcsm.domain.server;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.FileSystemUtils;
 import pl.bartlomiejstepien.mcsm.domain.exception.CouldNotInstallServerException;
 import pl.bartlomiejstepien.mcsm.domain.model.InstalledServer;
 
 import java.io.IOException;
+import java.nio.file.Path;
 
 public abstract class AbstractServerInstallationStrategy<T extends ServerInstallationRequest> implements ServerInstallationStrategy<T>
 {
@@ -35,5 +37,10 @@ public abstract class AbstractServerInstallationStrategy<T extends ServerInstall
             e.printStackTrace();
             throw new CouldNotInstallServerException(e);
         }
+    }
+
+    protected void rollbackInstallation(Path serverPath) throws IOException
+    {
+        FileSystemUtils.deleteRecursively(serverPath);
     }
 }

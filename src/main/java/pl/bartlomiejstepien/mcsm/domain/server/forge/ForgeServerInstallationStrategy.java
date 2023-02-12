@@ -6,17 +6,20 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.util.FileSystemUtils;
 import pl.bartlomiejstepien.mcsm.config.Config;
 import pl.bartlomiejstepien.mcsm.domain.exception.CouldNotDownloadServerFilesException;
 import pl.bartlomiejstepien.mcsm.domain.exception.CouldNotInstallServerException;
 import pl.bartlomiejstepien.mcsm.domain.model.InstallationStatus;
 import pl.bartlomiejstepien.mcsm.domain.model.InstalledServer;
 import pl.bartlomiejstepien.mcsm.domain.model.ModPack;
-import pl.bartlomiejstepien.mcsm.domain.server.*;
+import pl.bartlomiejstepien.mcsm.domain.server.AbstractServerInstallationStrategy;
+import pl.bartlomiejstepien.mcsm.domain.server.EulaAcceptor;
+import pl.bartlomiejstepien.mcsm.domain.server.ModpackDownloader;
+import pl.bartlomiejstepien.mcsm.domain.server.ServerFileService;
+import pl.bartlomiejstepien.mcsm.domain.server.ServerInstallationStatusMonitor;
+import pl.bartlomiejstepien.mcsm.domain.server.ServerStartFileFinder;
 import pl.bartlomiejstepien.mcsm.integration.curseforge.CurseForgeClient;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.FileVisitOption;
 import java.nio.file.Files;
@@ -32,23 +35,26 @@ public class ForgeServerInstallationStrategy extends AbstractServerInstallationS
 
     private final Config config;
     private final ServerInstallationStatusMonitor serverInstallationStatusMonitor;
-    private final CurseForgeClient curseForgeClient;
-    private final ServerDirNameCorrector serverDirNameCorrector;
+    private final ServerFileService serverFileService;
     private final ServerStartFileFinder serverStartFileFinder;
+    private final ModpackDownloader modpackDownloader;
+    private final CurseForgeClient curseForgeClient;
 
     @Autowired
     public ForgeServerInstallationStrategy(final Config config,
                                            final ServerInstallationStatusMonitor serverInstallationStatusMonitor,
                                            final EulaAcceptor eulaAcceptor,
                                            final CurseForgeClient curseForgeClient,
-                                           final ServerDirNameCorrector serverDirNameCorrector,
+                                           final ModpackDownloader modpackDownloader,
+                                           final ServerFileService serverFileService,
                                            final ServerStartFileFinder serverStartFileFinder)
     {
         super(eulaAcceptor);
         this.config = config;
-        this.serverInstallationStatusMonitor = serverInstallationStatusMonitor;
         this.curseForgeClient = curseForgeClient;
-        this.serverDirNameCorrector = serverDirNameCorrector;
+        this.modpackDownloader = modpackDownloader;
+        this.serverInstallationStatusMonitor = serverInstallationStatusMonitor;
+        this.serverFileService = serverFileService;
         this.serverStartFileFinder = serverStartFileFinder;
     }
 
@@ -62,19 +68,15 @@ public class ForgeServerInstallationStrategy extends AbstractServerInstallationS
         final ModPack modPack = this.curseForgeClient.getModpack(modpackId);
         Path serverPath = prepareServerPathForNewModpack(username, modPack);
 
-        Path downloadPath = getDownloadPath(modPack);
-        if (!isModPackAlreadyDownloaded(downloadPath))
+        Path downloadPath = null;
+        try
         {
-            try
-            {
-                //TODO: Add download status...
-                downloadPath = downloadServerFilesForModpack(serverId, modPack, serverPackId, downloadPath);
-            }
-            catch (CouldNotDownloadServerFilesException e)
-            {
-                e.printStackTrace();
-                throw new CouldNotInstallServerException(e.getMessage());
-            }
+            downloadPath = modpackDownloader.downloadServerFilesForModpack(serverId, modPack, serverPackId);
+        }
+        catch (CouldNotDownloadServerFilesException e)
+        {
+            e.printStackTrace();
+            throw new CouldNotInstallServerException(e.getMessage());
         }
 
         try
@@ -93,19 +95,15 @@ public class ForgeServerInstallationStrategy extends AbstractServerInstallationS
         {
             try
             {
-                FileSystemUtils.deleteRecursively(serverPath);
+                rollbackInstallation(serverPath);
             }
             catch (IOException e)
             {
                 e.printStackTrace();
             }
+            exception.printStackTrace();
             throw new CouldNotInstallServerException(format("Could not install modpack '%s'", modPack.getName()), exception);
         }
-    }
-
-    private Path getDownloadPath(ModPack modPack)
-    {
-        return this.config.getDownloadsDirPath().resolve(modPack.getName().replace(" ", "-") + "_" + modPack.getVersion() + ".zip");
     }
 
     private Path findServerStartFilePath(Path serverPath)
@@ -145,17 +143,9 @@ public class ForgeServerInstallationStrategy extends AbstractServerInstallationS
         this.serverInstallationStatusMonitor.setInstallationStatus(serverId, new InstallationStatus(2, 100, "Unpacking completed!"));
     }
 
-    private Path downloadServerFilesForModpack(int serverId, final ModPack modPack, int serverPackId, Path downloadPath) throws CouldNotDownloadServerFilesException
-    {
-        String serverDownloadUrl = this.curseForgeClient.getServerDownloadUrl(modPack.getId(), serverPackId);
-        //TODO: Fix url. Parenthesis "(" and ")" still not work
-        serverDownloadUrl = serverDownloadUrl.replaceAll(" ", "%20");
-        return this.curseForgeClient.downloadServerFile(serverId, modPack, serverDownloadUrl, downloadPath);
-    }
-
     private Path prepareServerPathForNewModpack(String username, ModPack modPack) {
-        String modpackName = this.serverDirNameCorrector.convert(modPack.getName());
-        Path path = Paths.get(config.getServersDir()).resolve(username).resolve(modpackName.replace(" ", "-"));
+        String modpackName = this.serverFileService.prepareFilePath(modPack.getName());
+        Path path = Paths.get(config.getServersDir()).resolve(username).resolve(modpackName);
 
         Path resultPath = path;
         int number = 1;
@@ -170,11 +160,6 @@ public class ForgeServerInstallationStrategy extends AbstractServerInstallationS
     private boolean isServerPathOccupied(Path serverPath)
     {
         return Files.exists(serverPath);
-    }
-
-    private boolean isModPackAlreadyDownloaded(final Path downloadPath)
-    {
-        return Files.exists(downloadPath);
     }
 
     private Path findServerRootDirectory(Path serverPath)

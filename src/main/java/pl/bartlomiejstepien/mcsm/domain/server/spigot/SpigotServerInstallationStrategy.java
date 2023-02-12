@@ -1,14 +1,13 @@
 package pl.bartlomiejstepien.mcsm.domain.server.spigot;
 
 import org.springframework.stereotype.Component;
-import org.springframework.util.FileSystemUtils;
 import pl.bartlomiejstepien.mcsm.config.Config;
 import pl.bartlomiejstepien.mcsm.domain.exception.CouldNotDownloadServerFilesException;
 import pl.bartlomiejstepien.mcsm.domain.exception.CouldNotInstallServerException;
 import pl.bartlomiejstepien.mcsm.domain.model.InstalledServer;
 import pl.bartlomiejstepien.mcsm.domain.server.AbstractServerInstallationStrategy;
 import pl.bartlomiejstepien.mcsm.domain.server.EulaAcceptor;
-import pl.bartlomiejstepien.mcsm.domain.server.ServerDirNameCorrector;
+import pl.bartlomiejstepien.mcsm.domain.server.ServerFileService;
 import pl.bartlomiejstepien.mcsm.integration.getbukkit.GetBukkitClient;
 import pl.bartlomiejstepien.mcsm.util.SystemUtil;
 
@@ -22,17 +21,17 @@ import java.nio.file.StandardOpenOption;
 public class SpigotServerInstallationStrategy extends AbstractServerInstallationStrategy<SpigotInstallationRequest>
 {
     private final GetBukkitClient getBukkitClient;
-    private final ServerDirNameCorrector serverDirNameCorrector;
+    private final ServerFileService serverFileService;
     private final Config config;
 
     public SpigotServerInstallationStrategy(final GetBukkitClient getBukkitClient,
                                             final EulaAcceptor eulaAcceptor,
-                                            final ServerDirNameCorrector serverDirNameCorrector,
+                                            final ServerFileService serverFileService,
                                             final Config config)
     {
         super(eulaAcceptor);
         this.getBukkitClient = getBukkitClient;
-        this.serverDirNameCorrector = serverDirNameCorrector;
+        this.serverFileService = serverFileService;
         this.config = config;
     }
 
@@ -65,7 +64,7 @@ public class SpigotServerInstallationStrategy extends AbstractServerInstallation
         {
             try
             {
-                FileSystemUtils.deleteRecursively(serverPath);
+                rollbackInstallation(serverPath);
             }
             catch (IOException e)
             {
@@ -100,7 +99,7 @@ public class SpigotServerInstallationStrategy extends AbstractServerInstallation
 
     private Path prepareServerPath(String username, String version)
     {
-        String serverDirName = this.serverDirNameCorrector.convert("spigot-" + version);
+        String serverDirName = this.serverFileService.prepareFilePath("spigot-" + version);
         return Paths.get(config.getServersDir()).resolve(username).resolve(serverDirName);
     }
 

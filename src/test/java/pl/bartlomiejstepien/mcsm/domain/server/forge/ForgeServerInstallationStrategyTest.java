@@ -13,7 +13,7 @@ import pl.bartlomiejstepien.mcsm.config.Config;
 import pl.bartlomiejstepien.mcsm.domain.exception.CouldNotDownloadServerFilesException;
 import pl.bartlomiejstepien.mcsm.domain.exception.CouldNotInstallServerException;
 import pl.bartlomiejstepien.mcsm.domain.model.ModPack;
-import pl.bartlomiejstepien.mcsm.domain.server.ServerDirNameCorrector;
+import pl.bartlomiejstepien.mcsm.domain.server.ServerFileService;
 import pl.bartlomiejstepien.mcsm.domain.server.ServerInstallationStatusMonitor;
 import pl.bartlomiejstepien.mcsm.domain.server.ServerStartFileFinder;
 import pl.bartlomiejstepien.mcsm.integration.curseforge.CurseForgeClient;
@@ -50,7 +50,7 @@ class ForgeServerInstallationStrategyTest
     @Mock
     private CurseForgeClient curseForgeClient;
     @Mock
-    private ServerDirNameCorrector serverDirNameCorrector;
+    private ServerFileService serverFileService;
     @Mock
     private ServerStartFileFinder serverStartFileFinder;
     @InjectMocks
@@ -63,7 +63,7 @@ class ForgeServerInstallationStrategyTest
         Path downloadPath = Paths.get(modPack.getName().replace(" ", "-") + "_" + modPack.getVersion() + ".zip");
         given(config.getServersDir()).willReturn(EMPTY_STRING);
         given(config.getDownloadsDirPath()).willReturn(Paths.get(EMPTY_STRING));
-        given(serverDirNameCorrector.convert(any())).willReturn(EMPTY_STRING);
+        given(serverFileService.prepareFilePath(any())).willReturn(EMPTY_STRING);
         given(curseForgeClient.getModpack(MOD_PACK_ID)).willReturn(modPack);
         given(curseForgeClient.getServerDownloadUrl(MOD_PACK_ID, SERVER_PACK_ID)).willReturn(SERVER_DOWNLOAD_URL);
         given(curseForgeClient.downloadServerFile(SERVER_ID, modPack, FIXED_SERVER_DOWNLOAD_URL, downloadPath)).willThrow(CouldNotDownloadServerFilesException.class);
