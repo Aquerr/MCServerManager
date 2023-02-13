@@ -1,10 +1,11 @@
-package pl.bartlomiejstepien.mcsm.domain.server;
+package pl.bartlomiejstepien.mcsm.domain.modpack;
 
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 import pl.bartlomiejstepien.mcsm.config.Config;
 import pl.bartlomiejstepien.mcsm.domain.exception.CouldNotDownloadServerFilesException;
 import pl.bartlomiejstepien.mcsm.domain.model.ModPack;
+import pl.bartlomiejstepien.mcsm.domain.server.ServerFileService;
 import pl.bartlomiejstepien.mcsm.integration.curseforge.CurseForgeClient;
 
 import java.nio.file.Files;

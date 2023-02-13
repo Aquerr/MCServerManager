@@ -13,7 +13,7 @@ import pl.bartlomiejstepien.mcsm.config.Config;
 import pl.bartlomiejstepien.mcsm.domain.exception.CouldNotDownloadServerFilesException;
 import pl.bartlomiejstepien.mcsm.domain.exception.CouldNotInstallServerException;
 import pl.bartlomiejstepien.mcsm.domain.model.ModPack;
-import pl.bartlomiejstepien.mcsm.domain.server.ModpackDownloader;
+import pl.bartlomiejstepien.mcsm.domain.modpack.ModpackDownloader;
 import pl.bartlomiejstepien.mcsm.domain.server.ServerFileService;
 import pl.bartlomiejstepien.mcsm.domain.server.ServerInstallationStatusMonitor;
 import pl.bartlomiejstepien.mcsm.domain.server.ServerStartFileFinder;

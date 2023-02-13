@@ -14,7 +14,7 @@ import pl.bartlomiejstepien.mcsm.domain.model.InstalledServer;
 import pl.bartlomiejstepien.mcsm.domain.model.ModPack;
 import pl.bartlomiejstepien.mcsm.domain.server.AbstractServerInstallationStrategy;
 import pl.bartlomiejstepien.mcsm.domain.server.EulaAcceptor;
-import pl.bartlomiejstepien.mcsm.domain.server.ModpackDownloader;
+import pl.bartlomiejstepien.mcsm.domain.modpack.ModpackDownloader;
 import pl.bartlomiejstepien.mcsm.domain.server.ServerFileService;
 import pl.bartlomiejstepien.mcsm.domain.server.ServerInstallationStatusMonitor;
 import pl.bartlomiejstepien.mcsm.domain.server.ServerStartFileFinder;
