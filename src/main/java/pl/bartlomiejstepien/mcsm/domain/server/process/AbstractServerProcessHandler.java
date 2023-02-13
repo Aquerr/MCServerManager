@@ -7,10 +7,18 @@ import pl.bartlomiejstepien.mcsm.domain.model.ServerId;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 public abstract class AbstractServerProcessHandler implements ServerProcessHandler
 {
+    private static final ScheduledExecutorService SCHEDULED_EXECUTOR_SERVICE = Executors.newSingleThreadScheduledExecutor();
+
+    protected static final String PID_FILE_NAME = "server.pid";
+
     protected static final Map<ServerId, Process> SERVER_PROCESSES = new HashMap<>();
 
     @Override
@@ -31,21 +39,10 @@ public abstract class AbstractServerProcessHandler implements ServerProcessHandl
         if (processId == -1L)
             return;
 
-        try
-        {
-            //TODO: Wait 60 seconds for process to be destroyed. After that force kill.
-            doProcessStop(processId);
-            SERVER_PROCESSES.remove(ServerId.of(serverDto.getId()));
-        }
-        catch (IOException e)
-        {
-            e.printStackTrace();
-        }
+        stopProcess(processId);
+        forceStopProcessDelayed(processId, 20);
+        SERVER_PROCESSES.remove(ServerId.of(serverDto.getId()));
     }
-
-    protected abstract void doProcessStop(long processId) throws IOException;
-
-    protected abstract boolean isPidAlive(long processId);
 
     @Override
     public boolean isRunning(ServerDto serverDto)
@@ -58,10 +55,47 @@ public abstract class AbstractServerProcessHandler implements ServerProcessHandl
         if (serverProcessId == -1L)
             return false;
 
-        if (!isPidAlive(serverProcessId))
-        {
-            return false;
-        }
-        return true;
+        return isPidAlive(serverProcessId);
     }
+
+    private void forceStopProcessDelayed(long processId, long delay)
+    {
+        ScheduledFuture<?> scheduledFuture = SCHEDULED_EXECUTOR_SERVICE.scheduleAtFixedRate(new Runnable()
+        {
+            private int seconds = 0;
+
+            @Override
+            public void run()
+            {
+                seconds++;
+
+                try
+                {
+
+                    if (!isPidAlive(processId))
+                        return;
+
+                    if (seconds >= delay)
+                    {
+                        forceStopProcess(processId);
+                    }
+                }
+                catch (Exception exception)
+                {
+                    exception.printStackTrace();
+                }
+            }
+        }, 0, 1, TimeUnit.SECONDS);
+
+        SCHEDULED_EXECUTOR_SERVICE.schedule(() ->
+        {
+            scheduledFuture.cancel(true);
+        }, delay + 20L, TimeUnit.SECONDS);
+    }
+
+    protected abstract void stopProcess(long processId) throws IOException;
+
+    protected abstract void forceStopProcess(long processId) throws IOException;
+
+    protected abstract boolean isPidAlive(long processId);
 }

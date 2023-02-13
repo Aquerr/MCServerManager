@@ -149,19 +149,16 @@ public class ServerManagerImpl implements ServerManager
 
         log.info("Scheduling kill server process task for server id = {}", serverDto.getId());
         log.info("Server process will be killed in 20 seconds");
-        ScheduledFuture<Boolean> scheduledFuture = SCHEDULED_EXECUTOR_SERVICE.schedule(() -> {
-            serverProcessHandler.stopServerProcess(serverDto);
-            return true;
-        }, 20, TimeUnit.SECONDS);
         try
         {
-            return scheduledFuture.get();
+            serverProcessHandler.stopServerProcess(serverDto);
+            return true;
         }
-        catch (InterruptedException | ExecutionException e)
+        catch (IOException e)
         {
             e.printStackTrace();
+            return false;
         }
-        return false;
     }
 
     @Override

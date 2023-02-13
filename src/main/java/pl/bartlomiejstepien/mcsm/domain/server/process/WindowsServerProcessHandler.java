@@ -27,8 +27,6 @@ import java.util.stream.Collectors;
 @Slf4j
 public class WindowsServerProcessHandler extends AbstractServerProcessHandler
 {
-    private static final String PID_FILE_NAME = "server.pid";
-
     private static final Pattern PATTERN = Pattern.compile("^\\d+.*$");
 
     @Override
@@ -63,9 +61,15 @@ public class WindowsServerProcessHandler extends AbstractServerProcessHandler
     }
 
     @Override
-    protected void doProcessStop(long processId) throws IOException
+    protected void stopProcess(long processId) throws IOException
     {
         Runtime.getRuntime().exec("taskkill /T /PID " + processId);
+    }
+
+    @Override
+    protected void forceStopProcess(long processId) throws IOException
+    {
+        Runtime.getRuntime().exec("taskkill /F /T /PID " + processId);
     }
 
     @Override

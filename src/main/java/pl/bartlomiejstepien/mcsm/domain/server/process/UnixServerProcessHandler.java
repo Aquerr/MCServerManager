@@ -24,8 +24,6 @@ import java.util.Map;
 @Slf4j
 public class UnixServerProcessHandler extends AbstractServerProcessHandler
 {
-    private static final String PID_FILE_NAME = "server.pid";
-
     /**
      * Current implementation starts the process and saves its pid to the file inside server directory.
      */
@@ -66,17 +64,17 @@ public class UnixServerProcessHandler extends AbstractServerProcessHandler
     }
 
     @Override
-    protected void doProcessStop(long processId) throws IOException
+    protected void stopProcess(long processId) throws IOException
     {
-        try
-        {
-            log.info("Killing process with id = " + processId);
-            Runtime.getRuntime().exec("kill " + processId);
-        }
-        catch (IOException e)
-        {
-            e.printStackTrace();
-        }
+        log.info("Stopping process with id = " + processId);
+        Runtime.getRuntime().exec("kill " + processId);
+    }
+
+    @Override
+    protected void forceStopProcess(long processId) throws IOException
+    {
+        log.info("Force killing process with id = " + processId);
+        Runtime.getRuntime().exec("kill -9 " + processId);
     }
 
     @Override
@@ -117,8 +115,8 @@ public class UnixServerProcessHandler extends AbstractServerProcessHandler
             }
 
             process.destroy();
-
             return isPidRunning;
+
         }
         catch (IOException e)
         {
