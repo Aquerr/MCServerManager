@@ -1,10 +1,24 @@
 package pl.bartlomiejstepien.mcsm.repository.ds;
 
-import javax.persistence.*;
-import java.util.*;
+import lombok.Data;
+
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
+import javax.persistence.Table;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "mcsm_user")
+@Data
 public class User
 {
     @Id
@@ -18,14 +32,16 @@ public class User
     @Column(name = "password")
     private String password;
 //
-//    @ManyToMany(cascade = {CascadeType.ALL}, fetch = FetchType.EAGER)
-//    @JoinTable(name = "user_server", joinColumns = {@JoinColumn(name = "user_id")}, inverseJoinColumns = {@JoinColumn(name = "server_id")})
-//    private final List<Server> servers = new ArrayList<>();
+    @ManyToMany(mappedBy = "users", cascade = {CascadeType.REMOVE})
+//    @JoinTable(name = "user_server",
+//            joinColumns = {@JoinColumn(name = "user_id")},
+//            inverseJoinColumns = {@JoinColumn(name = "server_id")})
+    private final List<Server> servers = new ArrayList<>();
 
-    @ElementCollection
-    @CollectionTable(name = "user_server", joinColumns = {@JoinColumn(name = "user_id")})
-    @Column(name = "server_id", nullable = false)
-    private List<Integer> serversIds = new ArrayList<>();
+//    @ElementCollection
+//    @CollectionTable(name = "user_server", joinColumns = {@JoinColumn(name = "user_id")})
+//    @Column(name = "server_id", nullable = false)
+//    private List<Integer> serversIds = new ArrayList<>();
 
     @Column(name = "role_id")
     private Integer roleId;
@@ -50,69 +66,9 @@ public class User
         this.roleId = roleId;
     }
 
-    public String getPassword()
+    public boolean doesOwnServer(Integer serverId)
     {
-        return this.password;
+        return this.getServers().stream()
+                .anyMatch(server -> server.getId().equals(serverId));
     }
-
-    public String getUsername()
-    {
-        return this.username;
-    }
-
-//    public void addServer(final Server server)
-//    {
-//        server.getUsers().add(this);
-//        this.servers.add(server);
-//    }
-
-//    private void addServers(final List<Server> servers)
-//    {
-//        this.servers.addAll(servers);
-//    }
-
-    public Integer getId()
-    {
-        return id;
-    }
-
-    public List<Integer> getServersIds()
-    {
-        return serversIds;
-    }
-
-    public void setId(Integer id)
-    {
-        this.id = id;
-    }
-
-    public void setUsername(String username)
-    {
-        this.username = username;
-    }
-
-    public void setPassword(String password)
-    {
-        this.password = password;
-    }
-
-    public void setServersIds(List<Integer> serversIds)
-    {
-        this.serversIds = serversIds;
-    }
-
-    public Integer getRoleId()
-    {
-        return roleId;
-    }
-
-    public void setRoleId(Integer roleId)
-    {
-        this.roleId = roleId;
-    }
-
-    //    public List<Server> getServers()
-//    {
-//        return servers;
-//    }
 }

@@ -7,6 +7,7 @@ import pl.bartlomiejstepien.mcsm.repository.ds.Server;
 import pl.bartlomiejstepien.mcsm.repository.ds.User;
 
 import java.io.File;
+import java.util.stream.Collectors;
 
 @Component
 public class ServerConverter
@@ -18,7 +19,11 @@ public class ServerConverter
 
         final ServerDto serverDto = new ServerDto(server.getId(), server.getPath().substring(server.getPath().lastIndexOf(File.separator) + 1), server.getPath());
         serverDto.setPlatform(server.getPlatform());
-        serverDto.setUsersIds(server.getUsersIds());
+//        serverDto.setUsersIds(server.getUsersIds());
+
+        serverDto.setUsersIds(server.getUsers().stream()
+                .map(User::getId)
+                .collect(Collectors.toList()));
         serverDto.setJavaId(server.getJavaId());
         return serverDto;
     }
@@ -30,8 +35,18 @@ public class ServerConverter
 
         final Server server = new Server(serverDto.getId(), serverDto.getName(), serverDto.getServerDir());
         server.setPlatform(serverDto.getPlatform());
-        server.setUsersIds(serverDto.getUsersIds());
+//        server.setUsersIds(serverDto.getUsersIds());
+        server.getUsers().addAll(serverDto.getUsersIds().stream()
+                .map(this::toUser)
+                .toList());
         server.setJavaId(serverDto.getJavaId());
         return server;
+    }
+
+    private User toUser(Integer userId)
+    {
+        User user = new User();
+        user.setId(userId);
+        return user;
     }
 }

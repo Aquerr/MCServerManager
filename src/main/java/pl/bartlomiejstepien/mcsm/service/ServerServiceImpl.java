@@ -111,13 +111,13 @@ public class ServerServiceImpl implements ServerService
 
         if (existingServerForPath != null)
         {
-            if (user.getServersIds().contains(existingServerForPath.getId()))
+            if (user.doesOwnServer(existingServerForPath.getId()))
             {
                 throw new ServerAlreadyOwnedException(new UserDto(user.getId(), user.getUsername()), new ServerDto(existingServerForPath.getId(), existingServerForPath.getName(), existingServerForPath.getPath()));
             }
             else
             {
-                user.getServersIds().add(existingServerForPath.getId());
+                user.getServers().add(existingServerForPath);
                 this.userRepository.save(user);
             }
         }
@@ -126,7 +126,7 @@ public class ServerServiceImpl implements ServerService
             final Server server = new Server(0, serverName, path);
             server.setPlatform(platform.getName());
             server.setJavaId(javaId);
-            server.getUsersIds().add(userId);
+            server.getUsers().add(user);
             this.serverRepository.save(server);
         }
     }

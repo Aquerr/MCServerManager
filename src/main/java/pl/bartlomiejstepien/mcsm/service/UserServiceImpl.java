@@ -113,7 +113,7 @@ public class UserServiceImpl implements UserService
         user.setId(existingUser.getId());
         user.setUsername(userRegUpdatePayload.getUsername());
         user.setPassword(this.passwordEncoder.encode(userRegUpdatePayload.getPassword()));
-        user.setServersIds(existingUser.getServerIds());
+//        user.setServersIds(existingUser.getServerIds());
         if (authenticatedUser.getId().equals(existingUser.getId()))
         {
             user.setRoleId(existingUser.getRole().getId());

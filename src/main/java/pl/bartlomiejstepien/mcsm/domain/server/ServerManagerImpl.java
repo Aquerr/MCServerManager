@@ -10,6 +10,7 @@ import org.springframework.util.FileSystemUtils;
 import pl.bartlomiejstepien.mcsm.config.Config;
 import pl.bartlomiejstepien.mcsm.domain.dto.JavaDto;
 import pl.bartlomiejstepien.mcsm.domain.dto.ServerDto;
+import pl.bartlomiejstepien.mcsm.domain.dto.UserDto;
 import pl.bartlomiejstepien.mcsm.domain.exception.CouldNotStartServerException;
 import pl.bartlomiejstepien.mcsm.domain.exception.MissingJavaConfigurationException;
 import pl.bartlomiejstepien.mcsm.domain.exception.ServerNotRunningException;
@@ -32,6 +33,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -394,12 +396,15 @@ public class ServerManagerImpl implements ServerManager
 
     private int saveServerToDB(Integer serverId, String username, String serverName, Platform platform, Path serverPath, int javaId)
     {
+        UserDto user = userService.findByUsername(username);
+
         ServerDto serverDto = new ServerDto(serverId, serverName, serverPath.toString());
         serverDto.setJavaId(javaId);
         serverDto.setPlatform(platform.getName());
+        serverDto.setUsersIds(Arrays.asList(user.getId()));
         this.serverService.saveNewServer(serverDto);
 
-        this.serverService.addServerToUser(userService.findByUsername(username).getId(), serverDto);
+//        this.serverService.addServerToUser(userService.findByUsername(username).getId(), serverDto);
         return this.serverService.getServerByPath(serverPath.toString())
                 .map(ServerDto::getId)
                 .orElse(-1);

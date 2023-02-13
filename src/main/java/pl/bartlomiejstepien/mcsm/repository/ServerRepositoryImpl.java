@@ -85,7 +85,7 @@ public class ServerRepositoryImpl implements ServerRepository
     @Override
     public List<Server> findByUserId(int userId)
     {
-        final TypedQuery<Server> query = this.entityManager.createQuery("SELECT server FROM Server AS server JOIN server.usersIds AS users WHERE users IN (:userId)", Server.class);
+        final TypedQuery<Server> query = this.entityManager.createQuery("SELECT server FROM Server AS server JOIN server.users AS users WHERE users.id IN (:userId)", Server.class);
         query.setParameter("userId", userId);
         List<Server> servers = query.getResultList();
         return servers;

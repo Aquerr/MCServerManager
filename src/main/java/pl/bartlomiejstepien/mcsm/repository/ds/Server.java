@@ -1,11 +1,23 @@
 package pl.bartlomiejstepien.mcsm.repository.ds;
 
-import javax.persistence.*;
+import lombok.Data;
+
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
+import javax.persistence.Table;
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
 @Table(name = "server")
+@Data
 public class Server
 {
     @Id
@@ -22,12 +34,16 @@ public class Server
     @Column(name = "platform", nullable = false)
     private String platform;
 
-//    @ManyToMany(mappedBy = "servers", cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH, CascadeType.REFRESH})
-//    private final List<User> users = new ArrayList<>();
-    @ElementCollection
-    @CollectionTable(name = "user_server", joinColumns = {@JoinColumn(name = "server_id")})
-    @Column(name = "user_id", nullable = false)
-    private List<Integer> usersIds = new ArrayList<>();
+    @ManyToMany
+    @JoinTable(name = "user_server",
+            joinColumns = @JoinColumn(name = "server_id"),
+            inverseJoinColumns = @JoinColumn(name = "user_id"))
+    private final List<User> users = new ArrayList<>();
+
+//    @ElementCollection
+//    @CollectionTable(name = "user_server", joinColumns = {@JoinColumn(name = "server_id")})
+//    @Column(name = "user_id", nullable = false)
+//    private List<Integer> usersIds = new ArrayList<>();
 
     @Column(name = "java_id")
     private Integer javaId;
@@ -41,41 +57,6 @@ public class Server
     {
         this.id = id;
         this.name = name;
-        this.path = path;
-    }
-
-    public int getId()
-    {
-        return id;
-    }
-
-    public String getName()
-    {
-        return name;
-    }
-
-    public String getPath()
-    {
-        return path;
-    }
-
-    public void setId(Integer id)
-    {
-        this.id = id;
-    }
-
-    public void setName(String name)
-    {
-        this.name = name;
-    }
-
-    public void setUsersIds(List<Integer> usersIds)
-    {
-        this.usersIds = usersIds;
-    }
-
-    public void setPath(String path)
-    {
         this.path = path;
     }
 
@@ -93,29 +74,4 @@ public class Server
 //    {
 //        this.users.addAll(users);
 //    }
-
-    public List<Integer> getUsersIds()
-    {
-        return usersIds;
-    }
-
-    public String getPlatform()
-    {
-        return platform;
-    }
-
-    public void setPlatform(String platform)
-    {
-        this.platform = platform;
-    }
-
-    public Integer getJavaId()
-    {
-        return javaId;
-    }
-
-    public void setJavaId(Integer javaId)
-    {
-        this.javaId = javaId;
-    }
 }
