@@ -13,6 +13,7 @@ import pl.bartlomiejstepien.mcsm.config.Config;
 import pl.bartlomiejstepien.mcsm.domain.exception.CouldNotDownloadServerFilesException;
 import pl.bartlomiejstepien.mcsm.domain.exception.CouldNotInstallServerException;
 import pl.bartlomiejstepien.mcsm.domain.model.ModPack;
+import pl.bartlomiejstepien.mcsm.domain.server.ModpackDownloader;
 import pl.bartlomiejstepien.mcsm.domain.server.ServerFileService;
 import pl.bartlomiejstepien.mcsm.domain.server.ServerInstallationStatusMonitor;
 import pl.bartlomiejstepien.mcsm.domain.server.ServerStartFileFinder;
@@ -20,7 +21,6 @@ import pl.bartlomiejstepien.mcsm.integration.curseforge.CurseForgeClient;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Collections;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -53,20 +53,19 @@ class ForgeServerInstallationStrategyTest
     private ServerFileService serverFileService;
     @Mock
     private ServerStartFileFinder serverStartFileFinder;
+    @Mock
+    private ModpackDownloader modpackDownloader;
     @InjectMocks
     private ForgeServerInstallationStrategy forgeServerInstallationStrategy;
 
     @Test
-    void shouldInstallThrowCouldNotInstallServerExceptionWhenServerFilesCouldNotBeDownloaded() throws CouldNotDownloadServerFilesException
+    void installShouldThrowCouldNotInstallServerExceptionWhenServerFilesCouldNotBeDownloaded() throws CouldNotDownloadServerFilesException
     {
         ModPack modPack = prepareModpack();
-        Path downloadPath = Paths.get(modPack.getName().replace(" ", "-") + "_" + modPack.getVersion() + ".zip");
         given(config.getServersDir()).willReturn(EMPTY_STRING);
-        given(config.getDownloadsDirPath()).willReturn(Paths.get(EMPTY_STRING));
         given(serverFileService.prepareFilePath(any())).willReturn(EMPTY_STRING);
         given(curseForgeClient.getModpack(MOD_PACK_ID)).willReturn(modPack);
-        given(curseForgeClient.getServerDownloadUrl(MOD_PACK_ID, SERVER_PACK_ID)).willReturn(SERVER_DOWNLOAD_URL);
-        given(curseForgeClient.downloadServerFile(SERVER_ID, modPack, FIXED_SERVER_DOWNLOAD_URL, downloadPath)).willThrow(CouldNotDownloadServerFilesException.class);
+        given(modpackDownloader.downloadServerFilesForModpack(SERVER_ID, modPack, SERVER_PACK_ID)).willThrow(CouldNotDownloadServerFilesException.class);
 
         Throwable throwable = null;
         try(MockedStatic<Files> mockedFiles = Mockito.mockStatic(Files.class);
