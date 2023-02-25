@@ -9,6 +9,9 @@ public final class Versions
 
     public static final String[] VERSIONS = {
             "",
+            "1.19.2",
+            "1.19.1",
+            "1.19",
             "1.18.2",
             "1.18.1",
             "1.18",
