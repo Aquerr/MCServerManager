@@ -113,6 +113,7 @@ public class UnixServerProcessHandler extends AbstractServerProcessHandler
             while ((strLine= bReader.readLine()) != null) {
                 if (strLine.contains(" " + processId + " ")) {
                     isPidRunning = true;
+                    break;
                 }
                 log.info(strLine);
             }
