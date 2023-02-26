@@ -80,6 +80,7 @@ public class UnixServerProcessHandler extends AbstractServerProcessHandler
     @Override
     public long getServerProcessId(ServerDto serverDto)
     {
+        log.info("Getting process id from file for server {}", serverDto);
         try
         {
             Path pidFilePath = getPidFilePath(serverDto.getServerDir());
@@ -99,6 +100,7 @@ public class UnixServerProcessHandler extends AbstractServerProcessHandler
     @Override
     protected boolean isPidAlive(long processId)
     {
+        log.info("Is pid = {} alive?", processId);
         ProcessBuilder processBuilder = new ProcessBuilder("ps -p " + processId);
 
         try
@@ -115,6 +117,7 @@ public class UnixServerProcessHandler extends AbstractServerProcessHandler
             }
 
             process.destroy();
+            log.info("Is pid = {} alive? {}", processId, isPidRunning);
             return isPidRunning;
 
         }
