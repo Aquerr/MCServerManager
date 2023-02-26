@@ -100,7 +100,6 @@ public class UnixServerProcessHandler extends AbstractServerProcessHandler
     @Override
     protected boolean isPidAlive(long processId)
     {
-        log.info("Is pid = {} alive?", processId);
         ProcessBuilder processBuilder = new ProcessBuilder("sh", "-c", "ps -p " + processId);
 
         try
@@ -115,7 +114,6 @@ public class UnixServerProcessHandler extends AbstractServerProcessHandler
                     isPidRunning = true;
                     break;
                 }
-                log.info(strLine);
             }
 
             process.destroy();
