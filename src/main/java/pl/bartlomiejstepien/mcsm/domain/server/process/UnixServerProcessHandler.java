@@ -101,7 +101,7 @@ public class UnixServerProcessHandler extends AbstractServerProcessHandler
     protected boolean isPidAlive(long processId)
     {
         log.info("Is pid = {} alive?", processId);
-        ProcessBuilder processBuilder = new ProcessBuilder("ps -p " + processId);
+        ProcessBuilder processBuilder = new ProcessBuilder("sh", "-c", "ps -p " + processId);
 
         try
         {
