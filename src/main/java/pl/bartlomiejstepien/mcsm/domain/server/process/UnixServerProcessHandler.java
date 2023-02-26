@@ -114,6 +114,7 @@ public class UnixServerProcessHandler extends AbstractServerProcessHandler
                 if (strLine.contains(" " + processId + " ")) {
                     isPidRunning = true;
                 }
+                log.info(strLine);
             }
 
             process.destroy();
