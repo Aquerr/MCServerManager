@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: jdbc:h2:file:./data/mcinstaller
+    url: jdbc:h2:file:./data/mcinstaller;AUTO_SERVER=TRUE
     username: mcinstaller
     password: mcinstaller
     driver-class-name: org.h2.Driver
