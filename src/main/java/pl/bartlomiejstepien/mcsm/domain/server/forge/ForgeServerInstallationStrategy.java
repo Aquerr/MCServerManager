@@ -89,7 +89,7 @@ public class ForgeServerInstallationStrategy extends AbstractServerInstallationS
 
             // TODO: Determine free server port
 
-            return new InstalledServer(serverId, modPack.getName(), serverPath, startFilePath);
+            return new InstalledServer(serverId, modPack.getName(), startFilePath.getParent(), startFilePath);
         }
         catch (Exception exception)
         {
