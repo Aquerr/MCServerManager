@@ -1,0 +1,12 @@
+.header {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  border-bottom: 1px solid gray;
+}
+
+.header-item {
+  padding: 10px;
+  border-right: 1px solid gray;
+  border-left: 1px solid gray;
+}

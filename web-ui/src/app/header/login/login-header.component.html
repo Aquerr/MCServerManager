@@ -1,0 +1,6 @@
+<div *ngIf="isLoggedIn(); else elseBlock">
+  <a href="#" routerLink="/user" style="text-decoration: none; color: var(--text-color-default)">{{ getCurrentUser() }}</a>
+</div>
+<ng-template #elseBlock>
+  <a href="#" routerLink="/login" style="text-decoration: none; color: var(--text-color-default)">Sign in <i class="pi pi-sign-in"></i></a>
+</ng-template>

@@ -1,0 +1,23 @@
+<div class="container" style="height: 100%">
+<!--  <app-mobile-header class="row mb-4" (changeThemeEmit)="changeTheme()" [darkMode]="isDarkMode()" *ngIf="isMobile"></app-mobile-header>-->
+  <div style="display: flex; flex-direction: row; height: 100%;">
+    <div class="side-menu-wrapper" *ngIf="!isMobile">
+      <app-side-menu (changeThemeEmit)="changeTheme()" [darkMode]="isDarkMode()"></app-side-menu>
+      <ng-container [ngTemplateOutlet]="footer" *ngIf="!isMobile"></ng-container>
+    </div>
+    <div class="page-content">
+      <app-header class="header-wrapper"></app-header>
+      <div class="content">
+        <router-outlet></router-outlet>
+      </div>
+      <ng-container [ngTemplateOutlet]="footer" *ngIf="isMobile"></ng-container>
+    </div>
+  </div>
+</div>
+<app-mcsm-spinner></app-mcsm-spinner>
+<ng-template #footer>
+  <footer class="footer">
+    <span class="version">Version: {{version}}</span>
+    <span class="copyright">&copy; MCSM 2024</span>
+  </footer>
+</ng-template>
