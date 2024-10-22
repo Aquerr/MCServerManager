@@ -1,0 +1,11 @@
+<div class="header">
+  <div class="header-item">
+    <app-header-time></app-header-time>
+  </div>
+  <div class="header-item">
+    <app-header-login></app-header-login>
+  </div>
+  <div class="header-item" *ngIf="isAuthenticated()">
+    <app-header-logout></app-header-logout>
+  </div>
+</div>
