@@ -1,117 +1,109 @@
-buildscript {
-	repositories {
-		mavenCentral()
-	}
-
-	dependencies {
-		classpath 'org.jsonschema2pojo:jsonschema2pojo-gradle-plugin:1.1.2'
-	}
-}
+import org.jsonschema2pojo.AnnotationStyle
 
 plugins {
-	id 'org.springframework.boot' version '2.7.5'
-	id 'io.spring.dependency-management' version '1.1.0'
-	id 'java'
-	id "io.freefair.lombok" version "6.5.1"
+	id("org.springframework.boot") version "3.3.4"
+	id("io.spring.dependency-management") version "1.1.6"
+	id("java")
+	id("io.freefair.lombok") version "8.10.2"
+	id("org.jsonschema2pojo") version "1.2.2"
 }
 
-apply plugin: 'jsonschema2pojo'
+group = "pl.bartlomiejstepien.mcsm"
+version = "0.0.1-SNAPSHOT"
 
-//apply plugin: 'com.bmuschko.clover'
-
-group = 'pl.bartlomiejstepien.mcsm'
-version = '0.0.1-SNAPSHOT'
-sourceCompatibility = JavaVersion.VERSION_17
-targetCompatibility = JavaVersion.VERSION_17
+java {
+	toolchain {
+		languageVersion = JavaLanguageVersion.of(21)
+	}
+}
 
 repositories {
 	mavenCentral()
 }
 
+afterEvaluate {
+	tasks.named("generateEffectiveLombokConfig") {
+		dependsOn("generateJsonSchema2Pojo")
+	}
+}
+
 dependencies {
-	implementation ('org.springframework.boot:spring-boot-starter-thymeleaf') {
-		exclude group: 'org.springframework.boot', module: 'spring-boot-starter-logging'
+	implementation ("org.springframework.boot:spring-boot-starter-thymeleaf") {
+		exclude(group = "org.springframework.boot", module = "spring-boot-starter-logging")
 	}
-	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-	implementation ('org.springframework.boot:spring-boot-starter-web') {
-		exclude group: 'org.springframework.boot', module: 'spring-boot-starter-logging'
+	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
+	implementation ("org.springframework.boot:spring-boot-starter-web") {
+		exclude(group = "org.springframework.boot", module = "spring-boot-starter-logging")
 	}
-	implementation 'org.springframework.boot:spring-boot-starter-security'
-	implementation 'org.springframework.boot:spring-boot-starter-validation'
-	implementation 'org.springframework.boot:spring-boot-starter-log4j2'
+	implementation("org.springframework.boot:spring-boot-starter-security")
+	implementation("org.springframework.boot:spring-boot-starter-validation")
+	implementation("org.springframework.boot:spring-boot-starter-log4j2")
 
-	implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity5'
+	implementation("org.thymeleaf.extras:thymeleaf-extras-springsecurity6")
 
-	implementation 'net.lingala.zip4j:zip4j:2.11.4'
-	implementation 'com.github.t9t.minecraft-rcon-client:minecraft-rcon-client:1.0.0'
-	implementation 'org.springdoc:springdoc-openapi-ui:1.6.8'
-	implementation 'org.liquibase:liquibase-core'
-//	clover 'org.openclover:clover:4.4.1'
+	implementation("net.lingala.zip4j:zip4j:2.11.5")
+	implementation("com.github.t9t.minecraft-rcon-client:minecraft-rcon-client:1.0.0")
+	implementation("org.springdoc:springdoc-openapi-ui:1.8.0")
+	implementation("org.liquibase:liquibase-core")
+	implementation("jakarta.servlet:jakarta.servlet-api:6.1.0")
 
-	developmentOnly 'org.springframework.boot:spring-boot-devtools'
-	testImplementation('org.springframework.boot:spring-boot-starter-test') {
-		exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
+	developmentOnly("org.springframework.boot:spring-boot-devtools")
+	testImplementation("org.springframework.boot:spring-boot-starter-test") {
+		exclude(group = "org.junit.vintage", module = "junit-vintage-engine")
 	}
-	testImplementation('org.springframework.security:spring-security-test')
-	testImplementation 'org.mockito:mockito-inline'
-	testImplementation 'com.tngtech.archunit:archunit-junit5:1.0.0'
+	testImplementation("org.springframework.security:spring-security-test")
+	testImplementation("com.tngtech.archunit:archunit-junit5:1.3.0")
 
-	runtimeOnly 'org.postgresql:postgresql'
-	runtimeOnly 'com.h2database:h2'
+	runtimeOnly("org.postgresql:postgresql")
+	runtimeOnly("com.h2database:h2")
+
+	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
 configurations {
 	all {
-		exclude group: 'org.springframework.boot', module: 'spring-boot-starter-logging'
+		exclude(group = "org.springframework.boot", module = "spring-boot-starter-logging")
 	}
-}
-
-test {
-	useJUnitPlatform()
-}
-
-bootJar {
-	exclude("schema")
 }
 
 jsonSchema2Pojo {
 
 	// Location of the JSON Schema file(s). This may refer to a single file or a directory of files.
-	source = files("${sourceSets.main.output.resourcesDir}/schema/json")
+	sourceFiles = files("${sourceSets.main.get().output.resourcesDir}/json")
 
 	// Target directory for generated Java source files. The plugin will add this directory to the
 	// java source set so the compiler will find and compile the newly generated source files.
 	targetDirectory = file("${project.buildDir}/generated-sources/js2p")
 
 	// Package name used for generated Java classes (for types where a fully qualified name has not
-	// been supplied in the schema using the 'javaType' property).
-	targetPackage = 'pl.bartlomiejstepien.schema'
+	// been supplied in the schema using the "javaType" property).
+	targetPackage = "pl.bartlomiejstepien.schema"
 
 	refFragmentPathDelimiters = "#/."
 
-	// Whether to allow 'additional' properties to be supported in classes by adding a map to
-	// hold these. This is true by default, meaning that the schema rule 'additionalProperties'
+	// Whether to allow "additional" properties to be supported in classes by adding a map to
+	// hold these. This is true by default, meaning that the schema rule "additionalProperties"
 	// controls whether the map is added. Set this to false to globabally disable additional properties.
 	includeAdditionalProperties = false
 
 	// Whether to include a javax.annotation.Generated (Java 8 and lower) or
 	// javax.annotation.processing.Generated (Java 9+) in on generated types (default true).
-	includeGeneratedAnnotation = true
+	isIncludeGeneratedAnnotation = true
 
 	// Whether to use primitives (long, double, boolean) instead of wrapper types where possible
 	// when generating bean properties (has the side-effect of making those properties non-null).
 	usePrimitives = false
 
 	// Whether to use the java type long (or Long) instead of int (or Integer) when representing the
-	// JSON Schema type 'integer'.
+	// JSON Schema type "integer".
 	useLongIntegers = true
 
-	// Whether to use the java type BigInteger when representing the JSON Schema type 'integer'. Note
+	// Whether to use the java type BigInteger when representing the JSON Schema type "integer". Note
 	// that this configuration overrides useLongIntegers
 	useBigIntegers = false
 
 	// Whether to use the java type double (or Double) instead of float (or Float) when representing
-	// the JSON Schema type 'number'.
+	// the JSON Schema type "number".
 	useDoubleNumbers = true
 
 	// Whether to include hashCode and equals methods in generated Java types.
@@ -119,17 +111,17 @@ jsonSchema2Pojo {
 
 	// Whether to include a toString method in generated Java types.
 	includeToString = true
-	annotationStyle = 'jackson'
+	setAnnotationStyle(AnnotationStyle.JACKSON.name)
 
 	// A fully qualified class name, referring to a custom annotator class that implements
 	// org.jsonschema2pojo.Annotator and will be used in addition to the one chosen
 	// by annotationStyle. If you want to use the custom annotator alone, set annotationStyle to none.
-	customAnnotator = 'org.jsonschema2pojo.NoopAnnotator'
+	setCustomAnnotator("org.jsonschema2pojo.NoopAnnotator")
 
 	// The Level of inclusion to set in the generated Java types (for Jackson serializers)
-	inclusionLevel = 'NON_NULL'
+	setInclusionLevel("NON_NULL")
 
-	// Whether to use the 'title' property of the schema to decide the class name (if not
+	// Whether to use the "title" property of the schema to decide the class name (if not
 	// set to true, the filename and property names are used).
 	useTitleAsClassname = true
 
@@ -140,16 +132,16 @@ jsonSchema2Pojo {
 	//  - yamlschema (JSON schema documents, represented as YAML)
 	//  - yaml (documents that represent an example of the kind of YAML (or JSON) data that the generated Java types
 	//          will be mapped to)
-	sourceType = 'jsonschema'
+	setSourceType("jsonschema")
 
 	// The character encoding that should be used when writing the generated Java source files
-	outputEncoding = 'UTF-8'
+	outputEncoding = "UTF-8"
 
 	// Whether to add JsonFormat annotations when using Jackson 2 that cause format "date", "time", and "date-time"
-	// fields to be formatted as yyyy-MM-dd, HH:mm:ss.SSS and yyyy-MM-dd'T'HH:mm:ss.SSSZ respectively. To customize these
+	// fields to be formatted as yyyy-MM-dd, HH:mm:ss.SSS and yyyy-MM-dd"T"HH:mm:ss.SSSZ respectively. To customize these
 	// patterns, use customDatePattern, customTimePattern, and customDateTimePattern config options or add these inside a
 	// schema to affect an individual field
-	formatDateTimes = true
+	isFormatDateTimes = true
 	formatDates = true
 	formatTimes = true
 
@@ -169,7 +161,7 @@ jsonSchema2Pojo {
 	dateTimeType = "java.time.LocalDateTime"
 
 	// What type to use instead of string when adding string properties of format "time" to Java types
-	timeType = "java.time.LocalDate"
+	timeType = "java.time.LocalTime"
 
 	// A custom pattern to use when formatting date fields during serialization. Requires support from
 	// your JSON binding library.

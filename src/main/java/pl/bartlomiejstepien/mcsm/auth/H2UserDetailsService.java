@@ -1,5 +1,6 @@
 package pl.bartlomiejstepien.mcsm.auth;
 
+import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,7 +14,6 @@ import pl.bartlomiejstepien.mcsm.domain.model.Role;
 import pl.bartlomiejstepien.mcsm.repository.UserRepository;
 import pl.bartlomiejstepien.mcsm.repository.ds.User;
 
-import javax.servlet.http.HttpServletRequest;
 
 @Component("userDetailsService")
 public class H2UserDetailsService implements UserDetailsService
