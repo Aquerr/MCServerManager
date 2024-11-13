@@ -4,58 +4,57 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.AccessDeniedHandler;
 import pl.bartlomiejstepien.mcsm.Routes;
 
 @Configuration
 @EnableWebSecurity
-public class SecurityConfig extends WebSecurityConfigurerAdapter
+public class SecurityConfig
 {
     @Autowired
     private UserDetailsService userDetailsService;
 
-    @Override
-    protected void configure(HttpSecurity http) throws Exception
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception
     {
         http
-            .authorizeRequests()
-                .antMatchers("/css/**", "icons/**", "/js/**", "/webjars/**", "/favicon.ico").permitAll()
-                .antMatchers("/config/**", "/api/config/users/**", "/logs/**").hasAnyAuthority("ADMIN", "OWNER")
-                .antMatchers(HttpMethod.POST, "/api/config/java").hasAnyAuthority("ADMIN", "OWNER")
-                .antMatchers(HttpMethod.PUT, "/api/config/java").hasAnyAuthority("ADMIN", "OWNER")
-                .antMatchers(HttpMethod.DELETE, "/api/config/java").hasAnyAuthority("ADMIN", "OWNER")
-                .antMatchers(HttpMethod.GET, "/api/config/java").permitAll()
-                .antMatchers("/users/**").hasAnyAuthority("ADMIN", "OWNER")
-                .antMatchers("/h2-console/**").permitAll()
-                .and().headers().frameOptions().sameOrigin()
-            .and()
-                .csrf().ignoringAntMatchers("/api/**", "/h2-console/**")
-            .and()
-            .formLogin()
-                .loginPage(Routes.LOGIN)
-                .defaultSuccessUrl(Routes.HOME)
-                .permitAll()
-            .and()
-            .logout()
-                .logoutUrl(Routes.LOGOUT)
-                .logoutSuccessUrl(Routes.LOGIN)
-                .invalidateHttpSession(true)
-                .permitAll()
-            .and()
-            .authorizeRequests()
-            .anyRequest().authenticated()
-            .and()
-            .exceptionHandling().accessDeniedHandler(accessDeniedHandler());
+            .authorizeRequests((auths) -> auths
+                    .requestMatchers("/css/**", "icons/**", "/js/**", "/webjars/**", "/favicon.ico").permitAll()
+                    .requestMatchers("/config/**", "/api/config/users/**", "/logs/**").hasAnyAuthority("ADMIN", "OWNER")
+                    .requestMatchers(HttpMethod.POST, "/api/config/java").hasAnyAuthority("ADMIN", "OWNER")
+                    .requestMatchers(HttpMethod.PUT, "/api/config/java").hasAnyAuthority("ADMIN", "OWNER")
+                    .requestMatchers(HttpMethod.DELETE, "/api/config/java").hasAnyAuthority("ADMIN", "OWNER")
+                    .requestMatchers(HttpMethod.GET, "/api/config/java").permitAll()
+                    .requestMatchers("/users/**").hasAnyAuthority("ADMIN", "OWNER")
+                    .requestMatchers("/h2-console/**").permitAll()
+                    .anyRequest().authenticated()
+
+            )
+                .csrf(customizer -> customizer.ignoringRequestMatchers("/api/**", "/h2-console/**"))
+                .formLogin(customizer -> customizer
+                        .loginPage(Routes.LOGIN)
+                        .defaultSuccessUrl(Routes.HOME)
+                        .permitAll()
+                )
+                .logout(customizer -> customizer
+                        .logoutUrl(Routes.LOGOUT)
+                        .logoutSuccessUrl(Routes.LOGIN)
+                        .invalidateHttpSession(true)
+                        .permitAll()
+                )
+                .exceptionHandling(customizer -> customizer
+                        .accessDeniedHandler(accessDeniedHandler()));
+        return http.build();
     }
 
-    @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception
     {
         auth.userDetailsService(userDetailsService).passwordEncoder(passwordEncoder());

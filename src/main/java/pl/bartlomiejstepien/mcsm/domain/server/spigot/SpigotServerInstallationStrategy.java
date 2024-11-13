@@ -1,6 +1,5 @@
 package pl.bartlomiejstepien.mcsm.domain.server.spigot;
 
-import liquibase.pro.packaged.R;
 import org.springframework.stereotype.Component;
 import pl.bartlomiejstepien.mcsm.config.Config;
 import pl.bartlomiejstepien.mcsm.domain.exception.CouldNotDownloadServerFilesException;

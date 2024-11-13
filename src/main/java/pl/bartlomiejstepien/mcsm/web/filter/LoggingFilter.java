@@ -1,5 +1,6 @@
 package pl.bartlomiejstepien.mcsm.web.filter;
 
+import jakarta.servlet.http.HttpServletRequest;
 import org.jboss.logging.MDC;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -7,11 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.AbstractRequestLoggingFilter;
-import pl.bartlomiejstepien.mcsm.auth.AuthenticatedUser;
-import pl.bartlomiejstepien.mcsm.auth.AuthenticationFacade;
-
-import javax.servlet.http.HttpServletRequest;
-import java.util.Optional;
 
 @Component
 @Order(10)
