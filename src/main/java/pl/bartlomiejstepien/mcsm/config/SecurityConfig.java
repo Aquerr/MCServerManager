@@ -27,7 +27,6 @@ public class SecurityConfig
     {
         http
             .authorizeRequests((auths) -> auths
-                    .anyRequest().authenticated()
                     .requestMatchers("/css/**", "icons/**", "/js/**", "/webjars/**", "/favicon.ico").permitAll()
                     .requestMatchers("/config/**", "/api/config/users/**", "/logs/**").hasAnyAuthority("ADMIN", "OWNER")
                     .requestMatchers(HttpMethod.POST, "/api/config/java").hasAnyAuthority("ADMIN", "OWNER")

@@ -69,7 +69,7 @@ configurations {
 jsonSchema2Pojo {
 
 	// Location of the JSON Schema file(s). This may refer to a single file or a directory of files.
-	sourceFiles = files("${sourceSets.main.get().output.resourcesDir}/json")
+	sourceFiles = files("${sourceSets.main.get().output.resourcesDir}/schema/json")
 
 	// Target directory for generated Java source files. The plugin will add this directory to the
 	// java source set so the compiler will find and compile the newly generated source files.

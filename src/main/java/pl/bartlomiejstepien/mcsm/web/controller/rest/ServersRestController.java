@@ -1,6 +1,7 @@
 package pl.bartlomiejstepien.mcsm.web.controller.rest;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +29,6 @@ import pl.bartlomiejstepien.mcsm.domain.server.ServerFileService;
 import pl.bartlomiejstepien.mcsm.service.ServerService;
 import pl.bartlomiejstepien.mcsm.service.UserService;
 
-import javax.validation.Valid;
 import java.io.File;
 import java.util.*;
 

@@ -1,5 +1,6 @@
 package pl.bartlomiejstepien.mcsm.web.controller.rest;
 
+import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +16,6 @@ import pl.bartlomiejstepien.mcsm.domain.server.ServerManager;
 import pl.bartlomiejstepien.mcsm.domain.model.ModPack;
 import pl.bartlomiejstepien.mcsm.integration.curseforge.CurseForgeClient;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 @RestController
